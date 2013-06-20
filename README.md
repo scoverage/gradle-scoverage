@@ -18,7 +18,8 @@ buildscript {
 apply plugin: 'scct'
 
 dependencies {
-    scct 'reaktor:scct_2.9.2:0.2-SNAPSHOT', 'org.scala-lang:scala-library:2.9.2'
+    scct 'reaktor:scct_2.10:0.2-SNAPSHOT'
+    compile 'org.scala-lang:scala-library:2.10.1'
 }
 ```
 

@@ -19,6 +19,7 @@ class ScctExtension {
 
         project.configurations.create(ScctPlugin.CONFIGURATION_NAME) {
             visible = false
+            transitive = false
             description = 'SCCT dependencies'
         }
 
@@ -40,20 +41,17 @@ class ScctExtension {
 
     private Action<Project> configureRuntimeOptions = new Action<Project>() {
 
-        def onlyScctPluginJar = { it.name.startsWith('scct') }
-        def excludeScalaLibraries = { !it.name.startsWith('scala-') }
-
         @Override
         void execute(Project t) {
             t.tasks[ScctPlugin.COMPILE_NAME].configure {
-                List<String> plugin = ['-Xplugin:' + t.configurations[ScctPlugin.CONFIGURATION_NAME].filter(onlyScctPluginJar).singleFile]
+                List<String> plugin = ['-Xplugin:' + t.configurations[ScctPlugin.CONFIGURATION_NAME].singleFile]
                 List<String> parameters = scalaCompileOptions.additionalParameters
                 if (parameters != null) {
                     plugin.addAll(parameters)
                 }
                 scalaCompileOptions.additionalParameters = plugin
                 // exclude the scala libraries that are added to enable scala version detection
-                classpath = t.tasks.compileScala.classpath.filter(excludeScalaLibraries) + t.configurations[ScctPlugin.CONFIGURATION_NAME]
+                classpath += t.configurations[ScctPlugin.CONFIGURATION_NAME]
             }
             t.tasks[ScctPlugin.TEST_NAME].configure {
                 systemProperty 'scct.report.dir', "${t.buildDir}/reports/${t.extensions[ScctPlugin.CONFIGURATION_NAME].reportDirName}"
