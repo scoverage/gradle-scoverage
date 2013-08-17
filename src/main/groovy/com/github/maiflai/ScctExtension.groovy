@@ -37,6 +37,10 @@ class ScctExtension {
             dependsOn(project.tasks[ScctPlugin.COMPILE_NAME])
         }
 
+        project.tasks.create(ScctPlugin.CHECK_NAME, OverallCheckTask.class) {
+            dependsOn(project.tasks[ScctPlugin.TEST_NAME])
+        }
+
     }
 
     private Action<Project> configureRuntimeOptions = new Action<Project>() {
@@ -64,6 +68,7 @@ class ScctExtension {
     }
 
     String reportDirName = 'scct'
+
 
 }
 
