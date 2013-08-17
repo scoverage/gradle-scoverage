@@ -27,5 +27,5 @@ This creates an additional task testCoverage which will run tests against instru
 
 - [x] instrumenting main scala code
 - [x] running JUnit tests against instrumented scala code
-- [ ] failing the build on lack of coverage
+- [x] failing the build on lack of coverage
 
