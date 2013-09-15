@@ -53,9 +53,7 @@ uploadArchives {
                 url 'http://maiflai.github.com/'
 
                 scm {
-                    url 'scm:git@github.com:maiflai/gradle-scct.git'
-                    connection 'scm:git@github.com:maiflai/gradle-scct.git'
-                    developerConnection 'scm:git@github.com:maiflai/gradle-scct.git'
+                    developerConnection 'scm:git:https://github.com/maiflai/gradle-scct.git'
                 }
 
                 licenses {
