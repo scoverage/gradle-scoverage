@@ -16,6 +16,7 @@ class OverallCheckTaskTest {
 
     private Project projectForLineRate(Number lineRate) {
         Project project = ProjectBuilder.builder().build()
+        project.plugins.apply(ScctPlugin)
         project.tasks.create('bob', OverallCheckTask) {
             minimumLineRate = lineRate
             cobertura = new File('src/test/resources/cobertura.xml')
