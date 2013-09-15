@@ -55,10 +55,12 @@ uploadArchives {
             }
 
             pom.project {
+                name 'GradleSCCT'
                 description 'gradle-scct is a Gradle plugin for calculating code coverage using SCCT'
                 url 'http://maiflai.github.com/'
 
                 scm {
+                    url 'scm:git:https://github.com/maiflai/gradle-scct.git'
                     developerConnection 'scm:git:https://github.com/maiflai/gradle-scct.git'
                 }
 
