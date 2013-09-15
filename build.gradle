@@ -20,6 +20,11 @@ dependencies {
     compile localGroovy()
 }
 
+task groovydocJar(type: Jar, dependsOn: groovydoc) {
+    classifier = 'groovydoc'
+    from "$buildDir/build/docs/groovydoc"
+}
+
 task sourcesJar(type: Jar) {
     from sourceSets.main.allSource
     classifier = 'sources'
@@ -27,6 +32,7 @@ task sourcesJar(type: Jar) {
 
 artifacts {
     archives jar
+    archives groovydocJar
     archives sourcesJar
 }
 
