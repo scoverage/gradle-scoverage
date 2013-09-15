@@ -9,6 +9,11 @@ import org.gradle.api.plugins.scala.ScalaPlugin
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.testing.Test
 
+/**
+ * Defines a new SourceSet for the code to be instrumented.
+ * Defines a new Test Task which executes normal tests with the instrumented classes.
+ * Defines a new Check Task which enforces an overall line coverage requirement.
+ */
 class ScctExtension {
 
     ScctExtension(Project project) {

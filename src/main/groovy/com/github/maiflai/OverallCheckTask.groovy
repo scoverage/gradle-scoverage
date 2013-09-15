@@ -4,6 +4,9 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
 
+/**
+ * Throws a GradleException if overall line coverage dips below the configured percentage.
+ */
 class OverallCheckTask extends DefaultTask {
 
     File cobertura
