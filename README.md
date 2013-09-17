@@ -2,16 +2,18 @@ gradle-scct
 ===========
 A plugin to enable the use of SCCT in a gradle Scala project.
 
+This has now been deployed to maven central.
+
 Getting started
 ---------------
 ```groovy
 buildscript {
     repositories {
+        mavenCentral()
         maven { url 'http://mtkopone.github.com/scct/maven-repo' }
-        maven { url 'https://github.com/maiflai/mvn-repo/raw/master/snapshots' }
     }
     dependencies {
-        classpath 'com.github.maiflai:gradle-scct:0.1-SNAPSHOT'
+        classpath 'com.github.maiflai:gradle-scct:0.3'
     }
 }
 
