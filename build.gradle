@@ -22,7 +22,7 @@ dependencies {
 
 task groovydocJar(type: Jar, dependsOn: groovydoc) {
     classifier = 'groovydoc'
-    from "$buildDir/build/docs/groovydoc"
+    from "$buildDir/docs/groovydoc"
 }
 
 task sourcesJar(type: Jar) {
