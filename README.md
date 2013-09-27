@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/SCCT/gradle-scct.png?branch=master)](https://travis-ci.org/SCCT/gradle-scct)
+
 gradle-scct
 ===========
 A plugin to enable the use of SCCT in a gradle Scala project.
