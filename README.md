@@ -22,7 +22,7 @@ buildscript {
 apply plugin: 'scct'
 
 dependencies {
-    scct 'reaktor:scct_2.10:0.2-SNAPSHOT'
+    scct 'com.github.scct:scct_2.10:0.2.1'
     compile 'org.scala-lang:scala-library:2.10.1'
 }
 ```
