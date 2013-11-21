@@ -4,7 +4,6 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 
 class ScctPlugin implements Plugin<Project> {
-
     static String CONFIGURATION_NAME = 'scct'
 
     static String TEST_NAME = 'testScct'
@@ -17,5 +16,4 @@ class ScctPlugin implements Plugin<Project> {
             t.extensions.create(CONFIGURATION_NAME, ScctExtension, t)
         }
     }
-
 }

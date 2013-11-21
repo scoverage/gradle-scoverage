@@ -1,9 +1,7 @@
 package com.github.maiflai
 
 import org.gradle.api.Action
-import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.Task
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.scala.ScalaPlugin
 import org.gradle.api.tasks.SourceSet
@@ -64,6 +62,8 @@ class ScctExtension {
             }
             t.tasks[ScctPlugin.TEST_NAME].configure {
                 systemProperty 'scct.report.dir', "${t.buildDir}/reports/${t.extensions[ScctPlugin.CONFIGURATION_NAME].reportDirName}"
+                systemProperty 'scct.basedir', "${t.rootDir.absolutePath}"  // for multi-module checking
+
                 def existingClasspath = classpath
                 classpath = t.files(t.sourceSets[ScctPlugin.CONFIGURATION_NAME].output.classesDir) +
                         project.configurations[ScctPlugin.CONFIGURATION_NAME] +
@@ -73,8 +73,4 @@ class ScctExtension {
     }
 
     String reportDirName = 'scct'
-
-
 }
-
-

@@ -11,7 +11,7 @@ apply plugin: 'idea'
 apply plugin: 'maven'
 apply plugin: 'signing'
 apply plugin: 'groovy'
-apply plugin: 'release'
+//apply plugin: 'release'
 
 group 'com.github.maiflai'
 
@@ -36,11 +36,11 @@ artifacts {
     archives sourcesJar
 }
 
-signing {
+/*signing {
     sign configurations.archives
-}
+}*/
 
-uploadArchives {
+/*uploadArchives {
     repositories {
         mavenDeployer {
             beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
@@ -80,4 +80,4 @@ uploadArchives {
             }
         }
     }
-}
+}*/
