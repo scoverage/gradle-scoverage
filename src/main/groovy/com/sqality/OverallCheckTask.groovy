@@ -1,4 +1,4 @@
-package com.github.maiflai
+package com.sqality
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException

@@ -1,4 +1,4 @@
-package com.github.maiflai
+package com.sqality
 
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskExecutionException

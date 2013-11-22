@@ -13,7 +13,7 @@ apply plugin: 'signing'
 apply plugin: 'groovy'
 //apply plugin: 'release'
 
-group 'com.github.maiflai'
+group 'com.sqality'
 
 dependencies {
     compile gradleApi()
@@ -36,11 +36,12 @@ artifacts {
     archives sourcesJar
 }
 
-/*signing {
+/*
+signing {
     sign configurations.archives
-}*/
+}
 
-/*uploadArchives {
+uploadArchives {
     repositories {
         mavenDeployer {
             beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
@@ -57,11 +58,11 @@ artifacts {
             pom.project {
                 name 'GradleSCCT'
                 description 'gradle-scct is a Gradle plugin for calculating code coverage using SCCT'
-                url 'http://maiflai.github.com/'
+                url 'http://sqality.com/'
 
                 scm {
-                    url 'scm:git:https://github.com/maiflai/gradle-scct.git'
-                    developerConnection 'scm:git:https://github.com/maiflai/gradle-scct.git'
+                    url 'scm:git:https://github.com/sqality/gradle-scct.git'
+                    developerConnection 'scm:git:https://github.com/sqality/gradle-scct.git'
                 }
 
                 licenses {
@@ -80,4 +81,5 @@ artifacts {
             }
         }
     }
-}*/
+}
+*/

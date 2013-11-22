@@ -15,7 +15,7 @@ buildscript {
         maven { url 'http://mtkopone.github.com/scct/maven-repo' }
     }
     dependencies {
-        classpath 'com.github.maiflai:gradle-scct:0.3'
+        classpath 'com.sqality:gradle-scct:0.3'
     }
 }
 

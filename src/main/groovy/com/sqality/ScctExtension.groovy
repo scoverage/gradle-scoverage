@@ -1,4 +1,4 @@
-package com.github.maiflai
+package com.sqality
 
 import org.gradle.api.Action
 import org.gradle.api.Project
