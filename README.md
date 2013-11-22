@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/SCCT/gradle-scct.png?branch=master)](https://travis-ci.org/SCCT/gradle-scct)
+[![Build Status](https://travis-ci.org/sqality/gradle-scct.png?branch=master)](https://travis-ci.org/sqality/gradle-scct)
 
 gradle-scct
 ===========
