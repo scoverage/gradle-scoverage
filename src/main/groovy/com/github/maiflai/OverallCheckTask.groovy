@@ -9,7 +9,7 @@ import org.gradle.api.tasks.TaskAction
  */
 class OverallCheckTask extends DefaultTask {
     File cobertura
-    double minimumLineRate = 1
+    double minimumLineRate = 0.75
 
     @TaskAction
     void requireLineCoverage() {
@@ -21,6 +21,7 @@ class OverallCheckTask extends DefaultTask {
         def overallLineRate = xml.attribute('line-rate').toDouble()
         def difference = (minimumLineRate - overallLineRate)
 
-        if (difference > 0.001) throw new GradleException("Line coverage of $overallLineRate is below $minimumLineRate by $difference")
+        if (difference > 1e-7)
+            throw new GradleException("Only ${overallLineRate * 100}% of project is covered by tests instead of ${(minimumLineRate * 100).toInteger()}%!")
     }
 }
