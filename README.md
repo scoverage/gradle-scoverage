@@ -33,3 +33,18 @@ This creates an additional task testCoverage which will run tests against instru
 - [x] running JUnit tests against instrumented scala code
 - [x] failing the build on lack of coverage
 
+Then launch command :
+`gradle testScct` or `gradle checkScct` 
+
+
+CheckScct
+---------
+
+By default, when you launch `gradle checkScct` build fail if only 75% of project is covered by tests.
+
+To configure it as you want, add this configuration :
+```
+checkScct {
+    minimumLineRate = 0.5
+}
+```
