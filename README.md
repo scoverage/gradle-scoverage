@@ -12,10 +12,9 @@ Getting started
 buildscript {
     repositories {
         mavenCentral()
-        maven { url 'http://mtkopone.github.com/scct/maven-repo' }
     }
     dependencies {
-        classpath 'com.sqality:gradle-scct:0.3'
+        classpath 'com.sqality:gradle-scct:0.2'
     }
 }
 
