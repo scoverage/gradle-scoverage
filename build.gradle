@@ -11,7 +11,7 @@ apply plugin: 'idea'
 apply plugin: 'maven'
 apply plugin: 'signing'
 apply plugin: 'groovy'
-//apply plugin: 'release'
+apply plugin: 'release'
 
 group 'com.sqality'
 
@@ -36,7 +36,6 @@ artifacts {
     archives sourcesJar
 }
 
-/*
 signing {
     sign configurations.archives
 }
@@ -67,8 +66,8 @@ uploadArchives {
 
                 licenses {
                     license {
-                        name 'unlicense'
-                        url 'http://unlicense.org'
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
                         distribution 'repo'
                     }
                 }
@@ -82,4 +81,3 @@ uploadArchives {
         }
     }
 }
-*/
