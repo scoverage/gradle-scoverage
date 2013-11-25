@@ -48,11 +48,11 @@ uploadArchives {
 
 
             snapshotRepository(url: 'https://oss.sonatype.org/content/repositories/snapshots') {
-                authentication(userName: sonatypeUsername, password: sonatypePassword)
+                authentication(userName: "$System.env.SONATYPE_USER", password: "$System.env.SONATYPE_PASS")
             }
 
             repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                authentication(userName: sonatypeUsername, password: sonatypePassword)
+                authentication(userName: "$System.env.SONATYPE_USER", password: "$System.env.SONATYPE_PASS")
             }
 
             pom.project {
