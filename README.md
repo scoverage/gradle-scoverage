@@ -14,14 +14,14 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.sqality:gradle-scct:0.2'
+        classpath 'com.sqality:gradle-scct:0.2.2'
     }
 }
 
 apply plugin: 'scct'
 
 dependencies {
-    scct 'com.github.scct:scct_2.10:0.2.1'
+    scct 'com.sqality.scct:scct_2.10:0.2.2'
     compile 'org.scala-lang:scala-library:2.10.1'
 }
 ```
