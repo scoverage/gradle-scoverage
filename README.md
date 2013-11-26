@@ -12,17 +12,16 @@ Getting started
 buildscript {
     repositories {
         mavenCentral()
-        maven { url 'http://mtkopone.github.com/scct/maven-repo' }
     }
     dependencies {
-        classpath 'com.github.maiflai:gradle-scct:0.3'
+        classpath 'com.sqality:gradle-scct:0.4.1'
     }
 }
 
-apply plugin: 'scct'
+apply plugin: com.sqality.ScctPlugin
 
 dependencies {
-    scct 'com.github.scct:scct_2.10:0.2.1'
+    scct 'com.sqality.scct:scct_2.10:0.2.2'
     compile 'org.scala-lang:scala-library:2.10.1'
 }
 ```
