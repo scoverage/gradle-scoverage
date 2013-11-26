@@ -14,7 +14,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.sqality:gradle-scct:0.2.2'
+        classpath 'com.sqality:gradle-scct:0.4.1'
     }
 }
 
