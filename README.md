@@ -18,7 +18,7 @@ buildscript {
     }
 }
 
-apply plugin: 'scct'
+apply plugin: com.sqality.ScctPlugin
 
 dependencies {
     scct 'com.sqality.scct:scct_2.10:0.2.2'
