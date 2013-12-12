@@ -40,7 +40,7 @@ artifacts {
     archives sourcesJar
 }
 
-if (sonatypeUser) {
+if (project.properties.containsKey('signing.keyId')) {
     apply plugin: 'signing'
     signing {
         sign configurations.archives
