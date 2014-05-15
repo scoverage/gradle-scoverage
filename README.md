@@ -14,7 +14,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.sqality:gradle-scoverage:0.4.1'
+        classpath 'org.scoverage:gradle-scoverage:0.4.1'
     }
 }
 
