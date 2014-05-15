@@ -13,7 +13,7 @@ class OverallCheckTask extends DefaultTask {
 
     @TaskAction
     void requireLineCoverage() {
-        def reportDirName = project.extensions[ScctPlugin.CONFIGURATION_NAME].reportDirName
+        def reportDirName = project.extensions[ScoveragePlugin.CONFIGURATION_NAME].reportDirName
 
         if (cobertura == null) cobertura = project.file("$project.buildDir/reports/$reportDirName/cobertura.xml")
 

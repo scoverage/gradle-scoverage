@@ -12,21 +12,21 @@ import org.gradle.api.tasks.testing.Test
  * Defines a new Test Task which executes normal tests with the instrumented classes.
  * Defines a new Check Task which enforces an overall line coverage requirement.
  */
-class ScctExtension {
+class ScoverageExtension {
 
-    ScctExtension(Project project) {
+    ScoverageExtension(Project project) {
 
         project.plugins.apply(JavaPlugin.class);
         project.plugins.apply(ScalaPlugin.class);
         project.afterEvaluate(configureRuntimeOptions)
 
-        project.configurations.create(ScctPlugin.CONFIGURATION_NAME) {
+        project.configurations.create(ScoveragePlugin.CONFIGURATION_NAME) {
             visible = false
             transitive = false
-            description = 'SCCT dependencies'
+            description = 'Scoverage dependencies'
         }
 
-        project.sourceSets.create(ScctPlugin.CONFIGURATION_NAME) {
+        project.sourceSets.create(ScoveragePlugin.CONFIGURATION_NAME) {
             def mainSourceSet = project.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
 
             java.source(mainSourceSet.java)
@@ -36,12 +36,12 @@ class ScctExtension {
             runtimeClasspath += mainSourceSet.runtimeClasspath
         }
 
-        project.tasks.create(ScctPlugin.TEST_NAME, Test.class) {
-            dependsOn(project.tasks[ScctPlugin.COMPILE_NAME])
+        project.tasks.create(ScoveragePlugin.TEST_NAME, Test.class) {
+            dependsOn(project.tasks[ScoveragePlugin.COMPILE_NAME])
         }
 
-        project.tasks.create(ScctPlugin.CHECK_NAME, OverallCheckTask.class) {
-            dependsOn(project.tasks[ScctPlugin.TEST_NAME])
+        project.tasks.create(ScoveragePlugin.CHECK_NAME, OverallCheckTask.class) {
+            dependsOn(project.tasks[ScoveragePlugin.TEST_NAME])
         }
 
     }
@@ -50,27 +50,28 @@ class ScctExtension {
 
         @Override
         void execute(Project t) {
-            t.tasks[ScctPlugin.COMPILE_NAME].configure {
-                List<String> plugin = ['-Xplugin:' + t.configurations[ScctPlugin.CONFIGURATION_NAME].singleFile]
+            t.tasks[ScoveragePlugin.COMPILE_NAME].configure {
+                List<String> plugin = ['-Xplugin:' + t.configurations[ScoveragePlugin.CONFIGURATION_NAME].singleFile]
                 List<String> parameters = scalaCompileOptions.additionalParameters
                 if (parameters != null) {
                     plugin.addAll(parameters)
                 }
                 scalaCompileOptions.additionalParameters = plugin
                 // exclude the scala libraries that are added to enable scala version detection
-                classpath += t.configurations[ScctPlugin.CONFIGURATION_NAME]
+                classpath += t.configurations[ScoveragePlugin.CONFIGURATION_NAME]
             }
-            t.tasks[ScctPlugin.TEST_NAME].configure {
-                systemProperty 'scct.report.dir', "${t.buildDir}/reports/${t.extensions[ScctPlugin.CONFIGURATION_NAME].reportDirName}"
-                systemProperty 'scct.basedir', "${t.rootDir.absolutePath}"  // for multi-module checking
+            t.tasks[ScoveragePlugin.TEST_NAME].configure {
+                // TODO : fix this
+                systemProperty 'scoverage.report.dir', "${t.buildDir}/reports/${t.extensions[ScoveragePlugin.CONFIGURATION_NAME].reportDirName}"
+                systemProperty 'scoverage.basedir', "${t.rootDir.absolutePath}"  // for multi-module checking
 
                 def existingClasspath = classpath
-                classpath = t.files(t.sourceSets[ScctPlugin.CONFIGURATION_NAME].output.classesDir) +
-                        project.configurations[ScctPlugin.CONFIGURATION_NAME] +
+                classpath = t.files(t.sourceSets[ScoveragePlugin.CONFIGURATION_NAME].output.classesDir) +
+                        project.configurations[ScoveragePlugin.CONFIGURATION_NAME] +
                         existingClasspath
             }
         }
     }
 
-    String reportDirName = 'scct'
+    String reportDirName = 'scoverage'
 }

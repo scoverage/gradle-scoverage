@@ -62,13 +62,13 @@ uploadArchives {
             }
 
             pom.project {
-                name 'GradleSCCT'
-                description 'gradle-scct is a Gradle plugin for calculating code coverage using SCCT'
-                url 'http://sqality.com/'
+                name 'GradleScoverage'
+                description 'gradle-scoverage is a Gradle plugin for calculating code coverage using Scoverage'
+                url 'http://scoverage.org'
 
                 scm {
-                    url 'scm:git:https://github.com/sqality/gradle-scct.git'
-                    developerConnection 'scm:git:https://github.com/sqality/gradle-scct.git'
+                    url 'scm:git:https://github.com/scoverage/gradle-scoverage.git'
+                    developerConnection 'scm:git:https://github.com/scoverage/gradle-scoverage.git'
                 }
 
                 licenses {
@@ -82,6 +82,12 @@ uploadArchives {
                 developers {
                     developer {
                         id 'maiflai'
+                    }
+                    developer {
+                        id 'ubourdon'
+                    }
+                    developer {
+                        id 'D-Roch'
                     }
                 }
             }

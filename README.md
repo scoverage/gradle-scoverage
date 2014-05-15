@@ -1,8 +1,8 @@
-[![Build Status](https://travis-ci.org/sqality/gradle-scct.png?branch=master)](https://travis-ci.org/sqality/gradle-scct)
+[![Build Status](https://travis-ci.org/scoverage/gradle-scoverage.png?branch=master)](https://travis-ci.org/scoverage/gradle-scoverage)
 
-gradle-scct
-===========
-A plugin to enable the use of SCCT in a gradle Scala project.
+gradle-scoverage
+================
+A plugin to enable the use of Scoverage in a gradle Scala project.
 
 This has now been deployed to maven central.
 
@@ -14,14 +14,14 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.sqality:gradle-scct:0.4.1'
+        classpath 'com.sqality:gradle-scoverage:0.4.1'
     }
 }
 
-apply plugin: com.sqality.ScctPlugin
+apply plugin: scoverage.ScoveragePlugin
 
 dependencies {
-    scct 'com.sqality.scct:scct_2.10:0.2.2'
+    scoverage 'org.scoverage:scalac-scoverage-plugin_2.10:0.98.4'
     compile 'org.scala-lang:scala-library:2.10.1'
 }
 ```
@@ -33,17 +33,17 @@ This creates an additional task testCoverage which will run tests against instru
 - [x] failing the build on lack of coverage
 
 Then launch command :
-`gradle testScct` or `gradle checkScct` 
+`gradle testScoverage` or `gradle checkScoverage`
 
 
-CheckScct
+CheckScoverage
 ---------
 
-By default, when you launch `gradle checkScct` build fail if only 75% of project is covered by tests.
+By default, when you launch `gradle checkScoverage` build fail if only 75% of project is covered by tests.
 
 To configure it as you want, add this configuration :
 ```
-checkScct {
+checkScoverage {
     minimumLineRate = 0.5
 }
 ```
