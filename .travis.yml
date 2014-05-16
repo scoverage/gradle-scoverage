@@ -2,3 +2,5 @@ env:
   global: 
     secure: qy7GXd9HlcGI0mRoHoY+wTCMJy7kjry8u2NiG5Npj60AaaTcHKadFhSJ3L+LNXrZYI3rA2DU2QLdd/GdIGrO4nc6WuamqfV4MmVuXmazTPVZIU471y44sNAmmAUt4nndiVW6/ObhJvArhO6SRKeVkQygDPy0enzpzsO37DjZaIE=
 language: groovy
+script:
+  - "gradle uploadArchives"
