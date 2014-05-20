@@ -1,4 +1,4 @@
-package com.sqality
+package org.scoverage
 
 import org.gradle.api.Action
 import org.gradle.api.Project

@@ -1,4 +1,4 @@
-package com.sqality
+package org.scoverage
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
