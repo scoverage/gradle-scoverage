@@ -62,16 +62,16 @@ class ScoverageExtension {
             }
             t.tasks[ScoveragePlugin.TEST_NAME].configure {
                 // TODO : fix this
-                systemProperty 'scoverage.report.dir', "${t.buildDir}/reports/${t.extensions[ScoveragePlugin.CONFIGURATION_NAME].reportDirName}"
+                systemProperty 'scoverage.dataDir', "${t.buildDir}/reports/${t.extensions[ScoveragePlugin.CONFIGURATION_NAME].dataDirName}"
                 systemProperty 'scoverage.basedir', "${t.rootDir.absolutePath}"  // for multi-module checking
 
                 def existingClasspath = classpath
                 classpath = t.files(t.sourceSets[ScoveragePlugin.CONFIGURATION_NAME].output.classesDir) +
-                        project.configurations[ScoveragePlugin.CONFIGURATION_NAME] +
-                        existingClasspath
+                project.configurations[ScoveragePlugin.CONFIGURATION_NAME] +
+                existingClasspath
             }
         }
     }
 
-    String reportDirName = 'scoverage'
+    String dataDirName = 'scoverage'
 }

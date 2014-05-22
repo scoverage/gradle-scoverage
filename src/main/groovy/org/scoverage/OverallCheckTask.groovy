@@ -13,9 +13,9 @@ class OverallCheckTask extends DefaultTask {
 
     @TaskAction
     void requireLineCoverage() {
-        def reportDirName = project.extensions[ScoveragePlugin.CONFIGURATION_NAME].reportDirName
+        def dataDirName = project.extensions[ScoveragePlugin.CONFIGURATION_NAME].dataDirName
 
-        if (cobertura == null) cobertura = project.file("$project.buildDir/reports/$reportDirName/cobertura.xml")
+        if (cobertura == null) cobertura = project.file("$project.buildDir/reports/$dataDirName/cobertura.xml")
 
         def xml = new XmlParser().parse(cobertura)
         def overallLineRate = xml.attribute('line-rate').toDouble()
