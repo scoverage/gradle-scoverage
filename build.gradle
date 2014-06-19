@@ -7,6 +7,10 @@ buildscript {
     }
 }
 
+repositories {
+    mavenCentral()
+}
+
 ext {
     sonatypeUser = System.env.SONATYPE_USER
     sonatypePass = System.env.SONATYPE_PASS
@@ -19,9 +23,15 @@ apply plugin: 'release'
 
 group 'org.scoverage'
 
+configurations {
+    scoverage
+    compile.extendsFrom scoverage
+}
+
 dependencies {
     compile gradleApi()
     compile localGroovy()
+    scoverage 'org.scoverage:scalac-scoverage-plugin_2.10:0.99.5'
 }
 
 task groovydocJar(type: Jar, dependsOn: groovydoc) {
