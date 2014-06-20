@@ -12,17 +12,18 @@ Getting started
 buildscript {
     repositories {
         mavenCentral()
+        maven { url "https://oss.sonatype.org/content/groups/public" }
     }
     dependencies {
-        classpath 'org.scoverage:gradle-scoverage:0.4.1'
+        classpath 'org.scoverage:gradle-scoverage:0.4.1-SNAPSHOT'
     }
 }
 
-apply plugin: scoverage.ScoveragePlugin
+apply plugin: org.scoverage.ScoveragePlugin
 
 dependencies {
-    scoverage 'org.scoverage:scalac-scoverage-plugin_2.10:0.98.4'
-    compile 'org.scala-lang:scala-library:2.10.1'
+    scoverage 'org.scoverage:scalac-scoverage-plugin_2.11:0.99.5'
+    compile 'org.scala-lang:scala-library:2.11.0'
 }
 ```
 
