@@ -5,5 +5,5 @@ language: groovy
 script:
   - "gradle build"
 after_script:
-- if [[ $TRAVIS_TEST_RESULT == 0 && "$TRAVIS_BRANCH" == "master" ]]; then "gradle uploadArchives";
+- if [[ $TRAVIS_TEST_RESULT == 0 && "$TRAVIS_BRANCH" == "master" ]]; then gradle uploadArchives;
   fi
