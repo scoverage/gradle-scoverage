@@ -2,8 +2,10 @@ package org.scoverage
 
 import org.gradle.api.Action
 import org.gradle.api.Project
+import org.gradle.api.artifacts.ResolvedConfiguration
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.scala.ScalaPlugin
+import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.testing.Test
 
@@ -14,6 +16,14 @@ import org.gradle.api.tasks.testing.Test
  */
 class ScoverageExtension {
 
+    /** a directory to write working files to */
+    File dataDir
+    /** a directory to write final output to */
+    File reportDir
+    /** sources to highlight */
+    SourceSet sourceSet
+
+
     ScoverageExtension(Project project) {
 
         project.plugins.apply(JavaPlugin.class);
@@ -22,11 +32,11 @@ class ScoverageExtension {
 
         project.configurations.create(ScoveragePlugin.CONFIGURATION_NAME) {
             visible = false
-            transitive = false
+            transitive = true
             description = 'Scoverage dependencies'
         }
 
-        project.sourceSets.create(ScoveragePlugin.CONFIGURATION_NAME) {
+        sourceSet = project.sourceSets.create(ScoveragePlugin.CONFIGURATION_NAME) {
             def mainSourceSet = project.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
 
             java.source(mainSourceSet.java)
@@ -44,34 +54,63 @@ class ScoverageExtension {
             dependsOn(project.tasks[ScoveragePlugin.TEST_NAME])
         }
 
+        project.tasks.create(ScoveragePlugin.REPORT_NAME, JavaExec.class) {
+            dependsOn(project.tasks[ScoveragePlugin.TEST_NAME])
+        }
+
+        dataDir = new File(project.buildDir, 'scoverage')
+        reportDir = new File(project.buildDir, 'reports' + File.separatorChar + 'scoverage')
+
     }
 
     private Action<Project> configureRuntimeOptions = new Action<Project>() {
 
         @Override
         void execute(Project t) {
+
+            def extension = ScoveragePlugin.extensionIn(t)
+            extension.dataDir.mkdirs()
+            extension.reportDir.mkdirs()
+
+            ResolvedConfiguration s = t.configurations[ScoveragePlugin.CONFIGURATION_NAME].resolvedConfiguration
+            String pluginPath = s.getFirstLevelModuleDependencies().iterator().next().moduleArtifacts.iterator().next().file.absolutePath
+
             t.tasks[ScoveragePlugin.COMPILE_NAME].configure {
-                List<String> plugin = ['-Xplugin:' + t.configurations[ScoveragePlugin.CONFIGURATION_NAME].singleFile]
+
+
+                List<String> plugin = ['-Xplugin:' + pluginPath]
                 List<String> parameters = scalaCompileOptions.additionalParameters
                 if (parameters != null) {
                     plugin.addAll(parameters)
                 }
+                plugin.add("-P:scoverage:dataDir:${extension.dataDir.absolutePath}".toString())
+                plugin.add('-P:scoverage:excludedPackages:')
                 scalaCompileOptions.additionalParameters = plugin
                 // exclude the scala libraries that are added to enable scala version detection
                 classpath += t.configurations[ScoveragePlugin.CONFIGURATION_NAME]
             }
-            t.tasks[ScoveragePlugin.TEST_NAME].configure {
-                // TODO : fix this
-                systemProperty 'scoverage.dataDir', "${t.buildDir}/reports/${t.extensions[ScoveragePlugin.CONFIGURATION_NAME].dataDirName}"
-                systemProperty 'scoverage.basedir', "${t.rootDir.absolutePath}"  // for multi-module checking
 
+            t.tasks[ScoveragePlugin.TEST_NAME].configure {
                 def existingClasspath = classpath
                 classpath = t.files(t.sourceSets[ScoveragePlugin.CONFIGURATION_NAME].output.classesDir) +
-                project.configurations[ScoveragePlugin.CONFIGURATION_NAME] +
-                existingClasspath
+                        project.configurations[ScoveragePlugin.CONFIGURATION_NAME] +
+                        existingClasspath
             }
+
+            t.tasks[ScoveragePlugin.REPORT_NAME].configure {
+                classpath = project.buildscript.configurations.classpath +
+                        project.configurations[ScoveragePlugin.CONFIGURATION_NAME]
+                main = 'org.scoverage.ScoverageReport'
+                args = [
+                        extension.sourceSet.allSource.iterator().next().absolutePath,
+                        extension.dataDir.absolutePath,
+                        extension.reportDir.absolutePath
+                ]
+                inputs.dir(extension.dataDir)
+                outputs.dir(extension.reportDir)
+            }
+
         }
     }
 
-    String dataDirName = 'scoverage'
 }
