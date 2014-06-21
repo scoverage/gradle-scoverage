@@ -44,6 +44,10 @@ task sourcesJar(type: Jar) {
     classifier = 'sources'
 }
 
+test {
+    dependsOn jar
+}
+
 artifacts {
     archives jar
     archives groovydocJar
