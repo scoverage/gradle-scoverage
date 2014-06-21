@@ -21,8 +21,7 @@ class ScoverageExtension {
     /** a directory to write final output to */
     File reportDir
     /** sources to highlight */
-    SourceSet sourceSet
-
+    File sources
 
     ScoverageExtension(Project project) {
 
@@ -36,7 +35,7 @@ class ScoverageExtension {
             description = 'Scoverage dependencies'
         }
 
-        sourceSet = project.sourceSets.create(ScoveragePlugin.CONFIGURATION_NAME) {
+        project.sourceSets.create(ScoveragePlugin.CONFIGURATION_NAME) {
             def mainSourceSet = project.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
 
             java.source(mainSourceSet.java)
@@ -50,17 +49,16 @@ class ScoverageExtension {
             dependsOn(project.tasks[ScoveragePlugin.COMPILE_NAME])
         }
 
-        project.tasks.create(ScoveragePlugin.CHECK_NAME, OverallCheckTask.class) {
-            dependsOn(project.tasks[ScoveragePlugin.TEST_NAME])
-        }
-
         project.tasks.create(ScoveragePlugin.REPORT_NAME, JavaExec.class) {
             dependsOn(project.tasks[ScoveragePlugin.TEST_NAME])
         }
 
+        project.tasks.create(ScoveragePlugin.CHECK_NAME, OverallCheckTask.class) {
+            dependsOn(project.tasks[ScoveragePlugin.REPORT_NAME])
+        }
+
         dataDir = new File(project.buildDir, 'scoverage')
         reportDir = new File(project.buildDir, 'reports' + File.separatorChar + 'scoverage')
-
     }
 
     private Action<Project> configureRuntimeOptions = new Action<Project>() {
@@ -69,6 +67,7 @@ class ScoverageExtension {
         void execute(Project t) {
 
             def extension = ScoveragePlugin.extensionIn(t)
+            extension.sources = t.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME).scala.srcDirs.iterator().next() as File
             extension.dataDir.mkdirs()
             extension.reportDir.mkdirs()
 
@@ -102,7 +101,7 @@ class ScoverageExtension {
                         project.configurations[ScoveragePlugin.CONFIGURATION_NAME]
                 main = 'org.scoverage.ScoverageReport'
                 args = [
-                        extension.sourceSet.allSource.iterator().next().absolutePath,
+                        extension.sources,
                         extension.dataDir.absolutePath,
                         extension.reportDir.absolutePath
                 ]

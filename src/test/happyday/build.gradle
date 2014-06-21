@@ -1,0 +1,27 @@
+description = 'a project that builds successfully with 100% coverage'
+
+buildscript {
+    repositories {
+        // need to get up to the working directory of gradle-plugins build
+        flatDir dir: "${project.projectDir}/../../../build/libs"
+    }
+    dependencies {
+        classpath name: 'gradle-scoverage', version: '+'
+    }
+}
+
+apply plugin: 'scoverage'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    scoverage 'org.scoverage:scalac-scoverage-plugin_2.11:0.99.5'
+    compile 'org.scala-lang:scala-library:2.11.0'
+    testCompile 'junit:junit:4.11'
+}
+
+checkScoverage {
+    minimumLineRate = 1.0
+}
