@@ -22,6 +22,8 @@ class ScoverageExtension {
     File reportDir
     /** sources to highlight */
     File sources
+    /** range positioning for highlighting */
+    boolean highlighting = true
 
     ScoverageExtension(Project project) {
 
@@ -84,6 +86,9 @@ class ScoverageExtension {
                 }
                 plugin.add("-P:scoverage:dataDir:${extension.dataDir.absolutePath}".toString())
                 plugin.add('-P:scoverage:excludedPackages:')
+                if (extension.highlighting) {
+                    plugin.add('-Yrangepos')
+                }
                 scalaCompileOptions.additionalParameters = plugin
                 // exclude the scala libraries that are added to enable scala version detection
                 classpath += t.configurations[ScoveragePlugin.CONFIGURATION_NAME]
