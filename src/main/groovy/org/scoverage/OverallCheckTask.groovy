@@ -11,13 +11,21 @@ class OverallCheckTask extends DefaultTask {
     File cobertura
     double minimumLineRate = 0.75
 
+    protected XmlParser parser;
+
+    OverallCheckTask() {
+        parser = new XmlParser()
+        parser.setFeature('http://apache.org/xml/features/disallow-doctype-decl', false)
+        parser.setFeature('http://apache.org/xml/features/nonvalidating/load-external-dtd', false)
+    }
+
     @TaskAction
     void requireLineCoverage() {
         def extension = ScoveragePlugin.extensionIn(project)
 
         if (cobertura == null) cobertura = new File(extension.reportDir, 'cobertura.xml')
 
-        def xml = new XmlParser().parse(cobertura)
+        def xml = parser.parse(cobertura)
         def overallLineRate = xml.attribute('line-rate').toDouble()
         def difference = (minimumLineRate - overallLineRate)
 
