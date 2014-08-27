@@ -15,7 +15,7 @@ buildscript {
         maven { url "https://oss.sonatype.org/content/groups/public" }
     }
     dependencies {
-        classpath 'org.scoverage:gradle-scoverage:0.4.1-SNAPSHOT'
+        classpath 'org.scoverage:gradle-scoverage:0.6-SNAPSHOT'
     }
 }
 
@@ -23,7 +23,6 @@ apply plugin: org.scoverage.ScoveragePlugin
 
 dependencies {
     scoverage 'org.scoverage:scalac-scoverage-plugin_2.11:0.99.5'
-    compile 'org.scala-lang:scala-library:2.11.0'
 }
 ```
 
@@ -36,6 +35,12 @@ This creates an additional task testCoverage which will run tests against instru
 Then launch command :
 `gradle testScoverage` or `gradle checkScoverage`
 
+Available tasks
+---------
+* testCoverage - Executes all tests and creates Scoverage XML report with information about code coverage
+* reportScoverage - Generates HTML report.
+* checkScoverage - See below.
+* compileScoverageScala - Instruments code without running tests.
 
 CheckScoverage
 ---------
