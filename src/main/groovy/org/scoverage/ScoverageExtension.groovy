@@ -87,7 +87,7 @@ class ScoverageExtension {
                     plugin.addAll(parameters)
                 }
                 plugin.add("-P:scoverage:dataDir:${extension.dataDir.absolutePath}".toString())
-                plugin.add("-P:scoverage:excludedPackages:${extension.excludedPackages}")
+                plugin.add("-P:scoverage:excludedPackages:${extension.excludedPackages}".toString())
                 if (extension.highlighting) {
                     plugin.add('-Yrangepos')
                 }
