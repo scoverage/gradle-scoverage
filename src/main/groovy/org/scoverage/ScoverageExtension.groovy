@@ -24,8 +24,8 @@ class ScoverageExtension {
     File sources
     /** range positioning for highlighting */
     boolean highlighting = true
-    /** regex of excluded packages, separated by semicolons */
-    String excludedPackages = ""
+    /** regex for each excluded package */
+    List<String> excludedPackages = []
 
     ScoverageExtension(Project project) {
 
@@ -87,7 +87,9 @@ class ScoverageExtension {
                     plugin.addAll(parameters)
                 }
                 plugin.add("-P:scoverage:dataDir:${extension.dataDir.absolutePath}".toString())
-                plugin.add("-P:scoverage:excludedPackages:${extension.excludedPackages}".toString())
+                if (extension.excludedPackages) {
+                    plugin.add("-P:scoverage:excludedPackages:${extension.excludedPackages.join(';')}".toString())
+                }
                 if (extension.highlighting) {
                     plugin.add('-Yrangepos')
                 }
