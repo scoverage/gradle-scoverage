@@ -26,6 +26,8 @@ class ScoverageExtension {
     boolean highlighting = true
     /** regex for each excluded package */
     List<String> excludedPackages = []
+    /** regex for each excluded file */
+    List<String> excludedFiles = []
 
     ScoverageExtension(Project project) {
 
@@ -89,6 +91,9 @@ class ScoverageExtension {
                 plugin.add("-P:scoverage:dataDir:${extension.dataDir.absolutePath}".toString())
                 if (extension.excludedPackages) {
                     plugin.add("-P:scoverage:excludedPackages:${extension.excludedPackages.join(';')}".toString())
+                }
+                if (extension.excludedFiles) {
+                    plugin.add("-P:scoverage:excludedFiles:${extension.excludedFiles.join(';')}".toString())
                 }
                 if (extension.highlighting) {
                     plugin.add('-Yrangepos')
