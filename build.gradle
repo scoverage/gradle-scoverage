@@ -40,7 +40,7 @@ configurations {
 dependencies {
     compile gradleApi()
     compile localGroovy()
-    scoverage 'org.scoverage:scalac-scoverage-plugin_2.11:1.0.1','org.scoverage:scalac-scoverage-plugin_2.11:1.0.1'
+    scoverage 'org.scoverage:scalac-scoverage-plugin_2.11:1.0.1'
 }
 
 task groovydocJar(type: Jar, dependsOn: groovydoc) {
