@@ -1,11 +1,21 @@
-buildscript {
-    repositories {
-        mavenCentral()
+def isDirty = { ->
+    def stdout = new ByteArrayOutputStream()
+    exec {
+        commandLine 'git', 'status', '--porcelain'
+        standardOutput = stdout
     }
-    dependencies {
-        classpath 'com.github.townsfolk:gradle-release:1.2'
-    }
+    return stdout.toString().trim()
 }
+def getVersionName = { ->
+    def stdout = new ByteArrayOutputStream()
+    exec {
+        commandLine 'git', 'describe', '--tags'
+        standardOutput = stdout
+    }
+    def gitVersionName = stdout.toString().trim()
+    return isDirty() ? gitVersionName + '-SNAPSHOT' : gitVersionName
+}
+version = getVersionName()
 
 repositories {
     mavenCentral()
@@ -19,7 +29,6 @@ ext {
 apply plugin: 'idea'
 apply plugin: 'maven'
 apply plugin: 'groovy'
-apply plugin: 'release'
 
 group 'org.scoverage'
 
@@ -31,7 +40,7 @@ configurations {
 dependencies {
     compile gradleApi()
     compile localGroovy()
-    scoverage 'org.scoverage:scalac-scoverage-plugin_2.10:0.99.5'
+    scoverage 'org.scoverage:scalac-scoverage-plugin_2.11:1.0.1'
 }
 
 task groovydocJar(type: Jar, dependsOn: groovydoc) {

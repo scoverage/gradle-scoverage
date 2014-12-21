@@ -4,6 +4,7 @@ import scala.collection.Seq;
 import scala.collection.Set;
 import scoverage.Coverage;
 import scoverage.IOUtils;
+import scoverage.Serializer;
 import scoverage.report.CoberturaXmlWriter;
 import scoverage.report.ScoverageHtmlWriter;
 
@@ -19,13 +20,14 @@ public class ScoverageReport {
         File sourceDir = new File(args[0]);
         File dataDir = new File(args[1]);
         File reportDir = new File(args[2]);
+        reportDir.mkdirs();
 
-        File coverageFile = IOUtils.coverageFile(dataDir);
+        File coverageFile = Serializer.coverageFile(dataDir);
         File[] array = IOUtils.findMeasurementFiles(dataDir);
         // TODO: patch scoverage core to use a consistent collection type?
         Seq<File> measurementFiles = scala.collection.JavaConversions.asScalaBuffer(Arrays.asList(array));
 
-        Coverage coverage = IOUtils.deserialize(coverageFile);
+        Coverage coverage = Serializer.deserialize(coverageFile);
 
         Set<Object> measurements = IOUtils.invoked(measurementFiles);
         coverage.apply(measurements);

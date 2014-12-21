@@ -2,7 +2,8 @@ package org.scoverage
 
 import org.gradle.api.Action
 import org.gradle.api.Project
-import org.gradle.api.artifacts.ResolvedConfiguration
+import org.gradle.api.artifacts.Configuration
+import org.gradle.api.file.FileCollection
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.scala.ScalaPlugin
 import org.gradle.api.tasks.JavaExec
@@ -77,13 +78,14 @@ class ScoverageExtension {
             extension.dataDir.mkdirs()
             extension.reportDir.mkdirs()
 
-            ResolvedConfiguration s = t.configurations[ScoveragePlugin.CONFIGURATION_NAME].resolvedConfiguration
-            String pluginPath = s.getFirstLevelModuleDependencies().iterator().next().moduleArtifacts.iterator().next().file.absolutePath
+            Configuration configuration = t.configurations[ScoveragePlugin.CONFIGURATION_NAME]
+            File pluginFile = configuration.filter { it.name.contains('plugin') }.iterator().next()
+            FileCollection pluginDependencies = configuration.filter { it != pluginFile }
 
             t.tasks[ScoveragePlugin.COMPILE_NAME].configure {
 
 
-                List<String> plugin = ['-Xplugin:' + pluginPath]
+                List<String> plugin = ['-Xplugin:' + pluginFile.absolutePath]
                 List<String> parameters = scalaCompileOptions.additionalParameters
                 if (parameters != null) {
                     plugin.addAll(parameters)
@@ -100,19 +102,18 @@ class ScoverageExtension {
                 }
                 scalaCompileOptions.additionalParameters = plugin
                 // exclude the scala libraries that are added to enable scala version detection
-                classpath += t.configurations[ScoveragePlugin.CONFIGURATION_NAME]
+                classpath += pluginDependencies
             }
 
             t.tasks[ScoveragePlugin.TEST_NAME].configure {
                 def existingClasspath = classpath
                 classpath = t.files(t.sourceSets[ScoveragePlugin.CONFIGURATION_NAME].output.classesDir) +
-                        project.configurations[ScoveragePlugin.CONFIGURATION_NAME] +
+                        pluginDependencies +
                         existingClasspath
             }
 
             t.tasks[ScoveragePlugin.REPORT_NAME].configure {
-                classpath = project.buildscript.configurations.classpath +
-                        project.configurations[ScoveragePlugin.CONFIGURATION_NAME]
+                classpath = project.buildscript.configurations.classpath + configuration
                 main = 'org.scoverage.ScoverageReport'
                 args = [
                         extension.sources,
