@@ -12,17 +12,16 @@ Getting started
 buildscript {
     repositories {
         mavenCentral()
-        maven { url "https://oss.sonatype.org/content/groups/public" }
     }
     dependencies {
-        classpath 'org.scoverage:gradle-scoverage:0.6-SNAPSHOT'
+        classpath 'org.scoverage:gradle-scoverage:1.0'
     }
 }
 
-apply plugin: org.scoverage.ScoveragePlugin
+apply plugin: 'scoverage'
 
 dependencies {
-    scoverage 'org.scoverage:scalac-scoverage-plugin_2.11:0.99.5'
+    scoverage 'org.scoverage:scalac-scoverage-plugin_2.11:1.0.1', 'org.scoverage:scalac-scoverage-runtime_2.11:1.0.1'
 }
 ```
 
@@ -37,7 +36,7 @@ Then launch command :
 
 Available tasks
 ---------
-* testCoverage - Executes all tests and creates Scoverage XML report with information about code coverage
+* testScoverage - Executes all tests and creates Scoverage XML report with information about code coverage
 * reportScoverage - Generates HTML report.
 * checkScoverage - See below.
 * compileScoverageScala - Instruments code without running tests.
