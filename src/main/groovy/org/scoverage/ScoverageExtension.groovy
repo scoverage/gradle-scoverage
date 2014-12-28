@@ -17,6 +17,18 @@ import org.gradle.api.tasks.testing.Test
  */
 class ScoverageExtension {
 
+    private static boolean isEscaped(String argument) {
+        return (argument.startsWith('"') && argument.endsWith('"')) || (argument.startsWith('\'') && argument.endsWith('\''))
+    }
+
+    static String escape(String argument) {
+        if (isEscaped(argument)) {
+            return argument
+        } else {
+            return "\"$argument\""
+        }
+    }
+
     /** a directory to write working files to */
     File dataDir
     /** a directory to write final output to */
@@ -83,24 +95,22 @@ class ScoverageExtension {
             FileCollection pluginDependencies = configuration.filter { it != pluginFile }
 
             t.tasks[ScoveragePlugin.COMPILE_NAME].configure {
-
-
-                List<String> plugin = ['-Xplugin:' + pluginFile.absolutePath]
-                List<String> parameters = scalaCompileOptions.additionalParameters
-                if (parameters != null) {
-                    plugin.addAll(parameters)
+                List<String> parameters = ['-Xplugin:' + pluginFile.absolutePath]
+                List<String> existingParameters = scalaCompileOptions.additionalParameters
+                if (existingParameters) {
+                    parameters.addAll(existingParameters)
                 }
-                plugin.add("-P:scoverage:dataDir:${extension.dataDir.absolutePath}".toString())
+                parameters.add("-P:scoverage:dataDir:${extension.dataDir.absolutePath}".toString())
                 if (extension.excludedPackages) {
-                    plugin.add("-P:scoverage:excludedPackages:${extension.excludedPackages.join(';')}".toString())
+                    parameters.add("-P:scoverage:excludedPackages:${extension.excludedPackages.join(';')}".toString())
                 }
                 if (extension.excludedFiles) {
-                    plugin.add("-P:scoverage:excludedFiles:${extension.excludedFiles.join(';')}".toString())
+                    parameters.add("-P:scoverage:excludedFiles:${extension.excludedFiles.join(';')}".toString())
                 }
                 if (extension.highlighting) {
-                    plugin.add('-Yrangepos')
+                    parameters.add('-Yrangepos')
                 }
-                scalaCompileOptions.additionalParameters = plugin
+                scalaCompileOptions.additionalParameters = parameters.collect { escape(it) }
                 // exclude the scala libraries that are added to enable scala version detection
                 classpath += pluginDependencies
             }
