@@ -1,6 +1,7 @@
 package org.scoverage
 
 import org.gradle.api.Action
+import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.FileCollection
@@ -91,7 +92,12 @@ class ScoverageExtension {
             extension.reportDir.mkdirs()
 
             Configuration configuration = t.configurations[ScoveragePlugin.CONFIGURATION_NAME]
-            File pluginFile = configuration.filter { it.name.contains('plugin') }.iterator().next()
+            File pluginFile
+            try {
+                pluginFile = configuration.filter { it.name.contains('plugin') }.iterator().next()
+            } catch(NoSuchElementException e) {
+                throw new GradleException("Could not find a plugin jar in configuration '${ScoveragePlugin.CONFIGURATION_NAME}'")
+            }
             FileCollection pluginDependencies = configuration.filter { it != pluginFile }
 
             t.tasks[ScoveragePlugin.COMPILE_NAME].configure {
