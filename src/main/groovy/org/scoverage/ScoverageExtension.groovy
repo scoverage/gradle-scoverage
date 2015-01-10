@@ -119,6 +119,8 @@ class ScoverageExtension {
                 scalaCompileOptions.additionalParameters = parameters.collect { escape(it) }
                 // exclude the scala libraries that are added to enable scala version detection
                 classpath += pluginDependencies
+                // the compile task creates a store of measured statements
+                outputs.file(new File(extension.dataDir, 'scoverage.coverage.xml'))
             }
 
             t.tasks[ScoveragePlugin.TEST_NAME].configure {
