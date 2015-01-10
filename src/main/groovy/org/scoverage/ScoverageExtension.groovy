@@ -116,7 +116,11 @@ class ScoverageExtension {
                 if (extension.highlighting) {
                     parameters.add('-Yrangepos')
                 }
-                scalaCompileOptions.additionalParameters = parameters.collect { escape(it) }
+                if (scalaCompileOptions.useAnt) {
+                    scalaCompileOptions.additionalParameters = parameters.collect { escape(it) }
+                } else {
+                    scalaCompileOptions.additionalParameters = parameters
+                }
                 // exclude the scala libraries that are added to enable scala version detection
                 classpath += pluginDependencies
                 // the compile task creates a store of measured statements
