@@ -77,6 +77,7 @@ class ScoverageExtension {
             dependsOn(project.tasks[ScoveragePlugin.REPORT_NAME])
         }
 
+        sources = project.projectDir
         dataDir = new File(project.buildDir, 'scoverage')
         reportDir = new File(project.buildDir, 'reports' + File.separatorChar + 'scoverage')
     }
@@ -87,7 +88,6 @@ class ScoverageExtension {
         void execute(Project t) {
 
             def extension = ScoveragePlugin.extensionIn(t)
-            extension.sources = t.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME).scala.srcDirs.iterator().next() as File
             extension.dataDir.mkdirs()
             extension.reportDir.mkdirs()
 
@@ -116,9 +116,15 @@ class ScoverageExtension {
                 if (extension.highlighting) {
                     parameters.add('-Yrangepos')
                 }
-                scalaCompileOptions.additionalParameters = parameters.collect { escape(it) }
+                if (scalaCompileOptions.useAnt) {
+                    scalaCompileOptions.additionalParameters = parameters.collect { escape(it) }
+                } else {
+                    scalaCompileOptions.additionalParameters = parameters
+                }
                 // exclude the scala libraries that are added to enable scala version detection
                 classpath += pluginDependencies
+                // the compile task creates a store of measured statements
+                outputs.file(new File(extension.dataDir, 'scoverage.coverage.xml'))
             }
 
             t.tasks[ScoveragePlugin.TEST_NAME].configure {
@@ -129,12 +135,12 @@ class ScoverageExtension {
             }
 
             t.tasks[ScoveragePlugin.REPORT_NAME].configure {
-                classpath = project.buildscript.configurations.classpath + configuration
-                main = 'org.scoverage.ScoverageReport'
+                classpath = configuration
+                main = 'scoverage.report.Reports'
                 args = [
-                        extension.sources,
-                        extension.dataDir.absolutePath,
-                        extension.reportDir.absolutePath
+                        '--base-dir', extension.sources,
+                        '--output-dir', extension.reportDir,
+                        '--data-dir', extension.dataDir
                 ]
                 inputs.dir(extension.dataDir)
                 outputs.dir(extension.reportDir)
