@@ -10,6 +10,7 @@ import org.gradle.api.plugins.scala.ScalaPlugin
 import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.testing.Test
+import org.gradle.util.GFileUtils
 
 /**
  * Defines a new SourceSet for the code to be instrumented.
@@ -119,6 +120,9 @@ class ScoverageExtension {
                 if (scalaCompileOptions.useAnt) {
                     scalaCompileOptions.additionalParameters = parameters.collect { escape(it) }
                 } else {
+                    doFirst {
+                        GFileUtils.deleteDirectory(destinationDir)
+                    }
                     scalaCompileOptions.additionalParameters = parameters
                 }
                 // exclude the scala libraries that are added to enable scala version detection
