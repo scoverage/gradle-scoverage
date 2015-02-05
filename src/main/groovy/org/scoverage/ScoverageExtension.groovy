@@ -151,7 +151,8 @@ class ScoverageExtension {
             }
 
             t.tasks[ScoveragePlugin.REPORT_NAME].configure {
-                classpath = project.buildscript.configurations.classpath + configuration
+                def classLocation = ScoverageExtension.class.getProtectionDomain().getCodeSource().getLocation()
+                classpath = project.files(classLocation.file) + configuration
                 main = 'org.scoverage.ScoverageReport'
                 args = [
                         extension.sources,
