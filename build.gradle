@@ -1,3 +1,22 @@
+def isDirty = { ->
+    def stdout = new ByteArrayOutputStream()
+    exec {
+        commandLine 'git', 'status', '--porcelain'
+        standardOutput = stdout
+    }
+    return stdout.toString().trim()
+}
+def getVersionName = { ->
+    def stdout = new ByteArrayOutputStream()
+    exec {
+        commandLine 'git', 'describe', '--tags'
+        standardOutput = stdout
+    }
+    def gitVersionName = stdout.toString().trim()
+    return isDirty() ? gitVersionName + '-SNAPSHOT' : gitVersionName
+}
+version = getVersionName()
+
 repositories {
     mavenCentral()
 }
