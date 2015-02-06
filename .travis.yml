@@ -1,9 +1,3 @@
-env: 
-  global: 
-    secure: IErJADm+yokOba01GxnJzLcB+yZJXXA6ISFkznsjh4UowStgNB6+mIvj9Hw8Sfnk7poU5H7tFrkfEDnusKavw71k0Hv4DIIoPcLRnRP0grngL0DsvYIaY4CQFJfKNkR/syv/y6b/cObMmgvdNlqKmJxCAA0sGSJBg2SuJa/usIM=
 language: groovy
 script:
   - "gradle build test"
-after_script:
-- if [[ $TRAVIS_TEST_RESULT == 0 && "$TRAVIS_BRANCH" == "master" ]]; then gradle uploadArchives;
-  fi

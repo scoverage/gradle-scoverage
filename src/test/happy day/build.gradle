@@ -26,3 +26,7 @@ dependencies {
 checkScoverage {
     minimumLineRate = 1.0
 }
+
+tasks.withType(ScalaCompile) {
+    scalaCompileOptions.useAnt = project.hasProperty('useAnt') ? project.property('useAnt').toBoolean() : true
+}

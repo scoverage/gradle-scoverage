@@ -10,6 +10,9 @@ import org.gradle.api.plugins.scala.ScalaPlugin
 import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.testing.Test
+import org.gradle.util.GFileUtils
+
+import java.util.concurrent.Callable
 
 /**
  * Defines a new SourceSet for the code to be instrumented.
@@ -55,18 +58,37 @@ class ScoverageExtension {
             description = 'Scoverage dependencies'
         }
 
-        project.sourceSets.create(ScoveragePlugin.CONFIGURATION_NAME) {
-            def mainSourceSet = project.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
+        def mainSourceSet = project.sourceSets.create('scoverage') {
+            def original = project.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
 
-            java.source(mainSourceSet.java)
-            scala.source(mainSourceSet.scala)
+            java.source(original.java)
+            scala.source(original.scala)
 
-            compileClasspath += mainSourceSet.compileClasspath
-            runtimeClasspath += mainSourceSet.runtimeClasspath
+            compileClasspath += original.compileClasspath + project.configurations.scoverage
+            runtimeClasspath = it.output + project.configurations.runtime
+        }
+
+        def testSourceSet = project.sourceSets.create('testScoverage') {
+            def original = project.sourceSets.getByName(SourceSet.TEST_SOURCE_SET_NAME)
+
+            java.source(original.java)
+            scala.source(original.scala)
+
+            compileClasspath = mainSourceSet.output + project.configurations.testCompile
+            runtimeClasspath = it.output + mainSourceSet.output + project.configurations.scoverage + project.configurations.testRuntime
         }
 
         project.tasks.create(ScoveragePlugin.TEST_NAME, Test.class) {
-            dependsOn(project.tasks[ScoveragePlugin.COMPILE_NAME])
+            conventionMapping.map("testClassesDir", new Callable<Object>() {
+                public Object call() throws Exception {
+                    return testSourceSet.output.classesDir;
+                }
+            })
+            conventionMapping.map("classpath", new Callable<Object>() {
+                public Object call() throws Exception {
+                    return testSourceSet.runtimeClasspath;
+                }
+            })
         }
 
         project.tasks.create(ScoveragePlugin.REPORT_NAME, JavaExec.class) {
@@ -116,20 +138,21 @@ class ScoverageExtension {
                 if (extension.highlighting) {
                     parameters.add('-Yrangepos')
                 }
-                scalaCompileOptions.additionalParameters = parameters.collect { escape(it) }
-                // exclude the scala libraries that are added to enable scala version detection
-                classpath += pluginDependencies
-            }
-
-            t.tasks[ScoveragePlugin.TEST_NAME].configure {
-                def existingClasspath = classpath
-                classpath = t.files(t.sourceSets[ScoveragePlugin.CONFIGURATION_NAME].output.classesDir) +
-                        pluginDependencies +
-                        existingClasspath
+                if (scalaCompileOptions.useAnt) {
+                    scalaCompileOptions.additionalParameters = parameters.collect { escape(it) }
+                } else {
+                    doFirst {
+                        GFileUtils.deleteDirectory(destinationDir)
+                    }
+                    scalaCompileOptions.additionalParameters = parameters
+                }
+                // the compile task creates a store of measured statements
+                outputs.file(new File(extension.dataDir, 'scoverage.coverage.xml'))
             }
 
             t.tasks[ScoveragePlugin.REPORT_NAME].configure {
-                classpath = project.buildscript.configurations.classpath + configuration
+                def classLocation = ScoverageExtension.class.getProtectionDomain().getCodeSource().getLocation()
+                classpath = project.files(classLocation.file) + configuration
                 main = 'org.scoverage.ScoverageReport'
                 args = [
                         extension.sources,
