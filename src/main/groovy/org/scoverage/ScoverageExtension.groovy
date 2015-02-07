@@ -99,6 +99,7 @@ class ScoverageExtension {
             dependsOn(project.tasks[ScoveragePlugin.REPORT_NAME])
         }
 
+        sources = project.projectDir
         dataDir = new File(project.buildDir, 'scoverage')
         reportDir = new File(project.buildDir, 'reports' + File.separatorChar + 'scoverage')
     }
@@ -109,7 +110,6 @@ class ScoverageExtension {
         void execute(Project t) {
 
             def extension = ScoveragePlugin.extensionIn(t)
-            extension.sources = t.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME).scala.srcDirs.iterator().next() as File
             extension.dataDir.mkdirs()
             extension.reportDir.mkdirs()
 
