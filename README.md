@@ -6,36 +6,6 @@ A plugin to enable the use of Scoverage in a gradle Scala project.
 
 This has now been deployed to maven central.
 
-Current Issues
-==============
-
-Choosing a version
-------------------
-
-Owing to current differences in the gradle Ant and Zinc compilers, there are currently two live releases of this plugin:
-
-Compiler | Plugin version
---- | ---
-Zinc | **1.0-5-g9c68988**
-Ant | **1.0.6**
-
-Multi-module projects
----------------------
-
-Please also note that if you have a multi-module project, then [Issues#13](https://github.com/scoverage/gradle-scoverage/issues/13) may apply.
-
-You will therefore need to add the following to each reporting task:
-
-```
-reportScoverage {
-  dependencies {
-    scoverage 'org.scoverage:gradle-scoverage:1.0-5-g9c68988'
-  }
-}
-```
-
-Both of these issues will be addressed in the near future.
-
 Getting started
 ---------------
 ```groovy
@@ -44,14 +14,14 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'org.scoverage:gradle-scoverage:1.0-5-g9c68988'
+        classpath 'org.scoverage:gradle-scoverage:1.0.7'
     }
 }
 
 apply plugin: 'scoverage'
 
 dependencies {
-    scoverage 'org.scoverage:scalac-scoverage-plugin_2.11:1.0.2', 'org.scoverage:scalac-scoverage-runtime_2.11:1.0.2'
+    scoverage 'org.scoverage:scalac-scoverage-plugin_2.11:1.0.4', 'org.scoverage:scalac-scoverage-runtime_2.11:1.0.4'
 }
 ```
 
