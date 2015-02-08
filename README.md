@@ -14,7 +14,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'org.scoverage:gradle-scoverage:1.0.7'
+        classpath 'org.scoverage:gradle-scoverage:1.0.8'
     }
 }
 
@@ -33,6 +33,20 @@ This creates an additional task testCoverage which will run tests against instru
 
 Then launch command :
 `gradle testScoverage` or `gradle checkScoverage`
+
+Aggregating Reports
+-------------------
+
+There is now experimental support for aggregating coverage statistics across subprojects.
+
+The project hosting the aggregation task **must** be configured as the sub-projects are;
+i.e. with the scoverage plugin applied and the scoverage dependencies configured.
+
+```groovy
+task aggregateScoverage(type: org.scoverage.ScoverageAggregate)
+```
+
+This will produce a report into _build_ / scoverage-aggregate
 
 Available tasks
 ---------
