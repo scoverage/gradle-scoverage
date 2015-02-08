@@ -46,6 +46,8 @@ class ScoverageExtension {
     /** regex for each excluded file */
     List<String> excludedFiles = []
 
+    FileCollection pluginClasspath
+
     ScoverageExtension(Project project) {
 
         project.plugins.apply(JavaPlugin.class);
@@ -93,8 +95,9 @@ class ScoverageExtension {
             })
         }
 
-        project.tasks.create(ScoveragePlugin.REPORT_NAME, JavaExec.class) {
+        project.tasks.create(ScoveragePlugin.REPORT_NAME, ScoverageReport.class) {
             dependsOn(project.tasks[ScoveragePlugin.TEST_NAME])
+            onlyIf { ScoveragePlugin.extensionIn(project).dataDir.list() }
         }
 
         project.tasks.create(ScoveragePlugin.CHECK_NAME, OverallCheckTask.class) {
@@ -104,6 +107,8 @@ class ScoverageExtension {
         sources = project.projectDir
         dataDir = new File(project.buildDir, 'scoverage')
         reportDir = new File(project.buildDir, 'reports' + File.separatorChar + 'scoverage')
+        def classLocation = ScoverageExtension.class.getProtectionDomain().getCodeSource().getLocation()
+        pluginClasspath = project.files(classLocation.file) + project.configurations.scoverage
     }
 
     private Action<Project> configureRuntimeOptions = new Action<Project>() {
@@ -113,7 +118,6 @@ class ScoverageExtension {
 
             def extension = ScoveragePlugin.extensionIn(t)
             extension.dataDir.mkdirs()
-            extension.reportDir.mkdirs()
 
             Configuration configuration = t.configurations[ScoveragePlugin.CONFIGURATION_NAME]
             File pluginFile
@@ -122,7 +126,6 @@ class ScoverageExtension {
             } catch(NoSuchElementException e) {
                 throw new GradleException("Could not find a plugin jar in configuration '${ScoveragePlugin.CONFIGURATION_NAME}'")
             }
-            FileCollection pluginDependencies = configuration.filter { it != pluginFile }
 
             t.tasks[ScoveragePlugin.COMPILE_NAME].configure {
                 List<String> parameters = ['-Xplugin:' + pluginFile.absolutePath]
@@ -151,21 +154,6 @@ class ScoverageExtension {
                 // the compile task creates a store of measured statements
                 outputs.file(new File(extension.dataDir, 'scoverage.coverage.xml'))
             }
-
-            t.tasks[ScoveragePlugin.REPORT_NAME].configure {
-                def classLocation = ScoverageExtension.class.getProtectionDomain().getCodeSource().getLocation()
-                classpath = project.files(classLocation.file) + configuration
-                main = 'org.scoverage.ScoverageReport'
-                args = [
-                        extension.sources,
-                        extension.dataDir.absolutePath,
-                        extension.reportDir.absolutePath
-                ]
-                inputs.dir(extension.dataDir)
-                outputs.dir(extension.reportDir)
-            }
-
         }
     }
-
 }

@@ -15,7 +15,7 @@ import java.util.Arrays;
 /**
  * late binding of scoverage core libraries (without a dependency on groovy)
  */
-public class ScoverageReport {
+public class SingleReportApp {
 
     public static void main(String... args) {
         File sourceDir = new File(args[0]);
