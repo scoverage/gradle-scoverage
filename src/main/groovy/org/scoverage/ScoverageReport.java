@@ -7,6 +7,7 @@ import scoverage.IOUtils;
 import scoverage.Serializer;
 import scoverage.report.CoberturaXmlWriter;
 import scoverage.report.ScoverageHtmlWriter;
+import scoverage.report.ScoverageXmlWriter;
 
 import java.io.File;
 import java.util.Arrays;
@@ -32,6 +33,7 @@ public class ScoverageReport {
         Set<Object> measurements = IOUtils.invoked(measurementFiles);
         coverage.apply(measurements);
 
+        new ScoverageXmlWriter(sourceDir, reportDir, false).write(coverage);
         new ScoverageHtmlWriter(sourceDir, reportDir).write(coverage);
         new CoberturaXmlWriter(sourceDir, reportDir).write(coverage);
     }
