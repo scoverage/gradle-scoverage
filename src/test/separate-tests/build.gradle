@@ -1,0 +1,53 @@
+description = 'a multi-project with separate tests setup for gradle-scoverage'
+
+buildscript {
+    repositories {
+        // need to get up to the working directory of gradle-plugins build
+        flatDir dir: "${project.projectDir}/../../../build/libs"
+    }
+    dependencies {
+        classpath name: 'gradle-scoverage', version: '+'
+    }
+}
+
+subprojects {
+
+    repositories {
+        mavenCentral()
+    }
+
+    apply plugin: 'scala'
+    apply plugin: 'scoverage'
+
+    dependencies {
+        compile 'org.scala-lang:scala-library:2.11.4'
+        scoverage 'org.scoverage:scalac-scoverage-plugin_2.11:1.0.4',
+            'org.scoverage:scalac-scoverage-runtime_2.11:1.0.4'
+
+        testCompile 'junit:junit:4.11'
+    }
+
+    testScoverage {
+        onlyIf { project.name.endsWith('-tests') }
+    }
+
+    reportScoverage {
+        onlyIf { project.name.endsWith('-tests') }
+    }
+
+}
+
+configure(subprojects.findAll { it.name.endsWith('-tests') }) {
+    def mainProject = project(":${project.name.minus('-tests')}")
+    dependencies {
+        testCompile mainProject
+    }
+    scoverage {
+        sources = mainProject.extensions.scoverage.sources
+        dataDir = mainProject.extensions.scoverage.dataDir
+        reportDir = mainProject.extensions.scoverage.reportDir
+    }
+    testScoverage {
+        classpath = mainProject.sourceSets.scoverage.runtimeClasspath + sourceSets.test.runtimeClasspath
+    }
+}

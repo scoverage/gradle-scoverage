@@ -5,11 +5,32 @@ import org.gradle.tooling.GradleConnector
 import org.hamcrest.core.Is
 import org.junit.Assert
 
+enum CoverageType {
+    Line('cobertura.xml', 'line-rate'),
+    Statement('scoverage.xml', 'statement-rate'),
+    Branch('scoverage.xml', 'branch-rate')
+
+    String fileName
+    String paramName
+
+    CoverageType(String fileName, String paramName) {
+        this.fileName = fileName
+        this.paramName = paramName
+    }
+}
+
 /**
  * Some utils for easy acceptance testing.
  */
 class AcceptanceTestUtils {
 
+    XmlParser parser
+
+    AcceptanceTestUtils() {
+        parser = new XmlParser()
+        parser.setFeature('http://apache.org/xml/features/disallow-doctype-decl', false)
+        parser.setFeature('http://apache.org/xml/features/nonvalidating/load-external-dtd', false)
+    }
 
     protected BuildLauncher setupBuild(File projectRoot, boolean useAnt) {
         return GradleConnector.
@@ -28,4 +49,9 @@ class AcceptanceTestUtils {
         return new File(baseDir, 'build/reports/scoverage')
     }
 
+    protected Double coverage(File reportDir, CoverageType coverageType) {
+        File reportFile = new File(reportDir, coverageType.fileName)
+        def xml = parser.parse(reportFile)
+        xml.attribute(coverageType.paramName).toDouble()
+    }
 }
