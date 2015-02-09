@@ -1,0 +1,6 @@
+*.java text eol=lf
+*.MD text eol=lf
+*.gradle text eol=lf
+*.groovy text eol=lf
+*.properties text eol=lf
+*.scala text eol=lf
