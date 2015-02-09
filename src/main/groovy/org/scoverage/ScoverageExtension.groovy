@@ -48,6 +48,12 @@ class ScoverageExtension {
 
     FileCollection pluginClasspath
 
+    /** Options for enabling and disabling output */
+    boolean coverageOutputCobertura = true
+    boolean coverageOutputXML = true
+    boolean coverageOutputHTML = true
+    boolean coverageDebug = false
+
     ScoverageExtension(Project project) {
 
         project.plugins.apply(JavaPlugin.class);

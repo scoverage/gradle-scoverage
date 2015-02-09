@@ -10,7 +10,15 @@ class ScoverageReport extends JavaExec {
         extension.reportDir.mkdirs()
         setClasspath(extension.pluginClasspath)
         setMain('org.scoverage.SingleReportApp')
-        setArgs([extension.sources.absolutePath, extension.dataDir.absolutePath, extension.reportDir.absolutePath])
+        setArgs([
+            /* sourceDir = */ extension.sources.absolutePath,
+            /* dataDir = */ extension.dataDir.absolutePath,
+            /* reportDir = */ extension.reportDir.absolutePath,
+            extension.coverageOutputCobertura,
+            extension.coverageOutputXML,
+            extension.coverageOutputHTML,
+            extension.coverageDebug
+        ])
         super.exec()
     }
 }
