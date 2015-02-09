@@ -1,0 +1,29 @@
+description = 'a multi-project setup for gradle-scoverage'
+
+buildscript {
+    repositories {
+        // need to get up to the working directory of gradle-plugins build
+        flatDir dir: "${project.projectDir}/../../../build/libs"
+    }
+    dependencies {
+        classpath name: 'gradle-scoverage', version: '+'
+    }
+}
+
+task aggregateScoverage(type: org.scoverage.ScoverageAggregate)
+
+allprojects {
+    repositories {
+        mavenCentral()
+    }
+
+    apply plugin: 'scoverage'
+
+    dependencies {
+        scoverage 'org.scoverage:scalac-scoverage-plugin_2.11:1.0.4',
+            'org.scoverage:scalac-scoverage-runtime_2.11:1.0.4'
+        compile 'org.scala-lang:scala-library:2.11.5'
+
+        testCompile 'junit:junit:4.11'
+    }
+}

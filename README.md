@@ -66,11 +66,15 @@ There is now experimental support for aggregating coverage statistics across sub
 The project hosting the aggregation task **must** be configured as the sub-projects are;
 i.e. with the scoverage plugin applied and the scoverage dependencies configured.
 
+You also have to declare this task:
+
 ```groovy
 task aggregateScoverage(type: org.scoverage.ScoverageAggregate)
 ```
 
-This will produce a report into _build_ / scoverage-aggregate
+This will produce a report into `build/scoverage-aggregate` directory.
+
+Aggregation uses same flags as reporting for enabling/disabling different output types.
 
 CheckScoverage
 --------------
