@@ -24,7 +24,8 @@ dependencies {
 }
 
 checkScoverage {
-    minimumLineRate = 1.0
+    minimumRate = 1.0
+    coverageType = 'Line'
 }
 
 tasks.withType(ScalaCompile) {

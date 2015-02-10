@@ -58,11 +58,27 @@ Available tasks
 CheckScoverage
 ---------
 
-By default, when you launch `gradle checkScoverage` build fail if only 75% of project is covered by tests.
+By default, when you launch `gradle checkScoverage` build fail if only 75% of statements in project is covered by tests.
 
 To configure it as you want, add this configuration :
 ```
 checkScoverage {
-    minimumLineRate = 0.5
+    minimumRate = 0.5
+}
+```
+
+You can also modify type of value to check from `Statement`s to `Line`s or `Branch`es:
+
+```
+checkScoverage {
+    coverageType = 'Line'
+    minimumRate = 0.5
+}
+```
+
+```
+checkScoverage {
+    coverageType = 'Branch'
+    minimumRate = 0.5
 }
 ```
