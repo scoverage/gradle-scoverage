@@ -9,6 +9,7 @@ import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.scala.ScalaPlugin
 import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.SourceSet
+import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.testing.Test
 import org.gradle.util.GFileUtils
 
@@ -86,6 +87,15 @@ class ScoverageExtension {
 
             compileClasspath = mainSourceSet.output + project.configurations.testCompile
             runtimeClasspath = it.output + mainSourceSet.output + project.configurations.scoverage + project.configurations.testRuntime
+        }
+
+        def scoverageJar = project.tasks.create('jarScoverage', Jar.class) {
+            dependsOn('scoverageClasses')
+            classifier = ScoveragePlugin.CONFIGURATION_NAME
+            from mainSourceSet.output
+        }
+        project.artifacts {
+            scoverage project.tasks.jarScoverage
         }
 
         project.tasks.create(ScoveragePlugin.TEST_NAME, Test.class) {

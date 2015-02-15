@@ -1,8 +1,9 @@
 package org.scoverage
 
-import org.hamcrest.core.Is
-import org.junit.Assert
+import static org.hamcrest.number.IsCloseTo.closeTo
 import org.junit.Test
+
+import static org.junit.Assert.assertThat
 
 class SeparateTestsAcceptanceTest extends AcceptanceTestUtils {
 
@@ -25,8 +26,8 @@ class SeparateTestsAcceptanceTest extends AcceptanceTestUtils {
         // ... and both statement and branch coverage is 100%
         def branchCoverage = coverage(reportDir(subprojectDir), CoverageType.Branch)
         def statementCoverage = coverage(reportDir(subprojectDir), CoverageType.Statement)
-        Assert.assertThat('Branch coverage should be 100%, was ' + branchCoverage, branchCoverage, Is.is(100.0))
-        Assert.assertThat('Statement coverage should be 100%, was ' + statementCoverage, statementCoverage, Is.is(100.0))
+        assertThat('Branch coverage should be 100%, was ' + branchCoverage, branchCoverage, closeTo(100.0, 1.0))
+        assertThat('Statement coverage should be 100%, was ' + statementCoverage, statementCoverage, closeTo(100.0, 1.0))
     }
 
     @Test
