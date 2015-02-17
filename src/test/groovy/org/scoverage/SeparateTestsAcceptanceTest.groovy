@@ -23,6 +23,10 @@ class SeparateTestsAcceptanceTest extends AcceptanceTestUtils {
         def testsIndexHtml = new File(reportDir(testsSubprojectDir), 'index.html')
         checkFile('an index HTML file', testsIndexHtml, false)
 
+        // ... and 'Hello.scala' is present there ...
+        def helloHtml = new File(reportDir(subprojectDir), 'src/main/scala/hello/Hello.scala.html')
+        checkFile('Hello.scala html file', helloHtml, true)
+
         // ... and both statement and branch coverage is 100%
         def branchCoverage = coverage(reportDir(subprojectDir), CoverageType.Branch)
         def statementCoverage = coverage(reportDir(subprojectDir), CoverageType.Statement)
