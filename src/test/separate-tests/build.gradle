@@ -52,4 +52,13 @@ configure(subprojects.findAll { it.name.endsWith('-tests') }) {
         dataDir = mainProject.extensions.scoverage.dataDir
         reportDir = mainProject.extensions.scoverage.reportDir
     }
+    sourceSets {
+        testScoverage {
+            compileClasspath += sourceSets.main.output
+            runtimeClasspath += sourceSets.main.output
+        }
+    }
+    compileScoverageScala {
+        onlyIf { false }
+    }
 }
