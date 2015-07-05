@@ -17,14 +17,14 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'org.scoverage:gradle-scoverage:1.0.8'
+        classpath 'org.scoverage:gradle-scoverage:1.0.9'
     }
 }
 
 apply plugin: 'scoverage'
 
 dependencies {
-    scoverage 'org.scoverage:scalac-scoverage-plugin_2.11:1.0.4', 'org.scoverage:scalac-scoverage-runtime_2.11:1.0.4'
+    scoverage 'org.scoverage:scalac-scoverage-plugin_2.11:1.1.0', 'org.scoverage:scalac-scoverage-runtime_2.11:1.1.0'
 }
 ```
 
