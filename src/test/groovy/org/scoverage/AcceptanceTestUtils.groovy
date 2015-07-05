@@ -5,20 +5,6 @@ import org.gradle.tooling.GradleConnector
 import org.hamcrest.core.Is
 import org.junit.Assert
 
-enum CoverageType {
-    Line('cobertura.xml', 'line-rate'),
-    Statement('scoverage.xml', 'statement-rate'),
-    Branch('scoverage.xml', 'branch-rate')
-
-    String fileName
-    String paramName
-
-    CoverageType(String fileName, String paramName) {
-        this.fileName = fileName
-        this.paramName = paramName
-    }
-}
-
 /**
  * Some utils for easy acceptance testing.
  */
