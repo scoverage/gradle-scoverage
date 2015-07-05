@@ -73,7 +73,6 @@ class OverallCheckTask extends DefaultTask {
         try {
             def xml = parser.parse(reportFile)
             Double overallRate = coverageType.normalize(xml.attribute(coverageType.paramName).toDouble())
-            println("$minimumRate - $overallRate")
             def difference = (minimumRate - overallRate)
 
             if (difference > 1e-7) {
