@@ -13,10 +13,23 @@ public class AggregateReportApp {
         File rootDir = new File(args[0]);
         File reportDir = new File(args[1]);
         Boolean clean = Boolean.parseBoolean(args[2]);
-        reportDir.mkdirs();
+
+        Boolean coverageOutputCobertura = java.lang.Boolean.valueOf(args[3]);
+        Boolean coverageOutputXML = java.lang.Boolean.valueOf(args[4]);
+        Boolean coverageOutputHTML = java.lang.Boolean.valueOf(args[5]);
+        Boolean coverageDebug = java.lang.Boolean.valueOf(args[6]);
+
         Coverage coverage = CoverageAggregator.aggregate(rootDir, clean).get();
-        new ScoverageHtmlWriter(rootDir, reportDir).write(coverage);
-        new CoberturaXmlWriter(rootDir, reportDir).write(coverage);
+
+        ScoverageWriter.write(
+            rootDir,
+            reportDir,
+            coverage,
+            coverageOutputCobertura,
+            coverageOutputXML,
+            coverageOutputHTML,
+            coverageDebug
+        );
     }
 
 }

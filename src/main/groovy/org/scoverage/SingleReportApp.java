@@ -5,9 +5,6 @@ import scala.collection.Set;
 import scoverage.Coverage;
 import scoverage.IOUtils;
 import scoverage.Serializer;
-import scoverage.report.CoberturaXmlWriter;
-import scoverage.report.ScoverageHtmlWriter;
-import scoverage.report.ScoverageXmlWriter;
 
 import java.io.File;
 import java.util.Arrays;
@@ -21,20 +18,36 @@ public class SingleReportApp {
         File sourceDir = new File(args[0]);
         File dataDir = new File(args[1]);
         File reportDir = new File(args[2]);
-        reportDir.mkdirs();
+
+        Boolean coverageOutputCobertura = java.lang.Boolean.valueOf(args[3]);
+        Boolean coverageOutputXML = java.lang.Boolean.valueOf(args[4]);
+        Boolean coverageOutputHTML = java.lang.Boolean.valueOf(args[5]);
+        Boolean coverageDebug = java.lang.Boolean.valueOf(args[6]);
 
         File coverageFile = Serializer.coverageFile(dataDir);
-        File[] array = IOUtils.findMeasurementFiles(dataDir);
-        // TODO: patch scoverage core to use a consistent collection type?
-        Seq<File> measurementFiles = scala.collection.JavaConversions.asScalaBuffer(Arrays.asList(array));
 
-        Coverage coverage = Serializer.deserialize(coverageFile);
+        if (!coverageFile.exists()) {
+            System.out.println("[scoverage] Could not find coverage file, skipping...");
+        } else {
+            File[] array = IOUtils.findMeasurementFiles(dataDir);
+            // TODO: patch scoverage core to use a consistent collection type?
+            Seq<File> measurementFiles = scala.collection.JavaConversions.asScalaBuffer(Arrays.asList(array));
 
-        Set<Object> measurements = IOUtils.invoked(measurementFiles);
-        coverage.apply(measurements);
+            Coverage coverage = Serializer.deserialize(coverageFile);
 
-        new ScoverageXmlWriter(sourceDir, reportDir, false).write(coverage);
-        new ScoverageHtmlWriter(sourceDir, reportDir).write(coverage);
-        new CoberturaXmlWriter(sourceDir, reportDir).write(coverage);
+            Set<Object> measurements = IOUtils.invoked(measurementFiles);
+            coverage.apply(measurements);
+
+            ScoverageWriter.write(
+                sourceDir,
+                reportDir,
+                coverage,
+                coverageOutputCobertura,
+                coverageOutputXML,
+                coverageOutputHTML,
+                coverageDebug);
+        }
     }
+
+
 }

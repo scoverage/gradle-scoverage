@@ -9,13 +9,21 @@ class ScoverageAggregate extends JavaExec {
 
     @Override
     void exec() {
+        def extension = ScoveragePlugin.extensionIn(project)
         setClasspath(ScoveragePlugin.extensionIn(project).pluginClasspath)
         setMain('org.scoverage.AggregateReportApp')
         def reportPath = reportDirOrDefault()
-        setArgs([project.projectDir, reportPath.absolutePath, clean])
+        setArgs([
+            project.projectDir,
+            reportPath.absolutePath,
+            clean,
+            // TODO - consider separate options for `report` and `aggregate` tasks
+            extension.coverageOutputCobertura,
+            extension.coverageOutputXML,
+            extension.coverageOutputHTML,
+            extension.coverageDebug
+        ])
         super.exec()
-        def reportEntryPoint = new File(reportPath, 'index.html').absolutePath
-        project.logger.lifecycle("Wrote aggregated scoverage report to ${reportEntryPoint}")
     }
 
     def reportDirOrDefault() {
