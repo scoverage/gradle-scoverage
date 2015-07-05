@@ -1,0 +1,51 @@
+<scoverage 
+statement-count="6" statements-invoked="2" statement-rate="33.33" branch-rate="50.00" version="1.0" timestamp="1423567091046">
+    <packages>
+        <package name="&lt;empty&gt;" statement-count="6" statements-invoked="2" statement-rate="33.33">
+            <classes>
+                <class 
+                name="D" filename="\src\main\scala\A.scala" statement-count="2" statements-invoked="0" statement-rate="0.00" branch-rate="0.00">
+                    <methods>
+                        <method 
+                        name="&lt;empty&gt;/D/apply" statement-count="1" statements-invoked="0" statement-rate="0.00" branch-rate="0.00">
+                            <statements>
+                                <statement 
+                                package="&lt;empty&gt;" class="D" class-type="Object" top-level-class="D" source="C:\Users\Jerzy\Documents\GitHub\gradle-scoverage-sample\multi-module\a\src\main\scala\A.scala" method="apply" start="189" end="196" line="14" branch="false" invocation-count="0">
+</statement>
+                            </statements>
+</method>
+                        <method name="&lt;empty&gt;/D/bob" statement-count="1" statements-invoked="0" statement-rate="0.00" branch-rate="0.00">
+                            <statements>
+                                <statement 
+                                package="&lt;empty&gt;" class="D" class-type="Class" top-level-class="D" source="C:\Users\Jerzy\Documents\GitHub\gradle-scoverage-sample\multi-module\a\src\main\scala\A.scala" method="bob" start="130" end="143" line="9" branch="false" invocation-count="0">
+</statement>
+                            </statements>
+                        </method>
+                    </methods>
+</class>
+                <class 
+                name="A" filename="\src\main\scala\A.scala" statement-count="4" statements-invoked="2" statement-rate="50.00" branch-rate="50.00">
+                    <methods>
+                        <method 
+                        name="&lt;empty&gt;/A/foo" statement-count="4" statements-invoked="2" statement-rate="50.00" branch-rate="50.00">
+                            <statements>
+                                <statement 
+                                package="&lt;empty&gt;" class="A" class-type="Class" top-level-class="A" source="C:\Users\Jerzy\Documents\GitHub\gradle-scoverage-sample\multi-module\a\src\main\scala\A.scala" method="foo" start="65" end="66" line="3" branch="true" invocation-count="1">
+</statement>
+                                <statement 
+                                package="&lt;empty&gt;" class="A" class-type="Class" top-level-class="A" source="C:\Users\Jerzy\Documents\GitHub\gradle-scoverage-sample\multi-module\a\src\main\scala\A.scala" method="foo" start="72" end="73" line="3" branch="true" invocation-count="0">
+</statement>
+                                <statement 
+                                package="&lt;empty&gt;" class="A" class-type="Class" top-level-class="A" source="C:\Users\Jerzy\Documents\GitHub\gradle-scoverage-sample\multi-module\a\src\main\scala\A.scala" method="foo" start="65" end="66" line="3" branch="false" invocation-count="1">
+</statement>
+                                <statement 
+                                package="&lt;empty&gt;" class="A" class-type="Class" top-level-class="A" source="C:\Users\Jerzy\Documents\GitHub\gradle-scoverage-sample\multi-module\a\src\main\scala\A.scala" method="foo" start="72" end="73" line="3" branch="false" invocation-count="0">
+</statement>
+                            </statements>
+</method>
+                    </methods>
+</class>
+            </classes>
+        </package>
+    </packages>
+</scoverage>
