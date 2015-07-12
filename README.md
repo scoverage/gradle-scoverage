@@ -76,6 +76,14 @@ This will produce a report into `build/scoverage-aggregate` directory.
 
 Aggregation uses same flags as reporting for enabling/disabling different output types.
 
+For checking coverage of the aggregated result, configure the checkScoverage task:
+
+```groovy
+checkScoverage {
+     reportDir = file("$buildDir/scoverage-aggregate")
+}
+```
+
 CheckScoverage
 --------------
 
