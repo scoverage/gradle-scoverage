@@ -5,6 +5,8 @@ import org.gradle.tooling.GradleConnector
 import org.hamcrest.core.Is
 import org.junit.Assert
 
+import java.text.NumberFormat
+
 /**
  * Some utils for easy acceptance testing.
  */
@@ -38,6 +40,8 @@ class AcceptanceTestUtils {
     protected Double coverage(File reportDir, CoverageType coverageType) {
         File reportFile = new File(reportDir, coverageType.fileName)
         def xml = parser.parse(reportFile)
-        xml.attribute(coverageType.paramName).toDouble()
+        println("reportfile path: ${reportFile.absolutePath}")
+        NumberFormat nf = NumberFormat.getInstance(Locale.getDefault());
+        nf.parse(xml.attribute(coverageType.paramName) as String).doubleValue();
     }
 }

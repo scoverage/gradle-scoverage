@@ -5,6 +5,7 @@ import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
 
 import java.text.DecimalFormat
+import java.text.NumberFormat
 
 /**
  * Handles different types of coverage Scoverage can measure.
@@ -71,8 +72,10 @@ class OverallCheckTask extends DefaultTask {
         File reportFile = new File(reportDir ? reportDir : extension.reportDir, coverageType.fileName)
 
         try {
-            def xml = parser.parse(reportFile)
-            Double overallRate = coverageType.normalize(xml.attribute(coverageType.paramName).toDouble())
+            Node xml = parser.parse(reportFile)
+            NumberFormat nf = NumberFormat.getInstance(Locale.getDefault());
+            Double coverageValue = nf.parse(xml.attribute(coverageType.paramName) as String).doubleValue();
+            Double overallRate = coverageType.normalize(coverageValue)
             def difference = (minimumRate - overallRate)
 
             if (difference > 1e-7) {
