@@ -5,6 +5,10 @@ import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 import org.hamcrest.Description
 import org.hamcrest.TypeSafeMatcher
+import org.junit.After
+import org.junit.AfterClass
+import org.junit.Before
+import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExpectedException
@@ -37,6 +41,17 @@ class CauseMatcher extends TypeSafeMatcher<Throwable> {
 }
 
 class OverallCheckTaskTest {
+    private static Locale defaultLocale
+    @BeforeClass
+    public static void setup() {
+        defaultLocale = Locale.getDefault()
+        Locale.setDefault(Locale.US)
+    }
+
+    @AfterClass
+    public static void tearDown() {
+        Locale.setDefault(defaultLocale)
+    }
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none()
