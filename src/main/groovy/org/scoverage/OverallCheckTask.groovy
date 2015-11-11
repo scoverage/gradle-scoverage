@@ -73,7 +73,7 @@ class OverallCheckTask extends DefaultTask {
 
         try {
             Node xml = parser.parse(reportFile)
-            NumberFormat nf = NumberFormat.getInstance(Locale.getDefault());
+            NumberFormat nf = NumberFormat.getInstance();
             Double coverageValue = nf.parse(xml.attribute(coverageType.paramName) as String).doubleValue();
             Double overallRate = coverageType.normalize(coverageValue)
             def difference = (minimumRate - overallRate)
