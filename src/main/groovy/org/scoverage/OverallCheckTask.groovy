@@ -46,7 +46,11 @@ class OverallCheckTask extends DefaultTask {
     /** Set if want to change default from 'reportDir' in scoverage extension. */
     File reportDir
 
+    /** Overwrite to test for a specific locale. */
+    Locale locale
+
     protected XmlParser parser
+
     protected DecimalFormat df = new DecimalFormat("#.##")
 
     OverallCheckTask() {
@@ -73,7 +77,7 @@ class OverallCheckTask extends DefaultTask {
 
         try {
             Node xml = parser.parse(reportFile)
-            NumberFormat nf = NumberFormat.getInstance();
+            NumberFormat nf = NumberFormat.getInstance(locale == null ? Locale.getDefault() : locale);
             Double coverageValue = nf.parse(xml.attribute(coverageType.paramName) as String).doubleValue();
             Double overallRate = coverageType.normalize(coverageValue)
             def difference = (minimumRate - overallRate)

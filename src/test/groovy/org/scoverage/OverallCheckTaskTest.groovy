@@ -13,6 +13,9 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExpectedException
 
+import javax.swing.text.NumberFormatter
+import java.text.NumberFormat
+
 /**
  * Copied from the Internet, just to check if we have correct exception thrown.
  */
@@ -41,17 +44,6 @@ class CauseMatcher extends TypeSafeMatcher<Throwable> {
 }
 
 class OverallCheckTaskTest {
-    private static Locale defaultLocale
-    @BeforeClass
-    public static void setup() {
-        defaultLocale = Locale.getDefault()
-        Locale.setDefault(Locale.US)
-    }
-
-    @AfterClass
-    public static void tearDown() {
-        Locale.setDefault(defaultLocale)
-    }
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none()
@@ -60,6 +52,7 @@ class OverallCheckTaskTest {
         Project project = ProjectBuilder.builder().build()
         project.plugins.apply(ScoveragePlugin)
         project.tasks.create('bob', OverallCheckTask) {
+            locale = Locale.US
             minimumRate = coverageRate
             reportDir = new File('src/test/resources')
             coverageType = type
@@ -74,6 +67,7 @@ class OverallCheckTaskTest {
         Project project = ProjectBuilder.builder().build()
         project.plugins.apply(ScoveragePlugin)
         project.tasks.create('bob', OverallCheckTask) {
+            locale = Locale.US
             minimumRate = 1.0
             reportDir = new File('src/test/nothingthere')
             coverageType = CoverageType.Line
@@ -114,9 +108,10 @@ class OverallCheckTaskTest {
     @Test
     void failsWhenStatementRateIsBelowTarget() {
         Project project = projectForRate(1, CoverageType.Statement)
+        NumberFormat nf = NumberFormat.getInstance()
         expectedException.expectCause(new CauseMatcher(
                 GradleException.class,
-                OverallCheckTask.errorMsg("33.33", "100", CoverageType.Statement)
+                OverallCheckTask.errorMsg(nf.format(new Double(33.33)), "100", CoverageType.Statement)
         ))
         project.tasks.bob.execute()
     }
