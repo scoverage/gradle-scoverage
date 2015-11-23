@@ -41,7 +41,7 @@ class AcceptanceTestUtils {
         File reportFile = new File(reportDir, coverageType.fileName)
         def xml = parser.parse(reportFile)
         println("reportfile path: ${reportFile.absolutePath}")
-        NumberFormat nf = NumberFormat.getInstance(Locale.getDefault());
+        NumberFormat nf = NumberFormat.getInstance();
         nf.parse(xml.attribute(coverageType.paramName) as String).doubleValue();
     }
 }
