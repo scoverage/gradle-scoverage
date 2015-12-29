@@ -6,7 +6,6 @@ A plugin to enable the use of Scoverage in a gradle Scala project.
 
 Getting started
 ---------------
-```groovy
 http://plugins.gradle.org/plugin/org.scoverage
 
 This creates an additional task `testScoverage` which will run tests against instrumented code.
@@ -15,6 +14,7 @@ A further task `reportScoverage` produces XML and HTML reports for analysing tes
 
 You need to configure the version of Scoverage that will be used. This plugin should be compatible with all 1+ versions.
 
+```groovy
 dependencies {
     scoverage 'org.scoverage:scalac-scoverage-plugin_2.11:1.1.0', 'org.scoverage:scalac-scoverage-runtime_2.11:1.1.0'
 }
