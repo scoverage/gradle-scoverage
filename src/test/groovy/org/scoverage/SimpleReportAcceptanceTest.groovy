@@ -28,4 +28,10 @@ class SimpleReportAcceptanceTest extends AcceptanceTestUtils {
         testHappyDay(false)
     }
 
+    @Test
+    public void testRun() throws Exception {
+        File projectRoot = new File('src/test/runtime')
+        def build = setupBuild(projectRoot, true)
+        build.forTasks('clean', 'run').run()
+    }
 }

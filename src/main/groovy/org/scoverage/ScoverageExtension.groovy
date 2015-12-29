@@ -7,7 +7,6 @@ import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.FileCollection
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.scala.ScalaPlugin
-import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.testing.Test
@@ -75,7 +74,7 @@ class ScoverageExtension {
             scala.source(original.scala)
 
             compileClasspath += original.compileClasspath + project.configurations.scoverage
-            runtimeClasspath = it.output + project.configurations.runtime
+            runtimeClasspath = it.output + project.configurations.scoverage + project.configurations.runtime
         }
 
         def testSourceSet = project.sourceSets.create('testScoverage') {
