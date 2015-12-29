@@ -4,38 +4,24 @@ gradle-scoverage
 ================
 A plugin to enable the use of Scoverage in a gradle Scala project.
 
-This has now been deployed to maven central.
-
-Using gradle-scoverage
-======================
-
 Getting started
 ---------------
 ```groovy
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'org.scoverage:gradle-scoverage:1.0.9'
-    }
-}
+http://plugins.gradle.org/plugin/org.scoverage
 
-apply plugin: 'scoverage'
+This creates an additional task `testScoverage` which will run tests against instrumented code.
+
+A further task `reportScoverage` produces XML and HTML reports for analysing test code coverage.
+
+You need to configure the version of Scoverage that will be used. This plugin should be compatible with all 1+ versions.
 
 dependencies {
     scoverage 'org.scoverage:scalac-scoverage-plugin_2.11:1.1.0', 'org.scoverage:scalac-scoverage-runtime_2.11:1.1.0'
 }
 ```
 
-This creates an additional task testCoverage which will run tests against instrumented code
-
-- [x] instrumenting main scala code
-- [x] running JUnit tests against instrumented scala code
-- [x] failing the build on lack of coverage
-
 Then launch command :
-`gradle testScoverage` or `gradle checkScoverage`
+`gradle reportScoverage` or `gradle checkScoverage`
 
 Available tasks
 ---------------

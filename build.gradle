@@ -1,27 +1,33 @@
-def isDirty = { ->
-    def stdout = new ByteArrayOutputStream()
-    exec {
-        commandLine 'git', 'status', '--porcelain'
-        standardOutput = stdout
+// First, apply the publishing plugin
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
     }
-    return stdout.toString().trim()
-}
-def getVersionName = { ->
-    def stdout = new ByteArrayOutputStream()
-    exec {
-        commandLine 'git', 'describe', '--tags'
-        standardOutput = stdout
+    dependencies {
+        classpath "com.gradle.publish:plugin-publish-plugin:0.9.2"
     }
-    def gitVersionName = stdout.toString().trim()
-    return isDirty() ? gitVersionName + '-SNAPSHOT' : gitVersionName
 }
-version = getVersionName()
+
+apply plugin: "com.gradle.plugin-publish"
+description = 'gradle-scoverage is a Gradle plugin for calculating code coverage using Scoverage'
+version = {
+    if (project.hasProperty('version')) {
+        return project.getProperty('version')
+    } else {
+        return '2.0.0-SNAPSHOT'
+    }
+}
 
 repositories {
     mavenCentral()
 }
 
 ext {
+    website = 'http://scoverage.org'
+    vcsUrl = 'https://github.com/scoverage/gradle-scoverage.git'
+    scmUrl = "scm:git:$vcsUrl"
     sonatypeUser = System.env.SONATYPE_USER
     sonatypePass = System.env.SONATYPE_PASS
 }
@@ -73,6 +79,20 @@ if (project.properties.containsKey('signing.keyId')) {
     }
 }
 
+pluginBundle {
+    website = project.website
+    vcsUrl = project.vcsUrl
+    description = project.description
+    tags = ['coverage', 'scala', 'scoverage']
+
+    plugins {
+        scoveragePlugin {
+            id = 'org.scoverage'
+            displayName = 'Gradle Scoverage plugin'
+        }
+    }
+}
+
 uploadArchives {
     repositories {
         mavenDeployer {
@@ -90,12 +110,12 @@ uploadArchives {
 
             pom.project {
                 name 'GradleScoverage'
-                description 'gradle-scoverage is a Gradle plugin for calculating code coverage using Scoverage'
-                url 'http://scoverage.org'
+                description project.description
+                url project.website
 
                 scm {
-                    url 'scm:git:https://github.com/scoverage/gradle-scoverage.git'
-                    developerConnection 'scm:git:https://github.com/scoverage/gradle-scoverage.git'
+                    url scmUrl
+                    developerConnection scmUrl
                 }
 
                 licenses {

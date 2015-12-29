@@ -17,7 +17,7 @@ allprojects {
         mavenCentral()
     }
 
-    apply plugin: 'scoverage'
+    apply plugin: 'org.scoverage'
 
     dependencies {
         scoverage 'org.scoverage:scalac-scoverage-plugin_2.11:1.0.4',

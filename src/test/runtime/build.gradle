@@ -10,7 +10,7 @@ buildscript {
     }
 }
 
-apply plugin: 'scoverage'
+apply plugin: 'org.scoverage'
 
 repositories {
     mavenCentral()

@@ -17,7 +17,7 @@ subprojects {
     }
 
     apply plugin: 'scala'
-    apply plugin: 'scoverage'
+    apply plugin: 'org.scoverage'
 
     dependencies {
         compile 'org.scala-lang:scala-library:2.11.4'
