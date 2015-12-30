@@ -12,12 +12,8 @@ buildscript {
 
 apply plugin: "com.gradle.plugin-publish"
 description = 'gradle-scoverage is a Gradle plugin for calculating code coverage using Scoverage'
-version = {
-    if (project.hasProperty('version')) {
-        return project.getProperty('version')
-    } else {
-        return '2.0.0-SNAPSHOT'
-    }
+if (project.version == 'unspecified') {
+    version = '2.0.0-SNAPSHOT'
 }
 
 repositories {
