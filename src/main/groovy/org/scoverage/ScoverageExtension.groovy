@@ -69,8 +69,8 @@ class ScoverageExtension {
         def mainSourceSet = project.sourceSets.create('scoverage') {
             def original = project.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
 
-            java.source(original.java)
             resources.source(original.resources)
+            scala.source(original.java)
             scala.source(original.scala)
 
             compileClasspath += original.compileClasspath + project.configurations.scoverage
