@@ -26,7 +26,10 @@ class AcceptanceTestUtils {
             forProjectDirectory(projectRoot).
             connect().
             newBuild().
-            withArguments("-PuseAnt=$useAnt")
+            withArguments(
+                    "-PuseAnt=$useAnt",
+                    '--init-script',
+                    new File(System.properties.getProperty('user.dir'), 'init-scoverage.gradle').toString())
     }
 
     protected void checkFile(String description, File file, boolean shouldExist) throws Exception {

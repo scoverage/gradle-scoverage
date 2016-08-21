@@ -44,7 +44,7 @@ configurations {
 dependencies {
     compile gradleApi()
     compile localGroovy()
-    scoverage 'org.scoverage:scalac-scoverage-plugin_2.11:1.0.2'
+    scoverage "org.scoverage:scalac-scoverage-plugin_2.11:1.1.1"
     testCompile 'org.hamcrest:hamcrest-library:1.3'
 }
 

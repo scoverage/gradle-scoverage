@@ -1,0 +1,7 @@
+gradle.beforeProject { p ->
+    p.ext {
+        scoverageVersion = '1.1.1'
+        scoverageLib = ["org.scoverage:scalac-scoverage-plugin_2.11:${scoverageVersion}",
+                        "org.scoverage:scalac-scoverage-runtime_2.11:${scoverageVersion}"]
+    }
+}

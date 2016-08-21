@@ -17,8 +17,7 @@ repositories {
 }
 
 dependencies {
-    scoverage 'org.scoverage:scalac-scoverage-plugin_2.11:1.0.1',
-            'org.scoverage:scalac-scoverage-runtime_2.11:1.0.1'
+    scoverage scoverageLib
     compile 'org.scala-lang:scala-library:2.11.0'
     testCompile 'junit:junit:4.11'
 }
