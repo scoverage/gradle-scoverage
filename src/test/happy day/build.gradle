@@ -26,7 +26,3 @@ checkScoverage {
     minimumRate = 1.0
     coverageType = 'Line'
 }
-
-tasks.withType(ScalaCompile) {
-    scalaCompileOptions.useAnt = project.hasProperty('useAnt') ? project.property('useAnt').toBoolean() : true
-}

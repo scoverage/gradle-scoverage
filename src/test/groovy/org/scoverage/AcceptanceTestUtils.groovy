@@ -20,14 +20,13 @@ class AcceptanceTestUtils {
         parser.setFeature('http://apache.org/xml/features/nonvalidating/load-external-dtd', false)
     }
 
-    protected BuildLauncher setupBuild(File projectRoot, boolean useAnt) {
+    protected BuildLauncher setupBuild(File projectRoot) {
         return GradleConnector.
             newConnector().
             forProjectDirectory(projectRoot).
             connect().
             newBuild().
             withArguments(
-                    "-PuseAnt=$useAnt",
                     '--init-script',
                     new File(System.properties.getProperty('user.dir'), 'init-scoverage.gradle').toString())
     }

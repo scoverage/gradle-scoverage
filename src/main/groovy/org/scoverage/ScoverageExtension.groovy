@@ -21,18 +21,6 @@ import java.util.concurrent.Callable
  */
 class ScoverageExtension {
 
-    private static boolean isEscaped(String argument) {
-        return (argument.startsWith('"') && argument.endsWith('"')) || (argument.startsWith('\'') && argument.endsWith('\''))
-    }
-
-    static String escape(String argument) {
-        if (isEscaped(argument)) {
-            return argument
-        } else {
-            return "\"$argument\""
-        }
-    }
-
     /** a directory to write working files to */
     File dataDir
     /** a directory to write final output to */
@@ -158,14 +146,10 @@ class ScoverageExtension {
                 if (extension.highlighting) {
                     parameters.add('-Yrangepos')
                 }
-                if (scalaCompileOptions.useAnt) {
-                    scalaCompileOptions.additionalParameters = parameters.collect { escape(it) }
-                } else {
-                    doFirst {
-                        GFileUtils.deleteDirectory(destinationDir)
-                    }
-                    scalaCompileOptions.additionalParameters = parameters
+                doFirst {
+                    GFileUtils.deleteDirectory(destinationDir)
                 }
+                scalaCompileOptions.additionalParameters = parameters
                 // the compile task creates a store of measured statements
                 outputs.file(new File(extension.dataDir, 'scoverage.coverage.xml'))
             }
