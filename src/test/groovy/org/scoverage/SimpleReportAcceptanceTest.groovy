@@ -6,7 +6,7 @@ class SimpleReportAcceptanceTest extends AcceptanceTestUtils {
 
 
     @Test
-    public void testZincProjectWithCompleteCoverage() throws Exception {
+    public void testProjectWithCompleteCoverage() throws Exception {
         File projectRoot = new File('src/test/happy day')
         def build = setupBuild(projectRoot)
         build.forTasks('clean', 'checkScoverage').run()

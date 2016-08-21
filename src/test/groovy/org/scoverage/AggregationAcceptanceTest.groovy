@@ -5,7 +5,7 @@ import org.junit.Test
 class AggregationAcceptanceTest extends AcceptanceTestUtils {
 
     @Test
-    public void testMultiProjectAggregationWithZinc() throws Exception {
+    public void testMultiProjectAggregation() throws Exception {
         File projectDir = new File('src/test/water')
         def build = setupBuild(projectDir)
         build.forTasks('clean', 'aggregateScoverage').run()
