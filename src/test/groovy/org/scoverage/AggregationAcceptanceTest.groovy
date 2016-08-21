@@ -8,7 +8,7 @@ class AggregationAcceptanceTest extends AcceptanceTestUtils {
     public void testMultiProjectAggregationWithZinc() throws Exception {
         File projectDir = new File('src/test/water')
         def build = setupBuild(projectDir)
-        build.forTasks('clean', 'reportScoverage', 'aggregateScoverage').run()
+        build.forTasks('clean', 'aggregateScoverage').run()
         def indexHtml = new File(aggregateReportDir(projectDir), 'index.html')
         checkFile('an aggregated index HTML file', indexHtml, true)
         def cobertura = new File(aggregateReportDir(projectDir), 'cobertura.xml')

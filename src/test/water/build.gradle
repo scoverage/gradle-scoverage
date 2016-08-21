@@ -10,8 +10,6 @@ buildscript {
     }
 }
 
-task aggregateScoverage(type: org.scoverage.ScoverageAggregate)
-
 allprojects {
     repositories {
         mavenCentral()
@@ -26,3 +24,10 @@ allprojects {
         testCompile 'junit:junit:4.11'
     }
 }
+
+task aggregateScoverage(type: org.scoverage.ScoverageAggregate)
+
+subprojects {
+    aggregateScoverage.dependsOn(it.tasks)
+}
+
