@@ -12,6 +12,9 @@ class ScoverageAggregate extends JavaExec {
         def extension = ScoveragePlugin.extensionIn(project)
         setClasspath(ScoveragePlugin.extensionIn(project).pluginClasspath)
         setMain('org.scoverage.AggregateReportApp')
+        if (extension.encoding) {
+            jvmArgs("-Dfile.encoding=$extension.encoding")
+        }
         def reportPath = reportDirOrDefault()
         setArgs([
             project.projectDir,

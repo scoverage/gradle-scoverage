@@ -9,7 +9,9 @@ import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.scala.ScalaPlugin
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.bundling.Jar
+import org.gradle.api.tasks.scala.ScalaCompile
 import org.gradle.api.tasks.testing.Test
+import org.gradle.language.scala.tasks.AbstractScalaCompile
 import org.gradle.util.GFileUtils
 
 import java.util.concurrent.Callable
@@ -33,6 +35,8 @@ class ScoverageExtension {
     List<String> excludedPackages = []
     /** regex for each excluded file */
     List<String> excludedFiles = []
+    /** Custom encoding to run the report application with */
+    String encoding
 
     FileCollection pluginClasspath
 
@@ -146,10 +150,23 @@ class ScoverageExtension {
                 if (extension.highlighting) {
                     parameters.add('-Yrangepos')
                 }
+                if (extension.encoding) {
+                    parameters.add("-Dfile.encoding=$extension.encoding".toString())
+                }
                 doFirst {
                     GFileUtils.deleteDirectory(destinationDir)
                 }
                 scalaCompileOptions.additionalParameters = parameters
+
+                if (extension.encoding) {
+                    List<String> forkOptions = ["-Dfile.encoding=$extension.encoding".toString()]
+                    List<String> existingForkOptions = scalaCompileOptions.forkOptions.jvmArgs
+                    if (existingForkOptions) {
+                        forkOptions.addAll(existingForkOptions)
+                    }
+                    scalaCompileOptions.forkOptions.jvmArgs = forkOptions
+                }
+
                 // the compile task creates a store of measured statements
                 outputs.file(new File(extension.dataDir, 'scoverage.coverage.xml'))
             }
