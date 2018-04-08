@@ -2,6 +2,7 @@ package org.scoverage
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.tasks.scala.ScalaCompile
 
 class ScoveragePlugin implements Plugin<Project> {
     static String CONFIGURATION_NAME = 'scoverage'
@@ -21,5 +22,10 @@ class ScoveragePlugin implements Plugin<Project> {
 
     protected static ScoverageExtension extensionIn(Project project) {
         project.extensions[CONFIGURATION_NAME]
+    }
+
+    protected static String encoding(Project project) {
+        ScalaCompile compile = project.tasks[ScoveragePlugin.COMPILE_NAME] as ScalaCompile
+        compile.scalaCompileOptions.encoding
     }
 }

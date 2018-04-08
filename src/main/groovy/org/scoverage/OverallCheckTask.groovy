@@ -76,7 +76,13 @@ class OverallCheckTask extends DefaultTask {
         File reportFile = new File(reportDir ? reportDir : extension.reportDir, coverageType.fileName)
 
         try {
-            Node xml = parser.parse(reportFile)
+            String encoding = ScoveragePlugin.encoding(project)
+            Node xml
+            if (encoding) {
+                xml = parser.parse(new InputStreamReader(new FileInputStream(reportFile), encoding))
+            } else {
+                xml = parser.parse(reportFile)
+            }
             NumberFormat nf = NumberFormat.getInstance(locale == null ? Locale.getDefault() : locale);
             Double coverageValue = nf.parse(xml.attribute(coverageType.paramName) as String).doubleValue();
             Double overallRate = coverageType.normalize(coverageValue)

@@ -1,9 +1,7 @@
 package org.scoverage;
 
 import scoverage.Coverage;
-import scoverage.report.CoberturaXmlWriter;
 import scoverage.report.CoverageAggregator;
-import scoverage.report.ScoverageHtmlWriter;
 
 import java.io.File;
 

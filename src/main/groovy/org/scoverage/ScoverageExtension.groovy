@@ -44,8 +44,8 @@ class ScoverageExtension {
 
     ScoverageExtension(Project project) {
 
-        project.plugins.apply(JavaPlugin.class);
-        project.plugins.apply(ScalaPlugin.class);
+        project.plugins.apply(JavaPlugin.class)
+        project.plugins.apply(ScalaPlugin.class)
         project.afterEvaluate(configureRuntimeOptions)
 
         project.configurations.create(ScoveragePlugin.CONFIGURATION_NAME) {
@@ -76,7 +76,7 @@ class ScoverageExtension {
             runtimeClasspath = it.output + mainSourceSet.output + project.configurations.scoverage + project.configurations.testRuntime
         }
 
-        def scoverageJar = project.tasks.create('jarScoverage', Jar.class) {
+        project.tasks.create('jarScoverage', Jar.class) {
             dependsOn('scoverageClasses')
             classifier = ScoveragePlugin.CONFIGURATION_NAME
             from mainSourceSet.output
@@ -87,13 +87,13 @@ class ScoverageExtension {
 
         project.tasks.create(ScoveragePlugin.TEST_NAME, Test.class) {
             conventionMapping.map("testClassesDir", new Callable<Object>() {
-                public Object call() throws Exception {
-                    return testSourceSet.output.classesDir;
+                Object call() throws Exception {
+                    return testSourceSet.output.classesDir
                 }
             })
             conventionMapping.map("classpath", new Callable<Object>() {
-                public Object call() throws Exception {
-                    return testSourceSet.runtimeClasspath;
+                Object call() throws Exception {
+                    return testSourceSet.runtimeClasspath
                 }
             })
         }
@@ -126,7 +126,7 @@ class ScoverageExtension {
             File pluginFile
             try {
                 pluginFile = configuration.filter { it.name.contains('plugin') }.iterator().next()
-            } catch(NoSuchElementException e) {
+            } catch (NoSuchElementException ignored) {
                 throw new GradleException("Could not find a plugin jar in configuration '${ScoveragePlugin.CONFIGURATION_NAME}'")
             }
 

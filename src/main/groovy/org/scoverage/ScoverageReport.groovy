@@ -8,6 +8,10 @@ class ScoverageReport extends JavaExec {
     void exec() {
         def extension = ScoveragePlugin.extensionIn(project)
         extension.reportDir.mkdirs()
+        String encoding = ScoveragePlugin.encoding(project)
+        if (encoding) {
+            jvmArgs("-Dfile.encoding=$encoding")
+        }
         setClasspath(extension.pluginClasspath)
         setMain('org.scoverage.SingleReportApp')
         setArgs([
