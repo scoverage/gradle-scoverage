@@ -150,6 +150,10 @@ class ScoverageExtension {
                     GFileUtils.deleteDirectory(destinationDir)
                 }
                 scalaCompileOptions.additionalParameters = parameters
+                String encoding = scalaCompileOptions.encoding
+                if (encoding) {
+                    scalaCompileOptions.forkOptions.jvmArgs.add('-Dfile.encoding=' + encoding)
+                }
                 // the compile task creates a store of measured statements
                 outputs.file(new File(extension.dataDir, 'scoverage.coverage.xml'))
             }
