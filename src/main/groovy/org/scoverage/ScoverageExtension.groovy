@@ -62,7 +62,7 @@ class ScoverageExtension {
             scala.source(original.scala)
 
             compileClasspath += original.compileClasspath + project.configurations.scoverage
-            runtimeClasspath = it.output + project.configurations.scoverage + project.configurations.runtime
+            runtimeClasspath = it.output + project.configurations.scoverage + original.runtimeClasspath
         }
 
         def testSourceSet = project.sourceSets.create('testScoverage') {
@@ -72,8 +72,8 @@ class ScoverageExtension {
             resources.source(original.resources)
             scala.source(original.scala)
 
-            compileClasspath = mainSourceSet.output + project.configurations.testCompile
-            runtimeClasspath = it.output + mainSourceSet.output + project.configurations.scoverage + project.configurations.testRuntime
+            compileClasspath = mainSourceSet.output + original.compileClasspath
+            runtimeClasspath = it.output + mainSourceSet.output + project.configurations.scoverage + original.runtimeClasspath
         }
 
         def scoverageJar = project.tasks.create('jarScoverage', Jar.class) {
