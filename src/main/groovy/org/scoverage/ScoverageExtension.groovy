@@ -154,6 +154,10 @@ class ScoverageExtension {
                 outputs.file(new File(extension.dataDir, 'scoverage.coverage.xml'))
             }
             t.tasks[ScoveragePlugin.TEST_NAME].outputs.dir(extension.dataDir)
+            t.tasks[ScoveragePlugin.REPORT_NAME].configure {
+                inputs.dir(extension.dataDir)
+                outputs.dir(extension.reportDir)
+            }
         }
     }
 }
