@@ -2,6 +2,7 @@ package org.scoverage
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
+import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.TaskAction
 
 import java.text.DecimalFormat
@@ -37,6 +38,7 @@ enum CoverageType {
 /**
  * Throws a GradleException if overall coverage dips below the configured percentage.
  */
+@CacheableTask
 class OverallCheckTask extends DefaultTask {
 
     /** Type of coverage to check. Available options: Line, Statement and Branch */
@@ -77,8 +79,8 @@ class OverallCheckTask extends DefaultTask {
 
         try {
             Node xml = parser.parse(reportFile)
-            NumberFormat nf = NumberFormat.getInstance(locale == null ? Locale.getDefault() : locale);
-            Double coverageValue = nf.parse(xml.attribute(coverageType.paramName) as String).doubleValue();
+            NumberFormat nf = NumberFormat.getInstance(locale == null ? Locale.getDefault() : locale)
+            Double coverageValue = nf.parse(xml.attribute(coverageType.paramName) as String).doubleValue()
             Double overallRate = coverageType.normalize(coverageValue)
             def difference = (minimumRate - overallRate)
 
