@@ -80,7 +80,7 @@ pluginBundle {
     vcsUrl = project.vcsUrl
     description = project.description
     tags = ['coverage', 'scala', 'scoverage']
-
+    withDependencies { it.clear() }
     plugins {
         scoveragePlugin {
             id = 'org.scoverage'
