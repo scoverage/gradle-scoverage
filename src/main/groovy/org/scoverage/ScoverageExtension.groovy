@@ -84,15 +84,18 @@ class ScoverageExtension {
                             testSourceSet.runtimeClasspath
                 }
             })
+            group = 'verification'
         }
 
         project.tasks.create(ScoveragePlugin.REPORT_NAME, ScoverageReport.class) {
             dependsOn(project.tasks[ScoveragePlugin.TEST_NAME])
             onlyIf { ScoveragePlugin.extensionIn(project).dataDir.list() }
+            group = 'verification'
         }
 
         project.tasks.create(ScoveragePlugin.CHECK_NAME, OverallCheckTask.class) {
             dependsOn(project.tasks[ScoveragePlugin.REPORT_NAME])
+            group = 'verification'
         }
 
         sources = project.projectDir
