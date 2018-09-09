@@ -54,7 +54,7 @@ class ScoverageExtension {
             description = 'Scoverage dependencies'
         }
 
-        def mainSourceSet = project.sourceSets.create('scoverage') {
+        def instrumentedSourceSet = project.sourceSets.create('scoverage') {
             def original = project.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
 
             resources.source(original.resources)
@@ -65,35 +65,23 @@ class ScoverageExtension {
             runtimeClasspath = it.output + project.configurations.scoverage + original.runtimeClasspath
         }
 
-        def testSourceSet = project.sourceSets.create('testScoverage') {
-            def original = project.sourceSets.getByName(SourceSet.TEST_SOURCE_SET_NAME)
-
-            java.source(original.java)
-            resources.source(original.resources)
-            scala.source(original.scala)
-
-            compileClasspath = mainSourceSet.output + original.compileClasspath
-            runtimeClasspath = it.output + mainSourceSet.output + project.configurations.scoverage + original.runtimeClasspath
-        }
-
         def scoverageJar = project.tasks.create('jarScoverage', Jar.class) {
             dependsOn('scoverageClasses')
             classifier = ScoveragePlugin.CONFIGURATION_NAME
-            from mainSourceSet.output
+            from instrumentedSourceSet.output
         }
         project.artifacts {
             scoverage scoverageJar
         }
 
         project.tasks.create(ScoveragePlugin.TEST_NAME, Test.class) {
-            conventionMapping.map("testClassesDir", new Callable<Object>() {
-                Object call() throws Exception {
-                    return testSourceSet.output.classesDir
-                }
-            })
             conventionMapping.map("classpath", new Callable<Object>() {
                 Object call() throws Exception {
-                    return testSourceSet.runtimeClasspath
+                    def testSourceSet = project.sourceSets.getByName(SourceSet.TEST_SOURCE_SET_NAME)
+                    return testSourceSet.output +
+                            instrumentedSourceSet.output +
+                            project.configurations.scoverage +
+                            testSourceSet.runtimeClasspath
                 }
             })
         }

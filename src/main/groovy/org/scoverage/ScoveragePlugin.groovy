@@ -10,7 +10,6 @@ class ScoveragePlugin implements Plugin<Project> {
     static String REPORT_NAME = 'reportScoverage'
     static String CHECK_NAME = 'checkScoverage'
     static String COMPILE_NAME = 'compileScoverageScala'
-    static String COMPILE_TEST_NAME = 'compileTestScoverageScala'
 
     @Override
     void apply(Project t) {
@@ -20,6 +19,6 @@ class ScoveragePlugin implements Plugin<Project> {
     }
 
     protected static ScoverageExtension extensionIn(Project project) {
-        project.extensions[CONFIGURATION_NAME]
+        project.extensions[CONFIGURATION_NAME] as ScoverageExtension
     }
 }
