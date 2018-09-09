@@ -44,8 +44,8 @@ class ScoverageExtension {
 
     ScoverageExtension(Project project) {
 
-        project.plugins.apply(JavaPlugin.class);
-        project.plugins.apply(ScalaPlugin.class);
+        project.plugins.apply(JavaPlugin.class)
+        project.plugins.apply(ScalaPlugin.class)
         project.afterEvaluate(configureRuntimeOptions)
 
         project.configurations.create(ScoveragePlugin.CONFIGURATION_NAME) {
@@ -82,18 +82,18 @@ class ScoverageExtension {
             from mainSourceSet.output
         }
         project.artifacts {
-            scoverage project.tasks.jarScoverage
+            scoverage scoverageJar
         }
 
         project.tasks.create(ScoveragePlugin.TEST_NAME, Test.class) {
             conventionMapping.map("testClassesDir", new Callable<Object>() {
-                public Object call() throws Exception {
-                    return testSourceSet.output.classesDir;
+                Object call() throws Exception {
+                    return testSourceSet.output.classesDir
                 }
             })
             conventionMapping.map("classpath", new Callable<Object>() {
-                public Object call() throws Exception {
-                    return testSourceSet.runtimeClasspath;
+                Object call() throws Exception {
+                    return testSourceSet.runtimeClasspath
                 }
             })
         }
@@ -126,7 +126,7 @@ class ScoverageExtension {
             File pluginFile
             try {
                 pluginFile = configuration.filter { it.name.contains('plugin') }.iterator().next()
-            } catch(NoSuchElementException e) {
+            } catch(NoSuchElementException ignored) {
                 throw new GradleException("Could not find a plugin jar in configuration '${ScoveragePlugin.CONFIGURATION_NAME}'")
             }
 
@@ -153,7 +153,7 @@ class ScoverageExtension {
                 // the compile task creates a store of measured statements
                 outputs.file(new File(extension.dataDir, 'scoverage.coverage.xml'))
             }
-            t.tasks[ScoveragePlugin.TEST_NAME].outputs.dir(extension.dataDir)
+            t.tasks[ScoveragePlugin.TEST_NAME].outputs.files("${extension.dataDir}/scoverage.measurements.*")
             t.tasks[ScoveragePlugin.REPORT_NAME].configure {
                 inputs.dir(extension.dataDir)
                 outputs.dir(extension.reportDir)
