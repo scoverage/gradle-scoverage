@@ -144,7 +144,7 @@ class ScoverageExtension {
                 // the compile task creates a store of measured statements
                 outputs.file(new File(extension.dataDir, 'scoverage.coverage.xml'))
             }
-            t.tasks[ScoveragePlugin.TEST_NAME].outputs.files("${extension.dataDir}/scoverage.measurements.*")
+            t.tasks[ScoveragePlugin.TEST_NAME].outputs.dir(extension.dataDir)
             t.tasks[ScoveragePlugin.REPORT_NAME].configure {
                 inputs.dir(extension.dataDir)
                 outputs.dir(extension.reportDir)
