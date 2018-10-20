@@ -1,3 +1,7 @@
 language: groovy
+os:
+  - windows
+  - linux
+  - osx
 script:
   - "./gradlew --info --stacktrace test"
