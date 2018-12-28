@@ -28,6 +28,6 @@ allprojects {
 task aggregateScoverage(type: org.scoverage.ScoverageAggregate)
 
 subprojects {
-    aggregateScoverage.dependsOn(it.tasks)
+    aggregateScoverage.dependsOn(it.tasks.reportScoverage)
 }
 
