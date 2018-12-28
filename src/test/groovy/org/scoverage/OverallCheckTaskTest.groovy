@@ -1,155 +1,121 @@
 package org.scoverage
 
 import org.gradle.api.GradleException
-import org.gradle.api.Project
-import org.gradle.testfixtures.ProjectBuilder
 import org.hamcrest.Description
+import org.hamcrest.Matcher
 import org.hamcrest.TypeSafeMatcher
-import org.junit.After
-import org.junit.AfterClass
-import org.junit.Before
-import org.junit.BeforeClass
-import org.junit.Rule
 import org.junit.Test
-import org.junit.rules.ExpectedException
 
-import javax.swing.text.NumberFormatter
 import java.text.NumberFormat
+
+import static org.junit.Assert.assertNull
+import static org.junit.Assert.assertThat
+import static org.scoverage.OverallCheckTask.checkLineCoverage
 
 /**
  * Copied from the Internet, just to check if we have correct exception thrown.
  */
 class CauseMatcher extends TypeSafeMatcher<Throwable> {
 
-    private final Class<? extends Throwable> type;
-    private final String expectedMessage;
+    private final Class<? extends Throwable> type
+    private final String expectedMessage
 
-    public CauseMatcher(Class<? extends Throwable> type, String expectedMessage) {
-        this.type = type;
-        this.expectedMessage = expectedMessage;
+    CauseMatcher(Class<? extends Throwable> type, String expectedMessage) {
+        this.type = type
+        this.expectedMessage = expectedMessage
     }
 
     @Override
     protected boolean matchesSafely(Throwable item) {
-        return item.getClass().isAssignableFrom(type) && item.getMessage().contains(expectedMessage);
+        return item.getClass().isAssignableFrom(type) && item.getMessage().contains(expectedMessage)
     }
 
     @Override
-    public void describeTo(Description description) {
+    void describeTo(Description description) {
         description.appendText("expects type ")
                 .appendValue(type)
                 .appendText(" and a message ")
-                .appendValue(expectedMessage);
+                .appendValue(expectedMessage)
     }
 }
 
 class OverallCheckTaskTest {
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none()
+    private NumberFormat numberFormat = NumberFormat.getInstance(Locale.US)
 
-    private Project projectForRate(Number coverageRate, CoverageType type) {
-        Project project = ProjectBuilder.builder().build()
-        project.plugins.apply(ScoveragePlugin)
-        project.tasks.create('bob', OverallCheckTask) {
-            locale = Locale.US
-            minimumRate = coverageRate
-            reportDir = new File('src/test/resources')
-            coverageType = type
-        }
-        project
+    private static File reportDir = new File('src/test/resources')
+
+    private static Matcher<Throwable> failsWith(String message) {
+        return new CauseMatcher(
+                GradleException.class,
+                message
+        )
     }
 
     // error when report file is not there
 
     @Test
     void failsWhenReportFileIsNotFound() {
-        Project project = ProjectBuilder.builder().build()
-        project.plugins.apply(ScoveragePlugin)
-        project.tasks.create('bob', OverallCheckTask) {
-            locale = Locale.US
-            minimumRate = 1.0
-            reportDir = new File('src/test/nothingthere')
-            coverageType = CoverageType.Line
-        }
-        expectedException.expectCause(new CauseMatcher(
-                GradleException.class,
-                OverallCheckTask.fileNotFoundErrorMsg(CoverageType.Line)
-        ))
-        project.tasks.bob.execute()
+        assertThat(
+                checkLineCoverage(numberFormat, new File('src/test/nothingthere'), CoverageType.Line, 0.0),
+                failsWith(OverallCheckTask.fileNotFoundErrorMsg(CoverageType.Line)))
     }
 
     // line coverage
 
     @Test
     void failsWhenLineRateIsBelowTarget() {
-        Project project = projectForRate(1, CoverageType.Line)
-        expectedException.expectCause(new CauseMatcher(
-                GradleException.class,
-                OverallCheckTask.errorMsg("66", "100", CoverageType.Line)
-        ))
-        project.tasks.bob.execute()
+        assertThat(
+                checkLineCoverage(numberFormat, reportDir, CoverageType.Line, 1.0),
+                failsWith(OverallCheckTask.errorMsg("66", "100", CoverageType.Line)))
     }
 
     @Test
-    void doesNotFailWhenLineRateIsAtTarget() throws Exception {
-        Project project = projectForRate(0.66, CoverageType.Line)
-        project.tasks.bob.execute()
+    void doesNotFailWhenLineRateIsAtTarget() {
+        assertNull(checkLineCoverage(numberFormat, reportDir, CoverageType.Line, 0.66))
     }
 
     @Test
-    void doesNotFailWhenLineRateIsAboveTarget() throws Exception {
-        Project project = projectForRate(0.6, CoverageType.Line)
-        project.tasks.bob.execute()
+    void doesNotFailWhenLineRateIsAboveTarget() {
+        assertNull(checkLineCoverage(numberFormat, reportDir, CoverageType.Line, 0.6))
     }
 
     // Statement coverage
 
     @Test
     void failsWhenStatementRateIsBelowTarget() {
-        Project project = projectForRate(1, CoverageType.Statement)
-        NumberFormat nf = NumberFormat.getInstance()
-        expectedException.expectCause(new CauseMatcher(
-                GradleException.class,
-                OverallCheckTask.errorMsg(nf.format(new Double(33.33)), "100", CoverageType.Statement)
-        ))
-        project.tasks.bob.execute()
+        assertThat(
+                checkLineCoverage(numberFormat, reportDir, CoverageType.Statement, 1.0),
+                failsWith(OverallCheckTask.errorMsg(numberFormat.format(new Double(33.33)), "100", CoverageType.Statement)))
     }
 
     @Test
-    void doesNotFailWhenStatementRateIsAtTarget() throws Exception {
-        Project project = projectForRate(0.33, CoverageType.Statement)
-        project.tasks.bob.execute()
+    void doesNotFailWhenStatementRateIsAtTarget() {
+        assertNull(checkLineCoverage(numberFormat, reportDir, CoverageType.Statement, 0.33))
     }
 
     @Test
-    void doesNotFailWhenStatementRateIsAboveTarget() throws Exception {
-        Project project = projectForRate(0.3, CoverageType.Statement)
-        project.tasks.bob.execute()
+    void doesNotFailWhenStatementRateIsAboveTarget() {
+        assertNull(checkLineCoverage(numberFormat, reportDir, CoverageType.Statement, 0.3))
     }
 
     // Branch coverage
 
     @Test
     void failsWhenBranchRateIsBelowTarget() {
-        Project project = projectForRate(1, CoverageType.Branch)
-        expectedException.expectCause(new CauseMatcher(
-                GradleException.class,
-                OverallCheckTask.errorMsg("50", "100", CoverageType.Branch)
-        ))
-        project.tasks.bob.execute()
+        assertThat(
+                checkLineCoverage(numberFormat, reportDir, CoverageType.Branch, 1.0),
+                failsWith(OverallCheckTask.errorMsg("50", "100", CoverageType.Branch)))
     }
 
     @Test
-    void doesNotFailWhenBranchRateIsAtTarget() throws Exception {
-        Project project = projectForRate(0.50, CoverageType.Branch)
-        project.tasks.bob.execute()
+    void doesNotFailWhenBranchRateIsAtTarget() {
+        assertNull(checkLineCoverage(numberFormat, reportDir, CoverageType.Branch, 0.5))
     }
 
     @Test
-    void doesNotFailWhenBranchRateIsAboveTarget() throws Exception {
-        Project project = projectForRate(0.45, CoverageType.Branch)
-        project.tasks.bob.execute()
+    void doesNotFailWhenBranchRateIsAboveTarget() {
+        assertNull(checkLineCoverage(numberFormat, reportDir, CoverageType.Branch, 0.45))
     }
 
 }
