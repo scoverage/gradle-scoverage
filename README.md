@@ -12,11 +12,12 @@ This creates an additional task `testScoverage` which will run tests against ins
 
 A further task `reportScoverage` produces XML and HTML reports for analysing test code coverage.
 
-You need to configure the version of Scoverage that will be used. This plugin should be compatible with all 1+ versions.
+You can configure the version of Scoverage that will be used. This plugin should be compatible with all 1+ versions.
 
 ```groovy
-dependencies {
-    scoverage 'org.scoverage:scalac-scoverage-plugin_2.11:1.1.0', 'org.scoverage:scalac-scoverage-runtime_2.11:1.1.0'
+scoverage {
+    scoverageVersion = "1.3.1"
+    scoverageScalaVersion = "2.12" // will be overridden by the 'scala-library' version (if configured)
 }
 ```
 
@@ -49,14 +50,7 @@ Aggregating Reports
 
 There is now experimental support for aggregating coverage statistics across sub-projects.
 
-The project hosting the aggregation task **must** be configured as the sub-projects are;
-i.e. with the scoverage plugin applied and the scoverage dependencies configured.
-
-You also have to declare this task:
-
-```groovy
-task aggregateScoverage(type: org.scoverage.ScoverageAggregate)
-```
+When applied on a project with sub-projects, the plugin will create the aggregation task `aggregateScoverage`. 
 
 This will produce a report into `build/scoverage-aggregate` directory.
 

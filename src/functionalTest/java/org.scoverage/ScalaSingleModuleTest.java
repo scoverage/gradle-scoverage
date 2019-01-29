@@ -74,7 +74,7 @@ public class ScalaSingleModuleTest extends ScoverageFunctionalTest {
         result.assertTaskOutcome(ScoveragePlugin.getTEST_NAME(), TaskOutcome.SUCCESS);
         result.assertTaskOutcome(ScoveragePlugin.getREPORT_NAME(), TaskOutcome.SUCCESS);
         result.assertTaskOutcome(ScoveragePlugin.getCHECK_NAME(), TaskOutcome.SUCCESS);
-        result.assertTaskSkipped(ScoveragePlugin.getAGGREGATE_NAME());
+        result.assertTaskDoesntExist(ScoveragePlugin.getAGGREGATE_NAME());
     }
 
     @Test
@@ -87,6 +87,6 @@ public class ScalaSingleModuleTest extends ScoverageFunctionalTest {
         result.assertTaskOutcome(ScoveragePlugin.getTEST_NAME(), TaskOutcome.SUCCESS);
         result.assertTaskOutcome(ScoveragePlugin.getREPORT_NAME(), TaskOutcome.SUCCESS);
         result.assertTaskOutcome(ScoveragePlugin.getCHECK_NAME(), TaskOutcome.FAILED);
-        result.assertTaskSkipped(ScoveragePlugin.getAGGREGATE_NAME());
+        result.assertTaskDoesntExist(ScoveragePlugin.getAGGREGATE_NAME());
     }
 }

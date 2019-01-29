@@ -23,17 +23,6 @@ public abstract class ScoverageFunctionalTest {
                 .withProjectDir(projectDir())
                 .withPluginClasspath()
                 .forwardOutput();
-
-
-        List<File> filteredPluginClassPath = new ArrayList<File>();
-
-        for (File file : runner.getPluginClasspath()) {
-            if (!file.getName().contains("scalac-scoverage-plugin")) {
-                filteredPluginClassPath.add(file);
-            }
-        }
-
-        runner.withPluginClasspath(filteredPluginClassPath);
     }
 
     protected File projectDir() {
@@ -65,12 +54,11 @@ public abstract class ScoverageFunctionalTest {
         List<String> fullArguments = new ArrayList<String>();
 
         fullArguments.add("-PscalaVersionMajor=2");
-        fullArguments.add("-PscalaVersionMinor=11");
-        fullArguments.add("-PscalaVersionBuild=5");
+        fullArguments.add("-PscalaVersionMinor=12");
+        fullArguments.add("-PscalaVersionBuild=8");
         fullArguments.add("-PjunitVersion=5.3.2");
         fullArguments.add("-PjunitPlatformVersion=1.3.2");
         fullArguments.add("-PscalatestVersion=3.0.5");
-        fullArguments.add("-PscoverageVersion=1.3.1");
         fullArguments.addAll(Arrays.asList(arguments));
 
         runner.withArguments(fullArguments);

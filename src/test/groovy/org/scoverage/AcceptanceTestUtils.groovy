@@ -26,9 +26,7 @@ class AcceptanceTestUtils {
                 .withPluginClasspath()
                 .forwardOutput()
 
-        def arguments = tasks + "-PscoverageVersion=1.3.1"
-
-        runner.withArguments(arguments as List).build()
+        runner.withArguments(tasks).build()
     }
 
     protected void checkFile(String description, File file, boolean shouldExist) throws Exception {

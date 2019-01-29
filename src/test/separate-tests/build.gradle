@@ -9,13 +9,6 @@ allprojects {
     repositories {
         jcenter()
     }
-
-    apply plugin: 'org.scoverage'
-
-    dependencies {
-        scoverage "org.scoverage:scalac-scoverage-plugin_2.11:${scoverageVersion}",
-                "org.scoverage:scalac-scoverage-runtime_2.11:${scoverageVersion}"
-    }
 }
 
 subprojects {
@@ -45,19 +38,12 @@ subprojects {
 configure(subprojects.findAll { it.name.endsWith('-tests') }) {
     def mainProject = project(":${project.name.minus('-tests')}")
     dependencies {
-        testCompile mainProject
-        scoverage mainProject.configurations.scoverage.artifacts.files
+        testCompile mainProject.sourceSets.scoverage.output
     }
     scoverage {
         sources = mainProject.extensions.scoverage.sources
         dataDir = mainProject.extensions.scoverage.dataDir
         reportDir = mainProject.extensions.scoverage.reportDir
-    }
-    sourceSets {
-        testScoverage {
-            compileClasspath += sourceSets.main.output
-            runtimeClasspath += sourceSets.main.output
-        }
     }
     compileScoverageScala {
         onlyIf { false }

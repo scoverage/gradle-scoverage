@@ -2,6 +2,7 @@ package org.scoverage
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.TaskAction
 import org.gradle.internal.impldep.com.google.common.annotations.VisibleForTesting
@@ -46,19 +47,16 @@ class OverallCheckTask extends DefaultTask {
     CoverageType coverageType = CoverageType.Statement
     double minimumRate = 0.75
 
-    /** Set if want to change default from 'reportDir' in scoverage extension. */
-    File reportDir
+    final Property<File> reportDir = project.objects.property(File)
 
     /** Overwrite to test for a specific locale. */
     Locale locale
 
     @TaskAction
     void requireLineCoverage() {
-        def extension = ScoveragePlugin.extensionIn(project)
-
         NumberFormat nf = NumberFormat.getInstance(locale == null ? Locale.getDefault() : locale)
 
-        Exception failure = checkLineCoverage(nf, reportDir == null ? extension.reportDir : reportDir, coverageType, minimumRate)
+        Exception failure = checkLineCoverage(nf, reportDir.get(), coverageType, minimumRate)
 
         if (failure) throw failure
     }

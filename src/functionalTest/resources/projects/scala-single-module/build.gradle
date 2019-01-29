@@ -18,11 +18,6 @@ dependencies {
     testCompile group: 'org.junit.platform', name: 'junit-platform-runner', version: junitPlatformVersion
 
     testCompile group: 'org.scalatest', name: "scalatest_${scalaVersionMajor}.${scalaVersionMinor}", version: scalatestVersion
-
-    def fullScoverageVersion = "${scalaVersionMajor}.${scalaVersionMinor}:${scoverageVersion}"
-
-    scoverage "org.scoverage:scalac-scoverage-plugin_${fullScoverageVersion}",
-            "org.scoverage:scalac-scoverage-runtime_${fullScoverageVersion}"
 }
 
 test {
