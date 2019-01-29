@@ -53,6 +53,31 @@ dependencies {
     testCompile 'org.hamcrest:hamcrest-library:1.3'
 }
 
+sourceSets {
+    functionalTest {
+        java {
+            srcDir file('src/functionalTest/java')
+        }
+        resources {
+            srcDir file('src/functionalTest/resources')
+        }
+        compileClasspath += sourceSets.main.output + configurations.testRuntime
+        runtimeClasspath += output + compileClasspath
+    }
+}
+
+task functionalTest(type: Test) {
+    testClassesDirs = sourceSets.functionalTest.output.classesDirs
+    classpath = sourceSets.functionalTest.runtimeClasspath
+}
+
+functionalTest.mustRunAfter(test)
+check.dependsOn functionalTest
+
+gradlePlugin {
+    testSourceSets sourceSets.test, sourceSets.functionalTest
+}
+
 task groovydocJar(type: Jar, dependsOn: groovydoc) {
     classifier = 'groovydoc'
     from "$buildDir/docs/groovydoc"

@@ -1,0 +1,34 @@
+plugins {
+    id 'org.scoverage'
+}
+
+repositories {
+    jcenter()
+}
+
+description = 'a single-module Scala project that builds successfully with 100% coverage'
+
+apply plugin: 'java'
+apply plugin: 'scala'
+
+dependencies {
+    compile group: 'org.scala-lang', name: 'scala-library', version: "${scalaVersionMajor}.${scalaVersionMinor}.${scalaVersionBuild}"
+
+    testRuntime group: 'org.junit.vintage', name: 'junit-vintage-engine', version: junitVersion
+    testCompile group: 'org.junit.platform', name: 'junit-platform-runner', version: junitPlatformVersion
+
+    testCompile group: 'org.scalatest', name: "scalatest_${scalaVersionMajor}.${scalaVersionMinor}", version: scalatestVersion
+
+    def fullScoverageVersion = "${scalaVersionMajor}.${scalaVersionMinor}:${scoverageVersion}"
+
+    scoverage "org.scoverage:scalac-scoverage-plugin_${fullScoverageVersion}",
+            "org.scoverage:scalac-scoverage-runtime_${fullScoverageVersion}"
+}
+
+test {
+    useJUnitPlatform()
+}
+
+checkScoverage {
+    minimumRate = 0.5
+}
