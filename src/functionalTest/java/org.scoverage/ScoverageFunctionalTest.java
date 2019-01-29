@@ -10,6 +10,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public abstract class ScoverageFunctionalTest {
 
@@ -99,6 +100,16 @@ public abstract class ScoverageFunctionalTest {
             Assert.assertTrue(task == null || task.getOutcome() == TaskOutcome.SKIPPED);
         }
 
+        public void assertTaskSucceeded(String taskName) {
+
+            assertTaskOutcome(taskName, TaskOutcome.SUCCESS);
+        }
+
+        public void assertTaskFailed(String taskName) {
+
+            assertTaskOutcome(taskName, TaskOutcome.FAILED);
+        }
+
         public void assertTaskOutcome(String taskName, TaskOutcome outcome) {
 
             BuildTask task = getTask(taskName);
@@ -119,7 +130,8 @@ public abstract class ScoverageFunctionalTest {
 
         private boolean taskExists(String taskName) {
 
-            return result.getOutput().contains(fullTaskName(taskName) + " ");
+            Pattern regex = Pattern.compile("^" + fullTaskName(taskName), Pattern.MULTILINE);
+            return regex.matcher(result.getOutput()).find();
         }
     }
 }

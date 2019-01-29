@@ -38,6 +38,8 @@ class ScoverageExtension {
     final Property<Boolean> coverageOutputHTML
     final Property<Boolean> coverageDebug
 
+    final Property<Boolean> deleteReportsOnAggregation
+
     ScoverageExtension(Project project) {
 
         project.plugins.apply(JavaPlugin.class)
@@ -78,5 +80,8 @@ class ScoverageExtension {
 
         coverageDebug = project.objects.property(Boolean)
         coverageDebug.set(false)
+
+        deleteReportsOnAggregation = project.objects.property(Boolean)
+        deleteReportsOnAggregation.set(false)
     }
 }

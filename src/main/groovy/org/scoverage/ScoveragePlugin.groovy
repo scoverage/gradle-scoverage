@@ -1,6 +1,6 @@
 package org.scoverage
 
-import org.gradle.api.GradleException
+
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.invocation.Gradle
@@ -156,16 +156,19 @@ class ScoveragePlugin implements Plugin<PluginAware> {
     private void configureAfterEvaluation(Project project, ScoverageExtension extension, ScoverageRunner scoverageRunner) {
 
         if (project.childProjects.size() > 0) {
-            def reportTasks = project.getSubprojects().collect { it.tasks.withType(ScoverageReport) }
-            project.tasks.create(AGGREGATE_NAME, ScoverageAggregate.class) {
+            def reportTasks = project.getAllprojects().collect { it.tasks.withType(ScoverageReport) }
+            def aggregationTask = project.tasks.create(AGGREGATE_NAME, ScoverageAggregate.class) {
                 dependsOn(reportTasks)
                 group = 'verification'
                 runner = scoverageRunner
+                reportDir = extension.reportDir
+                deleteReportsOnAggregation = extension.deleteReportsOnAggregation
                 coverageOutputCobertura = extension.coverageOutputCobertura
                 coverageOutputXML = extension.coverageOutputXML
                 coverageOutputHTML = extension.coverageOutputHTML
                 coverageDebug = extension.coverageDebug
             }
+            project.tasks[CHECK_NAME].mustRunAfter(aggregationTask)
         }
 
         project.tasks[COMPILE_NAME].configure {

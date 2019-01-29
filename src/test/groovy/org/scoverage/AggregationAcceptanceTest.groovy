@@ -21,6 +21,6 @@ class AggregationAcceptanceTest extends AcceptanceTestUtils {
     }
 
     private static File aggregateReportDir(File baseDir) {
-        return new File(baseDir, 'build/scoverage-aggregate')
+        return new File(baseDir, 'build/reports/scoverage')
     }
 }
