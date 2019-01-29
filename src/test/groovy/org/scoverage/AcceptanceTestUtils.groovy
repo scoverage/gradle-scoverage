@@ -1,7 +1,6 @@
 package org.scoverage
 
-import org.gradle.tooling.BuildLauncher
-import org.gradle.tooling.GradleConnector
+import org.gradle.testkit.runner.GradleRunner
 import org.hamcrest.core.Is
 import org.junit.Assert
 
@@ -20,15 +19,16 @@ class AcceptanceTestUtils {
         parser.setFeature('http://apache.org/xml/features/nonvalidating/load-external-dtd', false)
     }
 
-    protected BuildLauncher setupBuild(File projectRoot) {
-        return GradleConnector.
-            newConnector().
-            forProjectDirectory(projectRoot).
-            connect().
-            newBuild().
-            withArguments(
-                    '--init-script',
-                    new File(System.properties.getProperty('user.dir'), 'init-scoverage.gradle').toString())
+    protected void runBuild(File projectRoot, String... tasks) {
+        def runner = GradleRunner
+                .create()
+                .withProjectDir(projectRoot)
+                .withPluginClasspath()
+                .forwardOutput()
+
+        def arguments = tasks + "-PscoverageVersion=1.3.1"
+
+        runner.withArguments(arguments as List).build()
     }
 
     protected void checkFile(String description, File file, boolean shouldExist) throws Exception {

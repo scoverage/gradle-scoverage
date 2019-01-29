@@ -7,8 +7,7 @@ class AggregationAcceptanceTest extends AcceptanceTestUtils {
     @Test
     public void testMultiProjectAggregation() throws Exception {
         File projectDir = new File('src/test/water')
-        def build = setupBuild(projectDir)
-        build.forTasks('clean', 'aggregateScoverage').run()
+        runBuild(projectDir, 'clean', 'aggregateScoverage')
         def indexHtml = new File(aggregateReportDir(projectDir), 'index.html')
         checkFile('an aggregated index HTML file', indexHtml, true)
         def cobertura = new File(aggregateReportDir(projectDir), 'cobertura.xml')

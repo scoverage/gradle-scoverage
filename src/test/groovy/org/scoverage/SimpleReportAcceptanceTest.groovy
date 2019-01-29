@@ -8,8 +8,7 @@ class SimpleReportAcceptanceTest extends AcceptanceTestUtils {
     @Test
     public void testProjectWithCompleteCoverage() throws Exception {
         File projectRoot = new File('src/test/happy day')
-        def build = setupBuild(projectRoot)
-        build.forTasks('clean', 'checkScoverage').run()
+        runBuild(projectRoot, 'clean', 'checkScoverage')
         def html = new File(reportDir(projectRoot), 'index.html')
         checkFile('an index HTML file', html, true)
         def cobertura = new File(reportDir(projectRoot), 'cobertura.xml')
@@ -21,7 +20,6 @@ class SimpleReportAcceptanceTest extends AcceptanceTestUtils {
     @Test
     public void testRun() throws Exception {
         File projectRoot = new File('src/test/runtime')
-        def build = setupBuild(projectRoot)
-        build.forTasks('clean', 'run').run()
+        runBuild(projectRoot, 'clean', 'run')
     }
 }
