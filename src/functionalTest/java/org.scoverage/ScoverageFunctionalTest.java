@@ -1,21 +1,31 @@
 package org.scoverage;
 
+import groovy.util.Node;
+import groovy.util.XmlParser;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.BuildTask;
 import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
 import org.junit.Assert;
+import org.xml.sax.SAXException;
 
 import java.io.File;
+import java.io.IOException;
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import static org.hamcrest.number.IsCloseTo.closeTo;
+import static org.junit.Assert.assertThat;
+
 public abstract class ScoverageFunctionalTest {
 
     private final String projectName;
     private final GradleRunner runner;
+    private final XmlParser parser;
 
     protected ScoverageFunctionalTest(String projectName) {
 
@@ -24,11 +34,29 @@ public abstract class ScoverageFunctionalTest {
                 .withProjectDir(projectDir())
                 .withPluginClasspath()
                 .forwardOutput();
+
+        try {
+            this.parser = new XmlParser();
+            parser.setFeature("http://apache.org/xml/features/disallow-doctype-decl", false);
+            parser.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     protected File projectDir() {
 
         return new File("src/functionalTest/resources/projects/" + projectName);
+    }
+
+    protected File reportDir() {
+
+        return reportDir(projectDir());
+    }
+
+    protected File reportDir(File projectDir) {
+
+        return projectDir.toPath().resolve("build").resolve(ScoveragePlugin.getDEFAULT_REPORT_DIR()).toFile();
     }
 
     protected AssertableBuildResult run(String... arguments) {
@@ -48,6 +76,31 @@ public abstract class ScoverageFunctionalTest {
         List<String> withDryArgument = new ArrayList<String>(Arrays.asList(arguments));
         withDryArgument.add("--dry-run");
         return run(withDryArgument.toArray(new String[]{}));
+    }
+
+    protected void assertCoverage(Double expected) throws Exception {
+
+        assertCoverage(expected, reportDir());
+    }
+
+    protected void assertCoverage(Double expected, File reportDir) throws Exception {
+
+        assertThat(coverage(reportDir, CoverageType.Statement), closeTo(expected, 1.0));
+        assertThat(coverage(reportDir, CoverageType.Line), closeTo(expected, 1.0));
+    }
+
+    protected File resolve(File file, String relativePath) {
+
+        return file.toPath().resolve(relativePath).toFile();
+    }
+
+    private Double coverage(File reportDir, CoverageType coverageType) throws IOException, SAXException, ParseException {
+
+        File reportFile = reportDir.toPath().resolve(coverageType.getFileName()).toFile();
+        Node xml = parser.parse(reportFile);
+        Object attribute = xml.attribute(coverageType.getParamName());
+        double rawValue = NumberFormat.getInstance().parse(attribute.toString()).doubleValue();
+        return coverageType.normalize(rawValue) * 100.0;
     }
 
     private void configureArguments(String... arguments) {

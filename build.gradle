@@ -55,27 +55,25 @@ dependencies {
 
 sourceSets {
     functionalTest {
-        java {
-            srcDir file('src/functionalTest/java')
-        }
-        resources {
-            srcDir file('src/functionalTest/resources')
-        }
+        java.srcDir file('src/functionalTest/java')
+        resources.srcDir file('src/functionalTest/resources')
         compileClasspath += sourceSets.main.output + configurations.testRuntime
         runtimeClasspath += output + compileClasspath
     }
 }
 
 task functionalTest(type: Test) {
+    description = 'Runs the functional tests.'
+    group = 'verification'
     testClassesDirs = sourceSets.functionalTest.output.classesDirs
     classpath = sourceSets.functionalTest.runtimeClasspath
+    mustRunAfter test
 }
 
-functionalTest.mustRunAfter(test)
 check.dependsOn functionalTest
 
 gradlePlugin {
-    testSourceSets sourceSets.test, sourceSets.functionalTest
+    testSourceSets sourceSets.functionalTest
 }
 
 task groovydocJar(type: Jar, dependsOn: groovydoc) {

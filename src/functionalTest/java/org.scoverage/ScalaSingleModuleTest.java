@@ -1,6 +1,6 @@
 package org.scoverage;
 
-import org.gradle.testkit.runner.TaskOutcome;
+import org.junit.Assert;
 import org.junit.Test;
 
 public class ScalaSingleModuleTest extends ScoverageFunctionalTest {
@@ -66,7 +66,7 @@ public class ScalaSingleModuleTest extends ScoverageFunctionalTest {
     }
 
     @Test
-    public void checkScoverage() {
+    public void checkScoverage() throws Exception {
 
         AssertableBuildResult result = run("clean", ScoveragePlugin.getCHECK_NAME());
 
@@ -75,10 +75,13 @@ public class ScalaSingleModuleTest extends ScoverageFunctionalTest {
         result.assertTaskSucceeded(ScoveragePlugin.getREPORT_NAME());
         result.assertTaskSucceeded(ScoveragePlugin.getCHECK_NAME());
         result.assertTaskDoesntExist(ScoveragePlugin.getAGGREGATE_NAME());
+
+        assertReportFilesExist();
+        assertCoverage(100.0);
     }
 
     @Test
-    public void checkScoverageFails() {
+    public void checkScoverageFails() throws Exception {
 
         AssertableBuildResult result = runAndFail("clean", ScoveragePlugin.getCHECK_NAME(),
                 ScoveragePlugin.getTEST_NAME(), "--tests", "org.hello.TestNothingSuite");
@@ -88,5 +91,14 @@ public class ScalaSingleModuleTest extends ScoverageFunctionalTest {
         result.assertTaskSucceeded(ScoveragePlugin.getREPORT_NAME());
         result.assertTaskFailed(ScoveragePlugin.getCHECK_NAME());
         result.assertTaskDoesntExist(ScoveragePlugin.getAGGREGATE_NAME());
+
+        assertReportFilesExist();
+        assertCoverage(0.0);
+    }
+
+    private void assertReportFilesExist() {
+
+        Assert.assertTrue(resolve(reportDir(), "index.html").exists());
+        Assert.assertTrue(resolve(reportDir(), "src/main/scala/org/hello/World.scala.html").exists());
     }
 }

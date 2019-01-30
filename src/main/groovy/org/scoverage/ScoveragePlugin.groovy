@@ -21,6 +21,8 @@ class ScoveragePlugin implements Plugin<PluginAware> {
     static final String COMPILE_NAME = 'compileScoverageScala'
     static final String AGGREGATE_NAME = 'aggregateScoverage'
 
+    static final String DEFAULT_REPORT_DIR = 'reports' + File.separatorChar + 'scoverage'
+
     @Override
     void apply(PluginAware pluginAware) {
         if (pluginAware instanceof Project) {

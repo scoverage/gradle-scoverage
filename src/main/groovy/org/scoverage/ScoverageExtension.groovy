@@ -58,7 +58,7 @@ class ScoverageExtension {
         dataDir.set(new File(project.buildDir, 'scoverage'))
 
         reportDir = project.objects.property(File)
-        reportDir.set(new File(project.buildDir, 'reports' + File.separatorChar + 'scoverage'))
+        reportDir.set(new File(project.buildDir, ScoveragePlugin.DEFAULT_REPORT_DIR))
 
         highlighting = project.objects.property(Boolean)
         highlighting.set(true)
