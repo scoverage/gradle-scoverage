@@ -116,7 +116,7 @@ public class ScalaMultiModuleTest extends ScoverageFunctionalTest {
     public void checkScoverageWithoutCoverageInRoot() throws Exception {
 
         AssertableBuildResult result = runAndFail("clean", ScoveragePlugin.getCHECK_NAME(),
-                ScoveragePlugin.getTEST_NAME(),
+                "test",
                 "--tests", "org.hello.TestNothingSuite",
                 "--tests", "org.hello.a.WorldASuite",
                 "--tests", "org.hello.b.WorldBSuite");
@@ -131,7 +131,7 @@ public class ScalaMultiModuleTest extends ScoverageFunctionalTest {
     public void checkScoverageWithoutCoverageInA() throws Exception {
 
         AssertableBuildResult result = runAndFail("clean", ScoveragePlugin.getCHECK_NAME(),
-                ScoveragePlugin.getTEST_NAME(),
+                "test",
                 "--tests", "org.hello.a.TestNothingASuite",
                 "--tests", "org.hello.WorldSuite",
                 "--tests", "org.hello.b.WorldBSuite");
@@ -148,7 +148,7 @@ public class ScalaMultiModuleTest extends ScoverageFunctionalTest {
         // should pass as the check on the root is for the aggregation (which covers > 50%)
 
         AssertableBuildResult result = run("clean", ScoveragePlugin.getCHECK_NAME(),
-                ScoveragePlugin.getAGGREGATE_NAME(), ScoveragePlugin.getTEST_NAME(),
+                ScoveragePlugin.getAGGREGATE_NAME(), "test",
                 "--tests", "org.hello.TestNothingSuite",
                 "--tests", "org.hello.a.WorldASuite",
                 "--tests", "org.hello.b.WorldBSuite");
@@ -169,7 +169,7 @@ public class ScalaMultiModuleTest extends ScoverageFunctionalTest {
     public void checkAndAggregateScoverageWithoutCoverageInAll() throws Exception {
 
         AssertableBuildResult result = runAndFail("clean", ScoveragePlugin.getCHECK_NAME(),
-                ScoveragePlugin.getAGGREGATE_NAME(), ScoveragePlugin.getTEST_NAME(),
+                ScoveragePlugin.getAGGREGATE_NAME(), "test",
                 "--tests", "org.hello.TestNothingSuite",
                 "--tests", "org.hello.a.TestNothingASuite",
                 "--tests", "org.hello.b.TestNothingBSuite");

@@ -1,21 +1,16 @@
 package org.scoverage
 
-
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.invocation.Gradle
 import org.gradle.api.plugins.PluginAware
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.bundling.Jar
-import org.gradle.api.tasks.testing.Test
 import org.gradle.util.GFileUtils
-
-import java.util.concurrent.Callable
 
 class ScoveragePlugin implements Plugin<PluginAware> {
 
     static final String CONFIGURATION_NAME = 'scoverage'
-    static final String TEST_NAME = 'testScoverage'
     static final String REPORT_NAME = 'reportScoverage'
     static final String CHECK_NAME = 'checkScoverage'
     static final String COMPILE_NAME = 'compileScoverageScala'
@@ -80,17 +75,12 @@ class ScoveragePlugin implements Plugin<PluginAware> {
             }
         }
 
-        ScoverageRunner scoverageRunner = new ScoverageRunner(project.configurations.scoverage)
-
-        createTasks(project, extension, scoverageRunner)
-
-        project.afterEvaluate {
-            configureAfterEvaluation(project, extension, scoverageRunner)
-        }
+        createTasks(project, extension)
     }
 
-    private void createTasks(Project project, ScoverageExtension extension, ScoverageRunner scoverageRunner) {
+    private void createTasks(Project project, ScoverageExtension extension) {
 
+        ScoverageRunner scoverageRunner = new ScoverageRunner(project.configurations.scoverage)
 
         def instrumentedSourceSet = project.sourceSets.create('scoverage') {
             def original = project.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
@@ -103,8 +93,11 @@ class ScoveragePlugin implements Plugin<PluginAware> {
             runtimeClasspath = it.output + project.configurations.scoverage + original.runtimeClasspath
         }
 
+        def compileTask = project.tasks[instrumentedSourceSet.getCompileTaskName("scala")]
+        project.test.mustRunAfter(compileTask)
+
         def scoverageJar = project.tasks.create('jarScoverage', Jar.class) {
-            dependsOn('scoverageClasses')
+            dependsOn(instrumentedSourceSet.classesTaskName)
             classifier = CONFIGURATION_NAME
             from instrumentedSourceSet.output
         }
@@ -112,29 +105,8 @@ class ScoveragePlugin implements Plugin<PluginAware> {
             scoverage scoverageJar
         }
 
-        project.tasks.create(TEST_NAME, Test.class) {
-            conventionMapping.map("classpath", new Callable<Object>() {
-                Object call() throws Exception {
-                    def testSourceSet = project.sourceSets.getByName(SourceSet.TEST_SOURCE_SET_NAME)
-                    return testSourceSet.output +
-                            instrumentedSourceSet.output +
-                            project.configurations.scoverage +
-                            testSourceSet.runtimeClasspath
-                }
-            })
-            group = 'verification'
-
-            FilenameFilter measurementFile = new FilenameFilter() {
-                @Override
-                boolean accept(File dir, String name) {
-                    return name.startsWith("scoverage.measurements.")
-                }
-            }
-            outputs.upToDateWhen { extension.dataDir.get().listFiles(measurementFile) }
-        }
-
-        project.tasks.create(REPORT_NAME, ScoverageReport.class) {
-            dependsOn(project.tasks[TEST_NAME])
+        def reportTask = project.tasks.create(REPORT_NAME, ScoverageReport.class) {
+            dependsOn compileTask, project.test
             onlyIf { extension.dataDir.get().list() }
             group = 'verification'
             runner = scoverageRunner
@@ -148,58 +120,77 @@ class ScoveragePlugin implements Plugin<PluginAware> {
         }
 
         project.tasks.create(CHECK_NAME, OverallCheckTask.class) {
-            dependsOn(project.tasks[REPORT_NAME])
+            dependsOn(reportTask)
             group = 'verification'
             reportDir = extension.reportDir
         }
 
-    }
+        project.gradle.taskGraph.whenReady { graph ->
+            if (graph.hasTask(reportTask)) {
 
-    private void configureAfterEvaluation(Project project, ScoverageExtension extension, ScoverageRunner scoverageRunner) {
+                project.test.configure {
+                    project.logger.debug("Adding instrumented classes to '${path}' classpath")
 
-        if (project.childProjects.size() > 0) {
-            def reportTasks = project.getAllprojects().collect { it.tasks.withType(ScoverageReport) }
-            def aggregationTask = project.tasks.create(AGGREGATE_NAME, ScoverageAggregate.class) {
-                dependsOn(reportTasks)
-                group = 'verification'
-                runner = scoverageRunner
-                reportDir = extension.reportDir
-                deleteReportsOnAggregation = extension.deleteReportsOnAggregation
-                coverageOutputCobertura = extension.coverageOutputCobertura
-                coverageOutputXML = extension.coverageOutputXML
-                coverageOutputHTML = extension.coverageOutputHTML
-                coverageDebug = extension.coverageDebug
+                    classpath = project.configurations.scoverage + instrumentedSourceSet.output + classpath
+
+                    outputs.upToDateWhen {
+                        extension.dataDir.get().listFiles(new FilenameFilter() {
+                            @Override
+                            boolean accept(File dir, String name) {
+                                return name.startsWith("scoverage.measurements.")
+                            }
+                        })
+                    }
+                }
             }
-            project.tasks[CHECK_NAME].mustRunAfter(aggregationTask)
         }
 
-        project.tasks[COMPILE_NAME].configure {
-            File pluginFile = project.configurations[CONFIGURATION_NAME].find {
-                it.name.startsWith("scalac-scoverage-plugin")
+        project.afterEvaluate {
+
+            if (project.childProjects.size() > 0) {
+                def reportTasks = project.getAllprojects().collect { it.tasks.withType(ScoverageReport) }
+                def aggregationTask = project.tasks.create(AGGREGATE_NAME, ScoverageAggregate.class) {
+                    dependsOn(reportTasks)
+                    group = 'verification'
+                    runner = scoverageRunner
+                    reportDir = extension.reportDir
+                    deleteReportsOnAggregation = extension.deleteReportsOnAggregation
+                    coverageOutputCobertura = extension.coverageOutputCobertura
+                    coverageOutputXML = extension.coverageOutputXML
+                    coverageOutputHTML = extension.coverageOutputHTML
+                    coverageDebug = extension.coverageDebug
+                }
+                project.tasks[CHECK_NAME].mustRunAfter(aggregationTask)
             }
-            List<String> parameters = ['-Xplugin:' + pluginFile.absolutePath]
-            List<String> existingParameters = scalaCompileOptions.additionalParameters
-            if (existingParameters) {
-                parameters.addAll(existingParameters)
+
+            compileTask.configure {
+                File pluginFile = project.configurations[CONFIGURATION_NAME].find {
+                    it.name.startsWith("scalac-scoverage-plugin")
+                }
+                List<String> parameters = ['-Xplugin:' + pluginFile.absolutePath]
+                List<String> existingParameters = scalaCompileOptions.additionalParameters
+                if (existingParameters) {
+                    parameters.addAll(existingParameters)
+                }
+                parameters.add("-P:scoverage:dataDir:${extension.dataDir.get().absolutePath}".toString())
+                if (extension.excludedPackages.get()) {
+                    def packages = extension.excludedPackages.get().join(';')
+                    parameters.add("-P:scoverage:excludedPackages:$packages".toString())
+                }
+                if (extension.excludedFiles.get()) {
+                    def packages = extension.excludedFiles.get().join(';')
+                    parameters.add("-P:scoverage:excludedFiles:$packages".toString())
+                }
+                if (extension.highlighting.get()) {
+                    parameters.add('-Yrangepos')
+                }
+                doFirst {
+                    GFileUtils.deleteDirectory(destinationDir)
+                }
+                scalaCompileOptions.additionalParameters = parameters
+                // the compile task creates a store of measured statements
+                outputs.file(new File(extension.dataDir.get(), 'scoverage.coverage.xml'))
             }
-            parameters.add("-P:scoverage:dataDir:${extension.dataDir.get().absolutePath}".toString())
-            if (extension.excludedPackages.get()) {
-                def packages = extension.excludedPackages.get().join(';')
-                parameters.add("-P:scoverage:excludedPackages:$packages".toString())
-            }
-            if (extension.excludedFiles.get()) {
-                def packages = extension.excludedFiles.get().join(';')
-                parameters.add("-P:scoverage:excludedFiles:$packages".toString())
-            }
-            if (extension.highlighting.get()) {
-                parameters.add('-Yrangepos')
-            }
-            doFirst {
-                GFileUtils.deleteDirectory(destinationDir)
-            }
-            scalaCompileOptions.additionalParameters = parameters
-            // the compile task creates a store of measured statements
-            outputs.file(new File(extension.dataDir.get(), 'scoverage.coverage.xml'))
         }
     }
 }

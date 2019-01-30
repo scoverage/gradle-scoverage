@@ -15,7 +15,6 @@ public class ScalaSingleModuleTest extends ScoverageFunctionalTest {
         AssertableBuildResult result = dryRun("clean", "test");
 
         result.assertTaskDoesntExist(ScoveragePlugin.getCOMPILE_NAME());
-        result.assertTaskDoesntExist(ScoveragePlugin.getTEST_NAME());
         result.assertTaskDoesntExist(ScoveragePlugin.getREPORT_NAME());
         result.assertTaskDoesntExist(ScoveragePlugin.getAGGREGATE_NAME());
         result.assertTaskDoesntExist(ScoveragePlugin.getCHECK_NAME());
@@ -27,19 +26,6 @@ public class ScalaSingleModuleTest extends ScoverageFunctionalTest {
         AssertableBuildResult result = dryRun("clean", "build");
 
         result.assertTaskDoesntExist(ScoveragePlugin.getCOMPILE_NAME());
-        result.assertTaskDoesntExist(ScoveragePlugin.getTEST_NAME());
-        result.assertTaskDoesntExist(ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskDoesntExist(ScoveragePlugin.getAGGREGATE_NAME());
-        result.assertTaskDoesntExist(ScoveragePlugin.getCHECK_NAME());
-    }
-
-    @Test
-    public void testScoverage() {
-
-        AssertableBuildResult result = dryRun("clean", ScoveragePlugin.getTEST_NAME());
-
-        result.assertTaskExists(ScoveragePlugin.getCOMPILE_NAME());
-        result.assertTaskExists(ScoveragePlugin.getTEST_NAME());
         result.assertTaskDoesntExist(ScoveragePlugin.getREPORT_NAME());
         result.assertTaskDoesntExist(ScoveragePlugin.getAGGREGATE_NAME());
         result.assertTaskDoesntExist(ScoveragePlugin.getCHECK_NAME());
@@ -51,7 +37,6 @@ public class ScalaSingleModuleTest extends ScoverageFunctionalTest {
         AssertableBuildResult result = dryRun("clean", ScoveragePlugin.getREPORT_NAME());
 
         result.assertTaskExists(ScoveragePlugin.getCOMPILE_NAME());
-        result.assertTaskExists(ScoveragePlugin.getTEST_NAME());
         result.assertTaskExists(ScoveragePlugin.getREPORT_NAME());
         result.assertTaskDoesntExist(ScoveragePlugin.getAGGREGATE_NAME());
         result.assertTaskDoesntExist(ScoveragePlugin.getCHECK_NAME());
@@ -71,7 +56,6 @@ public class ScalaSingleModuleTest extends ScoverageFunctionalTest {
         AssertableBuildResult result = run("clean", ScoveragePlugin.getCHECK_NAME());
 
         result.assertTaskSucceeded(ScoveragePlugin.getCOMPILE_NAME());
-        result.assertTaskSucceeded(ScoveragePlugin.getTEST_NAME());
         result.assertTaskSucceeded(ScoveragePlugin.getREPORT_NAME());
         result.assertTaskSucceeded(ScoveragePlugin.getCHECK_NAME());
         result.assertTaskDoesntExist(ScoveragePlugin.getAGGREGATE_NAME());
@@ -84,10 +68,9 @@ public class ScalaSingleModuleTest extends ScoverageFunctionalTest {
     public void checkScoverageFails() throws Exception {
 
         AssertableBuildResult result = runAndFail("clean", ScoveragePlugin.getCHECK_NAME(),
-                ScoveragePlugin.getTEST_NAME(), "--tests", "org.hello.TestNothingSuite");
+                "test", "--tests", "org.hello.TestNothingSuite");
 
         result.assertTaskSucceeded(ScoveragePlugin.getCOMPILE_NAME());
-        result.assertTaskSucceeded(ScoveragePlugin.getTEST_NAME());
         result.assertTaskSucceeded(ScoveragePlugin.getREPORT_NAME());
         result.assertTaskFailed(ScoveragePlugin.getCHECK_NAME());
         result.assertTaskDoesntExist(ScoveragePlugin.getAGGREGATE_NAME());
