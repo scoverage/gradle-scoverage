@@ -1,12 +1,16 @@
 package org.scoverage
 
+import org.apache.commons.io.FileUtils
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.invocation.Gradle
 import org.gradle.api.plugins.PluginAware
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.bundling.Jar
-import org.gradle.util.GFileUtils
+
+import java.nio.file.Files
+
+import static groovy.io.FileType.FILES
 
 class ScoveragePlugin implements Plugin<PluginAware> {
 
@@ -82,18 +86,19 @@ class ScoveragePlugin implements Plugin<PluginAware> {
 
         ScoverageRunner scoverageRunner = new ScoverageRunner(project.configurations.scoverage)
 
+        def originalSourceSet = project.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
         def instrumentedSourceSet = project.sourceSets.create('scoverage') {
-            def original = project.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
 
-            resources.source(original.resources)
-            scala.source(original.java)
-            scala.source(original.scala)
+            resources.source(originalSourceSet.resources)
+            scala.source(originalSourceSet.java)
+            scala.source(originalSourceSet.scala)
 
-            compileClasspath += original.compileClasspath + project.configurations.scoverage
-            runtimeClasspath = it.output + project.configurations.scoverage + original.runtimeClasspath
+            compileClasspath += originalSourceSet.compileClasspath + project.configurations.scoverage
+            runtimeClasspath = it.output + project.configurations.scoverage + originalSourceSet.runtimeClasspath
         }
 
         def compileTask = project.tasks[instrumentedSourceSet.getCompileTaskName("scala")]
+        compileTask.mustRunAfter(originalSourceSet.getCompileTaskName("scala"))
         project.test.mustRunAfter(compileTask)
 
         def scoverageJar = project.tasks.create('jarScoverage', Jar.class) {
@@ -127,7 +132,6 @@ class ScoveragePlugin implements Plugin<PluginAware> {
 
         project.gradle.taskGraph.whenReady { graph ->
             if (graph.hasTask(reportTask)) {
-
                 project.test.configure {
                     project.logger.debug("Adding instrumented classes to '${path}' classpath")
 
@@ -164,6 +168,10 @@ class ScoveragePlugin implements Plugin<PluginAware> {
             }
 
             compileTask.configure {
+                doFirst {
+                    destinationDir.deleteDir()
+                }
+
                 File pluginFile = project.configurations[CONFIGURATION_NAME].find {
                     it.name.startsWith("scalac-scoverage-plugin")
                 }
@@ -184,13 +192,49 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                 if (extension.highlighting.get()) {
                     parameters.add('-Yrangepos')
                 }
-                doFirst {
-                    GFileUtils.deleteDirectory(destinationDir)
-                }
                 scalaCompileOptions.additionalParameters = parameters
                 // the compile task creates a store of measured statements
                 outputs.file(new File(extension.dataDir.get(), 'scoverage.coverage.xml'))
+
+                doLast {
+                    def originalCompileTaskName = project.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
+                            .getCompileTaskName("scala")
+                    def originalDestinationDir = project.tasks[originalCompileTaskName].destinationDir
+
+                    def findFiles = { File dir, Closure<Boolean> condition = null ->
+                        def files = []
+
+                        if (dir.exists()) {
+                            dir.eachFileRecurse(FILES) { f ->
+                                if (condition == null || condition(f)) {
+                                    def relativePath = dir.relativePath(f)
+                                    files << relativePath
+                                }
+                            }
+                        }
+
+                        return files
+                    }
+
+                    def isSameFile = { String relativePath ->
+                        def fileA = new File(originalDestinationDir, relativePath)
+                        def fileB = new File(destinationDir, relativePath)
+                        return FileUtils.contentEquals(fileA, fileB)
+                    }
+
+                    def originalClasses = findFiles(originalDestinationDir)
+                    def identicalInstrumentedClasses = findFiles(destinationDir, { f ->
+                        def relativePath = destinationDir.relativePath(f)
+                        return originalClasses.contains(relativePath) && isSameFile(relativePath)
+                    })
+
+                    identicalInstrumentedClasses.each { f ->
+                        Files.deleteIfExists(destinationDir.toPath().resolve(f))
+                    }
+                }
             }
         }
     }
+
+
 }

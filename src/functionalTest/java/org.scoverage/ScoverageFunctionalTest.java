@@ -49,6 +49,16 @@ public abstract class ScoverageFunctionalTest {
         return new File("src/functionalTest/resources/projects/" + projectName);
     }
 
+    protected File buildDir() {
+
+        return buildDir(projectDir());
+    }
+
+    protected File buildDir(File projectDir) {
+
+        return projectDir.toPath().resolve("build").toFile();
+    }
+
     protected File reportDir() {
 
         return reportDir(projectDir());
@@ -56,7 +66,7 @@ public abstract class ScoverageFunctionalTest {
 
     protected File reportDir(File projectDir) {
 
-        return projectDir.toPath().resolve("build").resolve(ScoveragePlugin.getDEFAULT_REPORT_DIR()).toFile();
+        return buildDir(projectDir).toPath().resolve(ScoveragePlugin.getDEFAULT_REPORT_DIR()).toFile();
     }
 
     protected AssertableBuildResult run(String... arguments) {

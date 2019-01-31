@@ -27,3 +27,9 @@ test {
 checkScoverage {
     minimumRate = 0.5
 }
+
+if (hasProperty("excludedFile")) {
+    scoverage {
+        excludedFiles = [excludedFile]
+    }
+}
