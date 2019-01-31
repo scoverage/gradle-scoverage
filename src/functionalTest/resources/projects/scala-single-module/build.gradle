@@ -25,11 +25,13 @@ test {
 }
 
 checkScoverage {
-    minimumRate = 0.5
+    minimumRate = 0.3
 }
 
 if (hasProperty("excludedFile")) {
-    scoverage {
-        excludedFiles = [excludedFile]
-    }
+    scoverage.excludedFiles = [excludedFile]
 }
+if (hasProperty("runNormalCompilation")) {
+    scoverage.runNormalCompilation = Boolean.valueOf(runNormalCompilation)
+}
+

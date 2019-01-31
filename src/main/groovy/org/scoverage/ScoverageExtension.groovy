@@ -40,6 +40,8 @@ class ScoverageExtension {
 
     final Property<Boolean> deleteReportsOnAggregation
 
+    final Property<Boolean> runNormalCompilation
+
     ScoverageExtension(Project project) {
 
         project.plugins.apply(JavaPlugin.class)
@@ -83,5 +85,8 @@ class ScoverageExtension {
 
         deleteReportsOnAggregation = project.objects.property(Boolean)
         deleteReportsOnAggregation.set(false)
+
+        runNormalCompilation = project.objects.property(Boolean)
+        runNormalCompilation.set(true)
     }
 }

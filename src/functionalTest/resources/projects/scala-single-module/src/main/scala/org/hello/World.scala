@@ -6,4 +6,7 @@ class World {
     val s = "a" + "b"
     s
   }
+
+  // not covered by tests
+  def bar(): String = "y"
 }

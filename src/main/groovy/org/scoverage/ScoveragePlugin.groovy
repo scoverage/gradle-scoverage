@@ -6,7 +6,6 @@ import org.gradle.api.Project
 import org.gradle.api.invocation.Gradle
 import org.gradle.api.plugins.PluginAware
 import org.gradle.api.tasks.SourceSet
-import org.gradle.api.tasks.bundling.Jar
 
 import java.nio.file.Files
 
@@ -97,18 +96,12 @@ class ScoveragePlugin implements Plugin<PluginAware> {
             runtimeClasspath = it.output + project.configurations.scoverage + originalSourceSet.runtimeClasspath
         }
 
-        def compileTask = project.tasks[instrumentedSourceSet.getCompileTaskName("scala")]
-        compileTask.mustRunAfter(originalSourceSet.getCompileTaskName("scala"))
-        project.test.mustRunAfter(compileTask)
+        def originalCompileTask = project.tasks[originalSourceSet.getCompileTaskName("scala")]
+        originalCompileTask.onlyIf { extension.runNormalCompilation.get() }
 
-        def scoverageJar = project.tasks.create('jarScoverage', Jar.class) {
-            dependsOn(instrumentedSourceSet.classesTaskName)
-            classifier = CONFIGURATION_NAME
-            from instrumentedSourceSet.output
-        }
-        project.artifacts {
-            scoverage scoverageJar
-        }
+        def compileTask = project.tasks[instrumentedSourceSet.getCompileTaskName("scala")]
+        compileTask.mustRunAfter(originalCompileTask)
+        project.test.mustRunAfter(compileTask)
 
         def reportTask = project.tasks.create(REPORT_NAME, ScoverageReport.class) {
             dependsOn compileTask, project.test
@@ -146,6 +139,12 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                         })
                     }
                 }
+
+                if (!extension.runNormalCompilation.get()) {
+                    project.sourceSets.getByName(SourceSet.TEST_SOURCE_SET_NAME) {
+                        compileClasspath = instrumentedSourceSet.output + compileClasspath
+                    }
+                }
             }
         }
 
@@ -168,8 +167,12 @@ class ScoveragePlugin implements Plugin<PluginAware> {
             }
 
             compileTask.configure {
-                doFirst {
-                    destinationDir.deleteDir()
+                if (extension.runNormalCompilation.get()) {
+                    doFirst {
+                        destinationDir.deleteDir()
+                    }
+                } else {
+                    destinationDir = originalCompileTask.destinationDir
                 }
 
                 File pluginFile = project.configurations[CONFIGURATION_NAME].find {
@@ -196,40 +199,43 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                 // the compile task creates a store of measured statements
                 outputs.file(new File(extension.dataDir.get(), 'scoverage.coverage.xml'))
 
-                doLast {
-                    def originalCompileTaskName = project.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
-                            .getCompileTaskName("scala")
-                    def originalDestinationDir = project.tasks[originalCompileTaskName].destinationDir
+                if (extension.runNormalCompilation.get()) {
+                    // delete non-instrumented classes by comparing normally compiled classes to those compiled with scoverage
+                    doLast {
+                        def originalCompileTaskName = project.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
+                                .getCompileTaskName("scala")
+                        def originalDestinationDir = project.tasks[originalCompileTaskName].destinationDir
 
-                    def findFiles = { File dir, Closure<Boolean> condition = null ->
-                        def files = []
+                        def findFiles = { File dir, Closure<Boolean> condition = null ->
+                            def files = []
 
-                        if (dir.exists()) {
-                            dir.eachFileRecurse(FILES) { f ->
-                                if (condition == null || condition(f)) {
-                                    def relativePath = dir.relativePath(f)
-                                    files << relativePath
+                            if (dir.exists()) {
+                                dir.eachFileRecurse(FILES) { f ->
+                                    if (condition == null || condition(f)) {
+                                        def relativePath = dir.relativePath(f)
+                                        files << relativePath
+                                    }
                                 }
                             }
+
+                            return files
                         }
 
-                        return files
-                    }
+                        def isSameFile = { String relativePath ->
+                            def fileA = new File(originalDestinationDir, relativePath)
+                            def fileB = new File(destinationDir, relativePath)
+                            return FileUtils.contentEquals(fileA, fileB)
+                        }
 
-                    def isSameFile = { String relativePath ->
-                        def fileA = new File(originalDestinationDir, relativePath)
-                        def fileB = new File(destinationDir, relativePath)
-                        return FileUtils.contentEquals(fileA, fileB)
-                    }
+                        def originalClasses = findFiles(originalDestinationDir)
+                        def identicalInstrumentedClasses = findFiles(destinationDir, { f ->
+                            def relativePath = destinationDir.relativePath(f)
+                            return originalClasses.contains(relativePath) && isSameFile(relativePath)
+                        })
 
-                    def originalClasses = findFiles(originalDestinationDir)
-                    def identicalInstrumentedClasses = findFiles(destinationDir, { f ->
-                        def relativePath = destinationDir.relativePath(f)
-                        return originalClasses.contains(relativePath) && isSameFile(relativePath)
-                    })
-
-                    identicalInstrumentedClasses.each { f ->
-                        Files.deleteIfExists(destinationDir.toPath().resolve(f))
+                        identicalInstrumentedClasses.each { f ->
+                            Files.deleteIfExists(destinationDir.toPath().resolve(f))
+                        }
                     }
                 }
             }
