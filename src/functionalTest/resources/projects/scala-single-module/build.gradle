@@ -24,7 +24,7 @@ test {
     useJUnitPlatform()
 }
 
-checkScoverage {
+scoverage {
     minimumRate = 0.3
 }
 

@@ -42,6 +42,9 @@ class ScoverageExtension {
 
     final Property<Boolean> runNormalCompilation
 
+    final Property<CoverageType> coverageType
+    final Property<BigDecimal> minimumRate
+
     ScoverageExtension(Project project) {
 
         project.plugins.apply(JavaPlugin.class)
@@ -88,5 +91,11 @@ class ScoverageExtension {
 
         runNormalCompilation = project.objects.property(Boolean)
         runNormalCompilation.set(true)
+
+        coverageType = project.objects.property(CoverageType)
+        coverageType.set(CoverageType.Statement)
+
+        minimumRate = project.objects.property(BigDecimal)
+        minimumRate.set(0.75)
     }
 }

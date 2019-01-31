@@ -44,8 +44,8 @@ enum CoverageType {
 class OverallCheckTask extends DefaultTask {
 
     /** Type of coverage to check. Available options: Line, Statement and Branch */
-    CoverageType coverageType = CoverageType.Statement
-    double minimumRate = 0.75
+    final Property<CoverageType> coverageType = project.objects.property(CoverageType)
+    final Property<BigDecimal> minimumRate = project.objects.property(BigDecimal)
 
     final Property<File> reportDir = project.objects.property(File)
 
@@ -56,7 +56,7 @@ class OverallCheckTask extends DefaultTask {
     void requireLineCoverage() {
         NumberFormat nf = NumberFormat.getInstance(locale == null ? Locale.getDefault() : locale)
 
-        Exception failure = checkLineCoverage(nf, reportDir.get(), coverageType, minimumRate)
+        Exception failure = checkLineCoverage(nf, reportDir.get(), coverageType.get(), minimumRate.get().doubleValue())
 
         if (failure) throw failure
     }

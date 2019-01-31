@@ -120,6 +120,8 @@ class ScoveragePlugin implements Plugin<PluginAware> {
         project.tasks.create(CHECK_NAME, OverallCheckTask.class) {
             dependsOn(reportTask)
             group = 'verification'
+            coverageType = extension.coverageType
+            minimumRate = extension.minimumRate
             reportDir = extension.reportDir
         }
 
