@@ -6,7 +6,7 @@ repositories {
     jcenter()
 }
 
-description = 'a single-module Scala project that builds successfully with 100% coverage'
+description = 'a single-module Scala project that builds successfully with 50% coverage'
 
 apply plugin: 'java'
 apply plugin: 'scala'
