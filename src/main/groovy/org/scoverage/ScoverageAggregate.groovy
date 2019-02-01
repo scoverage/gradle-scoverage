@@ -31,7 +31,7 @@ class ScoverageAggregate extends DefaultTask {
             reportDir.get().deleteDir()
 
             if (coverage.nonEmpty()) {
-                ScoverageWriter.write(
+                new ScoverageWriter(project.logger).write(
                         rootDir,
                         reportDir.get(),
                         coverage.get(),

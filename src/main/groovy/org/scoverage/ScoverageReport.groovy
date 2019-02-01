@@ -50,7 +50,7 @@ class ScoverageReport extends DefaultTask {
                 Set<Object> measurements = IOUtils.invoked(measurementFiles)
                 coverage.apply(measurements)
 
-                ScoverageWriter.write(
+                new ScoverageWriter(project.logger).write(
                         sources.get(),
                         reportDir.get(),
                         coverage,
