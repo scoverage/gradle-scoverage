@@ -57,14 +57,24 @@ class ScoveragePlugin implements Plugin<PluginAware> {
 
             project.afterEvaluate {
                 def scoverageVersion = project.extensions.scoverage.scoverageVersion.get()
-                def scalaVersion = project.extensions.scoverage.scoverageScalaVersion.get()
+                def scalaVersion = null
 
                 def scalaLibrary = project.configurations.compile.dependencies.find {
                     it.group == "org.scala-lang" && it.name == "scala-library"
                 }
 
                 if (scalaLibrary != null) {
-                    scalaVersion = scalaLibrary.version.substring(0, scalaLibrary.version.lastIndexOf("."))
+                    scalaVersion = scalaLibrary.version
+                }
+
+                if (scalaVersion == null && project.pluginManager.hasPlugin("io.spring.dependency-management")) {
+                    scalaVersion = project.dependencyManagement.compile.managedVersions["org.scala-lang:scala-library"]
+                }
+
+                if (scalaVersion == null) {
+                    scalaVersion = project.extensions.scoverage.scoverageScalaVersion.get()
+                } else {
+                    scalaVersion = scalaVersion.substring(0, scalaVersion.lastIndexOf("."))
                 }
 
                 def fullScoverageVersion = "$scalaVersion:$scoverageVersion"
