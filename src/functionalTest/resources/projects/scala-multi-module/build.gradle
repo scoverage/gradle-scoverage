@@ -32,7 +32,3 @@ allprojects {
         minimumRate = 0.5
     }
 }
-
-scoverage {
-    minimumRate = 0.5
-}

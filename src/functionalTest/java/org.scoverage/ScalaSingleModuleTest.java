@@ -103,7 +103,7 @@ public class ScalaSingleModuleTest extends ScoverageFunctionalTest {
     public void reportScoverageWithoutNormalCompilation() throws Exception {
 
         AssertableBuildResult result = run("clean", ScoveragePlugin.getREPORT_NAME(),
-                "-PrunNormalCompilation=false");
+                "-x", "compileScala");
 
         result.assertTaskSkipped("compileScala");
         result.assertTaskSucceeded(ScoveragePlugin.getCOMPILE_NAME());
@@ -122,7 +122,7 @@ public class ScalaSingleModuleTest extends ScoverageFunctionalTest {
     public void reportScoverageWithoutNormalCompilationAndWithExcludedClasses() throws Exception {
 
         AssertableBuildResult result = run("clean", ScoveragePlugin.getREPORT_NAME(),
-                "-PrunNormalCompilation=false", "-PexcludedFile=.*");
+                "-PexcludedFile=.*", "-x", "compileScala");
 
         Assert.assertTrue(resolve(reportDir(), "index.html").exists());
         Assert.assertFalse(resolve(reportDir(), "src/main/scala/org/hello/World.scala.html").exists());

@@ -30,7 +30,7 @@ Available tasks
     In order to check coverage of aggregated reports one should use `gradle checkScoverage aggregateScoverage`.
     
 Configuration
----------------
+-------------
 
 The plugin exposes multiple options that can be configured by setting them in an `scoverage` block within the project's
 build script. These options are as follows:
@@ -58,9 +58,13 @@ required for the validation to pass (otherwise `checkScoverage` will fail the bu
 `checkScoverage` task. For more information on the different types, please refer to the documentation of the scalac
 plugin (https://github.com/scoverage/scalac-scoverage-plugin).
 
-* `runNormalCompilation = <boolean>` (default `true`): Determines whether both normal scalac compilation (`compileScala`) 
-and compilation with scoverage (`compileScoverageScala`) should be executed, or if only the scoverage compilation should.
-It may be helpful to turn this off so that only the scoverage instrumented classes -- which are not intended for release
--- will be created, thus reducing the build time.
+Run without normal compilation
+------------------------------
 
+By default, running any of the plugin tasks will compile the code both using "normal" compilation (`compileScala`)
+and using the scoverage scalac plugin (`compileScoverageScala`).
 
+In cases where you only wish to generate reports / validate coverage, but are not interested in publishing the code,
+it is possible to only compile the code with the scoverage scalac plugin, thus reducing build times significantly.
+In order to do so, simply add the arguments `-x compileScala` to the gradle execution.
+For example: `gradle reportScoverage -x compileScala`.

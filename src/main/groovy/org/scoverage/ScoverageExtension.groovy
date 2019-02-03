@@ -40,8 +40,6 @@ class ScoverageExtension {
 
     final Property<Boolean> deleteReportsOnAggregation
 
-    final Property<Boolean> runNormalCompilation
-
     final Property<CoverageType> coverageType
     final Property<BigDecimal> minimumRate
 
@@ -88,9 +86,6 @@ class ScoverageExtension {
 
         deleteReportsOnAggregation = project.objects.property(Boolean)
         deleteReportsOnAggregation.set(false)
-
-        runNormalCompilation = project.objects.property(Boolean)
-        runNormalCompilation.set(true)
 
         coverageType = project.objects.property(CoverageType)
         coverageType.set(CoverageType.Statement)

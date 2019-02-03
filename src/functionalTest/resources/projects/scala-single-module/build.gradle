@@ -31,7 +31,3 @@ scoverage {
 if (hasProperty("excludedFile")) {
     scoverage.excludedFiles = [excludedFile]
 }
-if (hasProperty("runNormalCompilation")) {
-    scoverage.runNormalCompilation = Boolean.valueOf(runNormalCompilation)
-}
-

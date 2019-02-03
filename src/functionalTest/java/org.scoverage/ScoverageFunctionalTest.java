@@ -193,7 +193,7 @@ public abstract class ScoverageFunctionalTest {
 
         private boolean taskExists(String taskName) {
 
-            Pattern regex = Pattern.compile("^" + fullTaskName(taskName), Pattern.MULTILINE);
+            Pattern regex = Pattern.compile("^(> Task )?" + fullTaskName(taskName), Pattern.MULTILINE);
             return regex.matcher(result.getOutput()).find();
         }
     }

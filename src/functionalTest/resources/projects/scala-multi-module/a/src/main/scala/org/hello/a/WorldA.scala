@@ -1,9 +1,11 @@
 package org.hello.a
 
+import org.hello.common.WorldCommon
+
 class WorldA {
 
   def fooA(): String = {
-    val s = "a" + "a"
+    val s = "a" + new WorldCommon().fooCommon()
     s
   }
 }

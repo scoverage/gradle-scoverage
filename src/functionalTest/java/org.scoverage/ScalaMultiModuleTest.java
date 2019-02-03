@@ -19,6 +19,7 @@ public class ScalaMultiModuleTest extends ScoverageFunctionalTest {
         result.assertTaskExists(ScoveragePlugin.getREPORT_NAME());
         result.assertTaskExists("a:" + ScoveragePlugin.getREPORT_NAME());
         result.assertTaskExists("b:" + ScoveragePlugin.getREPORT_NAME());
+        result.assertTaskExists("common:" + ScoveragePlugin.getREPORT_NAME());
     }
 
     @Test
@@ -29,6 +30,7 @@ public class ScalaMultiModuleTest extends ScoverageFunctionalTest {
         result.assertTaskExists(ScoveragePlugin.getREPORT_NAME());
         result.assertTaskDoesntExist("a:" + ScoveragePlugin.getREPORT_NAME());
         result.assertTaskDoesntExist("b:" + ScoveragePlugin.getREPORT_NAME());
+        result.assertTaskDoesntExist("common:" + ScoveragePlugin.getREPORT_NAME());
     }
 
     @Test
@@ -39,6 +41,7 @@ public class ScalaMultiModuleTest extends ScoverageFunctionalTest {
         result.assertTaskDoesntExist(ScoveragePlugin.getREPORT_NAME());
         result.assertTaskExists("a:" + ScoveragePlugin.getREPORT_NAME());
         result.assertTaskDoesntExist("b:" + ScoveragePlugin.getREPORT_NAME());
+        result.assertTaskDoesntExist("common:" + ScoveragePlugin.getREPORT_NAME());
     }
 
     @Test
@@ -50,6 +53,7 @@ public class ScalaMultiModuleTest extends ScoverageFunctionalTest {
         result.assertTaskExists("a:" + ScoveragePlugin.getREPORT_NAME());
         result.assertTaskExists("b:" + ScoveragePlugin.getREPORT_NAME());
         result.assertTaskExists(ScoveragePlugin.getAGGREGATE_NAME());
+        result.assertTaskExists("common:" + ScoveragePlugin.getREPORT_NAME());
     }
 
     @Test
@@ -60,9 +64,11 @@ public class ScalaMultiModuleTest extends ScoverageFunctionalTest {
         result.assertTaskExists(ScoveragePlugin.getREPORT_NAME());
         result.assertTaskExists("a:" + ScoveragePlugin.getREPORT_NAME());
         result.assertTaskExists("b:" + ScoveragePlugin.getREPORT_NAME());
+        result.assertTaskExists("common:" + ScoveragePlugin.getREPORT_NAME());
         result.assertTaskExists(ScoveragePlugin.getCHECK_NAME());
         result.assertTaskExists("a:" + ScoveragePlugin.getCHECK_NAME());
         result.assertTaskExists("b:" + ScoveragePlugin.getCHECK_NAME());
+        result.assertTaskExists("common:" + ScoveragePlugin.getCHECK_NAME());
         result.assertTaskDoesntExist(ScoveragePlugin.getAGGREGATE_NAME());
     }
 
@@ -88,9 +94,11 @@ public class ScalaMultiModuleTest extends ScoverageFunctionalTest {
         result.assertTaskDoesntExist(ScoveragePlugin.getREPORT_NAME());
         result.assertTaskExists("a:" + ScoveragePlugin.getREPORT_NAME());
         result.assertTaskDoesntExist("b:" + ScoveragePlugin.getREPORT_NAME());
+        result.assertTaskDoesntExist("common:" + ScoveragePlugin.getREPORT_NAME());
         result.assertTaskDoesntExist(ScoveragePlugin.getCHECK_NAME());
         result.assertTaskExists("a:" + ScoveragePlugin.getCHECK_NAME());
         result.assertTaskDoesntExist("b:" + ScoveragePlugin.getCHECK_NAME());
+        result.assertTaskDoesntExist("common:" + ScoveragePlugin.getCHECK_NAME());
         result.assertTaskDoesntExist(ScoveragePlugin.getAGGREGATE_NAME());
     }
 
@@ -103,9 +111,11 @@ public class ScalaMultiModuleTest extends ScoverageFunctionalTest {
         result.assertTaskSucceeded(ScoveragePlugin.getREPORT_NAME());
         result.assertTaskSucceeded("a:" + ScoveragePlugin.getREPORT_NAME());
         result.assertTaskSucceeded("b:" + ScoveragePlugin.getREPORT_NAME());
+        result.assertTaskSucceeded("common:" + ScoveragePlugin.getREPORT_NAME());
         result.assertTaskSucceeded(ScoveragePlugin.getCHECK_NAME());
         result.assertTaskSucceeded("a:" + ScoveragePlugin.getCHECK_NAME());
         result.assertTaskSucceeded("b:" + ScoveragePlugin.getCHECK_NAME());
+        result.assertTaskSucceeded("common:" + ScoveragePlugin.getCHECK_NAME());
         result.assertTaskSucceeded(ScoveragePlugin.getAGGREGATE_NAME());
 
         assertAllReportFilesExist();
@@ -119,7 +129,8 @@ public class ScalaMultiModuleTest extends ScoverageFunctionalTest {
                 "test",
                 "--tests", "org.hello.TestNothingSuite",
                 "--tests", "org.hello.a.WorldASuite",
-                "--tests", "org.hello.b.WorldBSuite");
+                "--tests", "org.hello.b.WorldBSuite",
+                "--tests", "org.hello.common.WorldCommonSuite");
 
         result.assertTaskFailed(ScoveragePlugin.getCHECK_NAME());
 
@@ -134,12 +145,28 @@ public class ScalaMultiModuleTest extends ScoverageFunctionalTest {
                 "test",
                 "--tests", "org.hello.a.TestNothingASuite",
                 "--tests", "org.hello.WorldSuite",
-                "--tests", "org.hello.b.WorldBSuite");
+                "--tests", "org.hello.b.WorldBSuite",
+                "--tests", "org.hello.common.WorldCommonSuite");
 
         result.assertTaskFailed("a:" + ScoveragePlugin.getCHECK_NAME());
 
         assertAReportFilesExist();
         assertCoverage(0.0, reportDir(projectDir().toPath().resolve("a").toFile()));
+    }
+
+    @Test
+    public void checkScoverageWithoutNormalCompilationAndWithoutCoverageInCommon() throws Exception {
+
+        AssertableBuildResult result = runAndFail("clean",
+                ":a:test",
+                ":common:test", "--tests", "org.hello.common.TestNothingCommonSuite",
+                "-x", "compileScala",
+                ScoveragePlugin.getCHECK_NAME());
+
+        result.assertTaskFailed("common:" + ScoveragePlugin.getCHECK_NAME());
+
+        assertCommonReportFilesExist();
+        assertCoverage(0.0, reportDir(projectDir().toPath().resolve("common").toFile()));
     }
 
     @Test
@@ -151,18 +178,21 @@ public class ScalaMultiModuleTest extends ScoverageFunctionalTest {
                 ScoveragePlugin.getAGGREGATE_NAME(), "test",
                 "--tests", "org.hello.TestNothingSuite",
                 "--tests", "org.hello.a.WorldASuite",
-                "--tests", "org.hello.b.WorldBSuite");
+                "--tests", "org.hello.b.WorldBSuite",
+                "--tests", "org.hello.common.WorldCommonSuite");
 
         result.assertTaskSucceeded(ScoveragePlugin.getREPORT_NAME());
         result.assertTaskSucceeded("a:" + ScoveragePlugin.getREPORT_NAME());
         result.assertTaskSucceeded("b:" + ScoveragePlugin.getREPORT_NAME());
+        result.assertTaskSucceeded("common:" + ScoveragePlugin.getREPORT_NAME());
         result.assertTaskSucceeded(ScoveragePlugin.getCHECK_NAME());
         result.assertTaskSucceeded("a:" + ScoveragePlugin.getCHECK_NAME());
         result.assertTaskSucceeded("b:" + ScoveragePlugin.getCHECK_NAME());
+        result.assertTaskSucceeded("common:" + ScoveragePlugin.getCHECK_NAME());
         result.assertTaskSucceeded(ScoveragePlugin.getAGGREGATE_NAME());
 
         assertAllReportFilesExist();
-        assertCoverage(66.6);
+        assertCoverage(87.5);
     }
 
     @Test
@@ -172,11 +202,13 @@ public class ScalaMultiModuleTest extends ScoverageFunctionalTest {
                 ScoveragePlugin.getAGGREGATE_NAME(), "test",
                 "--tests", "org.hello.TestNothingSuite",
                 "--tests", "org.hello.a.TestNothingASuite",
-                "--tests", "org.hello.b.TestNothingBSuite");
+                "--tests", "org.hello.b.TestNothingBSuite",
+                "--tests", "org.hello.common.TestNothingCommonSuite");
 
         result.assertTaskSucceeded(ScoveragePlugin.getREPORT_NAME());
         result.assertTaskSucceeded("a:" + ScoveragePlugin.getREPORT_NAME());
         result.assertTaskSucceeded("b:" + ScoveragePlugin.getREPORT_NAME());
+        result.assertTaskSucceeded("common:" + ScoveragePlugin.getREPORT_NAME());
         result.assertTaskSucceeded(ScoveragePlugin.getAGGREGATE_NAME());
         result.assertTaskFailed(ScoveragePlugin.getCHECK_NAME());
 
@@ -184,19 +216,53 @@ public class ScalaMultiModuleTest extends ScoverageFunctionalTest {
         assertCoverage(0.0);
     }
 
+    @Test
+    public void aggregateScoverageWithoutNormalCompilation() throws Exception {
+
+        AssertableBuildResult result = run("clean", ScoveragePlugin.getAGGREGATE_NAME(),
+                "-x", "compileScala");
+
+        result.assertTaskSkipped("compileScala");
+        result.assertTaskSkipped("a:compileScala");
+        result.assertTaskSkipped("b:compileScala");
+        result.assertTaskSkipped("common:compileScala");
+        result.assertTaskSucceeded(ScoveragePlugin.getCOMPILE_NAME());
+        result.assertTaskSucceeded("a:" + ScoveragePlugin.getCOMPILE_NAME());
+        result.assertTaskSucceeded("b:" + ScoveragePlugin.getCOMPILE_NAME());
+        result.assertTaskSucceeded("common:" + ScoveragePlugin.getCOMPILE_NAME());
+        result.assertTaskSucceeded(ScoveragePlugin.getREPORT_NAME());
+        result.assertTaskSucceeded("a:" + ScoveragePlugin.getREPORT_NAME());
+        result.assertTaskSucceeded("b:" + ScoveragePlugin.getREPORT_NAME());
+        result.assertTaskSucceeded("common:" + ScoveragePlugin.getREPORT_NAME());
+        result.assertTaskSucceeded(ScoveragePlugin.getAGGREGATE_NAME());
+
+        assertAllReportFilesExist();
+        assertCoverage(100.0);
+
+        Assert.assertTrue(resolve(buildDir(resolve(projectDir(), "a")), "classes/scala/main/org/hello/a/WorldA.class").exists());
+        Assert.assertFalse(resolve(buildDir(resolve(projectDir(), "a")), "classes/scala/scoverage/org/hello/a/WorldA.class").exists());
+
+        Assert.assertTrue(resolve(buildDir(resolve(projectDir(), "b")), "classes/scala/main/org/hello/b/WorldB.class").exists());
+        Assert.assertFalse(resolve(buildDir(resolve(projectDir(), "b")), "classes/scala/scoverage/org/hello/b/WorldB.class").exists());
+
+        Assert.assertTrue(resolve(buildDir(resolve(projectDir(), "common")), "classes/scala/main/org/hello/common/WorldCommon.class").exists());
+        Assert.assertFalse(resolve(buildDir(resolve(projectDir(), "common")), "classes/scala/scoverage/org/hello/common/WorldCommon.class").exists());
+    }
+
     private void assertAllReportFilesExist() {
 
         assertRootReportFilesExist();
         assertAReportFilesExist();
         assertBReportFilesExist();
+        assertCommonReportFilesExist();
         assertAggregationFilesExist();
     }
 
     private void assertAggregationFilesExist() {
 
-        assertRootReportFilesExist();
         Assert.assertTrue(resolve(reportDir(), "a/src/main/scala/org/hello/a/WorldA.scala.html").exists());
         Assert.assertTrue(resolve(reportDir(), "b/src/main/scala/org/hello/b/WorldB.scala.html").exists());
+        Assert.assertTrue(resolve(reportDir(), "common/src/main/scala/org/hello/common/WorldCommon.scala.html").exists());
     }
 
     private void assertRootReportFilesExist() {
@@ -207,16 +273,22 @@ public class ScalaMultiModuleTest extends ScoverageFunctionalTest {
 
     private void assertAReportFilesExist() {
 
-        File aReportDir = reportDir(projectDir().toPath().resolve("a").toFile());
-        Assert.assertTrue(resolve(aReportDir, "index.html").exists());
-        Assert.assertTrue(resolve(aReportDir, "src/main/scala/org/hello/a/WorldA.scala.html").exists());
+        File reportDir = reportDir(projectDir().toPath().resolve("a").toFile());
+        Assert.assertTrue(resolve(reportDir, "index.html").exists());
+        Assert.assertTrue(resolve(reportDir, "src/main/scala/org/hello/a/WorldA.scala.html").exists());
     }
 
     private void assertBReportFilesExist() {
 
-        File bReportDir = reportDir(projectDir().toPath().resolve("b").toFile());
-        Assert.assertTrue(resolve(bReportDir, "index.html").exists());
-        Assert.assertTrue(resolve(bReportDir, "src/main/scala/org/hello/b/WorldB.scala.html").exists());
+        File reportDir = reportDir(projectDir().toPath().resolve("b").toFile());
+        Assert.assertTrue(resolve(reportDir, "index.html").exists());
+        Assert.assertTrue(resolve(reportDir, "src/main/scala/org/hello/b/WorldB.scala.html").exists());
+    }
 
+    private void assertCommonReportFilesExist() {
+
+        File reportDir = reportDir(projectDir().toPath().resolve("common").toFile());
+        Assert.assertTrue(resolve(reportDir, "index.html").exists());
+        Assert.assertTrue(resolve(reportDir, "src/main/scala/org/hello/common/WorldCommon.scala.html").exists());
     }
 }
