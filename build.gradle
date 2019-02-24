@@ -26,6 +26,7 @@ gradlePlugin {
         gradleScoverage {
             id = 'org.scoverage'
             implementationClass = 'org.scoverage.ScoveragePlugin'
+            displayName = 'Gradle Scoverage plugin'
         }
     }
 }
@@ -35,11 +36,6 @@ pluginBundle {
     vcsUrl = ext.vcsUrl
     description = project.description
     tags = ['coverage', 'scala', 'scoverage']
-    plugins {
-        scoveragePlugin {
-            displayName = 'Gradle Scoverage plugin'
-        }
-    }
 }
 
 apply plugin: 'maven'
