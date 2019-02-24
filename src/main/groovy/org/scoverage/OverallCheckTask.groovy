@@ -1,5 +1,6 @@
 package org.scoverage
 
+import org.apache.tools.ant.taskdefs.Local
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.provider.Property
@@ -54,11 +55,12 @@ class OverallCheckTask extends DefaultTask {
     final Property<File> reportDir = project.objects.property(File)
 
     /** Overwrite to test for a specific locale. */
-    Locale locale
+    @Input
+    final Property<Locale> locale = project.objects.property(Locale).value(Locale.getDefault())
 
     @TaskAction
     void requireLineCoverage() {
-        NumberFormat nf = NumberFormat.getInstance(locale == null ? Locale.getDefault() : locale)
+        NumberFormat nf = NumberFormat.getInstance(locale.get())
 
         Exception failure = checkLineCoverage(nf, reportDir.get(), coverageType.get(), minimumRate.get().doubleValue())
 
