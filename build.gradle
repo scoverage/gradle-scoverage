@@ -10,8 +10,9 @@ repositories {
 
 group 'org.scoverage'
 description = 'gradle-scoverage is a Gradle plugin for calculating code coverage using Scoverage'
-version = '3.0.0-SNAPSHOT'
-
+if (project.version == 'unspecified') {
+    version = '3.0.0-SNAPSHOT'
+}
 ext {
     website = 'http://scoverage.org'
     vcsUrl = 'https://github.com/scoverage/gradle-scoverage.git'
