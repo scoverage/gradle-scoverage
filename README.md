@@ -101,13 +101,3 @@ checkScoverage {
      reportDir = file("$buildDir/scoverage-aggregate")
 }
 ```
-
-Release history
----------------
-
-##### (not released yet) - 3.0.0
-
-* Auto resolution of scalac plugin dependencies.
-* Aggregation task declared by default.
-* Deletion of non-instrumented classes, allowing for better integration with other coverage tools such as cobertura.
-* Ability to execute coverage without "normal" compilation, thus reducing build times.
