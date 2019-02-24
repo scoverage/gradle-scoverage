@@ -1,24 +1,16 @@
-// First, apply the publishing plugin
-buildscript {
-    repositories {
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-    }
-    dependencies {
-        classpath "com.gradle.publish:plugin-publish-plugin:0.9.10"
-    }
-}
-
-apply plugin: "com.gradle.plugin-publish"
-description = 'gradle-scoverage is a Gradle plugin for calculating code coverage using Scoverage'
-if (project.version == 'unspecified') {
-    version = '2.0.0-SNAPSHOT'
+plugins {
+    id 'java-gradle-plugin'
+    id "com.gradle.plugin-publish" version "0.10.0"
+    id "org.jetbrains.gradle.plugin.idea-ext" version "0.4.2"
 }
 
 repositories {
-    mavenCentral()
+    jcenter()
 }
+
+group 'org.scoverage'
+description = 'gradle-scoverage is a Gradle plugin for calculating code coverage using Scoverage'
+version = '2.0.0-SNAPSHOT'
 
 ext {
     website = 'http://scoverage.org'
@@ -28,24 +20,61 @@ ext {
     sonatypePass = System.env.SONATYPE_PASS
 }
 
-apply plugin: 'idea'
+gradlePlugin {
+    plugins {
+        gradleScoverage {
+            id = 'org.scoverage'
+            implementationClass = 'org.scoverage.ScoveragePlugin'
+        }
+    }
+}
+
+pluginBundle {
+    website = project.website
+    vcsUrl = ext.vcsUrl
+    description = project.description
+    tags = ['coverage', 'scala', 'scoverage']
+    plugins {
+        scoveragePlugin {
+            displayName = 'Gradle Scoverage plugin'
+        }
+    }
+}
+
 apply plugin: 'maven'
 apply plugin: 'groovy'
 
-group 'org.scoverage'
 sourceCompatibility = '1.6'
 targetCompatibility = '1.6'
 
-configurations {
-    scoverage
-    compile.extendsFrom scoverage
+dependencies {
+    compileOnly "org.scoverage:scalac-scoverage-plugin_2.12:1.3.1"
+    compile group: 'commons-io', name: 'commons-io', version: '2.6'
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.hamcrest:hamcrest-library:1.3'
 }
 
-dependencies {
-    compile gradleApi()
-    compile localGroovy()
-    scoverage "org.scoverage:scalac-scoverage-plugin_2.11:1.1.1"
-    testCompile 'junit:junit:4.12', 'org.hamcrest:hamcrest-library:1.3'
+sourceSets {
+    functionalTest {
+        java.srcDir file('src/functionalTest/java')
+        resources.srcDir file('src/functionalTest/resources')
+        compileClasspath += sourceSets.main.output + configurations.testRuntime
+        runtimeClasspath += output + compileClasspath
+    }
+}
+
+task functionalTest(type: Test) {
+    description = 'Runs the functional tests.'
+    group = 'verification'
+    testClassesDirs = sourceSets.functionalTest.output.classesDirs
+    classpath = sourceSets.functionalTest.runtimeClasspath
+    mustRunAfter test
+}
+
+check.dependsOn functionalTest
+
+gradlePlugin {
+    testSourceSets sourceSets.functionalTest
 }
 
 task groovydocJar(type: Jar, dependsOn: groovydoc) {
@@ -56,10 +85,6 @@ task groovydocJar(type: Jar, dependsOn: groovydoc) {
 task sourcesJar(type: Jar) {
     from sourceSets.main.allSource
     classifier = 'sources'
-}
-
-test {
-    dependsOn jar
 }
 
 artifacts {
@@ -75,25 +100,11 @@ if (project.properties.containsKey('signing.keyId')) {
     }
 }
 
-pluginBundle {
-    website = project.website
-    vcsUrl = project.vcsUrl
-    description = project.description
-    tags = ['coverage', 'scala', 'scoverage']
-    withDependencies { it.clear() }
-    plugins {
-        scoveragePlugin {
-            id = 'org.scoverage'
-            displayName = 'Gradle Scoverage plugin'
-        }
-    }
-}
-
 uploadArchives {
     repositories {
         mavenDeployer {
             if (project.properties.containsKey('signing.keyId')) {
-              beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
             }
 
             snapshotRepository(url: 'https://oss.sonatype.org/content/repositories/snapshots') {
@@ -132,8 +143,30 @@ uploadArchives {
                     developer {
                         id 'D-Roch'
                     }
+                    developer {
+                        id 'eyalroth'
+                    }
                 }
             }
         }
+    }
+}
+
+// see https://stackoverflow.com/questions/44679007
+task fixIdeaPluginClasspath {
+    doFirst {
+        configure(tasks.pluginUnderTestMetadata) {
+            def ideaClassesPath = project.buildDir.toPath().resolveSibling("out").resolve("production")
+            def newClasspath = pluginClasspath as List
+            newClasspath.add(0, ideaClassesPath)
+            pluginClasspath.setFrom(newClasspath)
+        }
+    }
+}
+pluginUnderTestMetadata.mustRunAfter(fixIdeaPluginClasspath)
+
+idea.project.settings {
+    taskTriggers {
+        beforeBuild fixIdeaPluginClasspath, pluginUnderTestMetadata
     }
 }

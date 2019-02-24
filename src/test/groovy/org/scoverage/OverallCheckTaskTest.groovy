@@ -4,8 +4,11 @@ import org.gradle.api.GradleException
 import org.hamcrest.Description
 import org.hamcrest.Matcher
 import org.hamcrest.TypeSafeMatcher
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TemporaryFolder
 
+import java.nio.file.Paths
 import java.text.NumberFormat
 
 import static org.junit.Assert.assertNull
@@ -43,7 +46,10 @@ class OverallCheckTaskTest {
 
     private NumberFormat numberFormat = NumberFormat.getInstance(Locale.US)
 
-    private static File reportDir = new File('src/test/resources')
+    private File reportDir = Paths.get(getClass().getClassLoader().getResource("checkTask").toURI()).toFile()
+
+    @Rule
+    public TemporaryFolder tempDir = new TemporaryFolder()
 
     private static Matcher<Throwable> failsWith(String message) {
         return new CauseMatcher(
@@ -57,7 +63,7 @@ class OverallCheckTaskTest {
     @Test
     void failsWhenReportFileIsNotFound() {
         assertThat(
-                checkLineCoverage(numberFormat, new File('src/test/nothingthere'), CoverageType.Line, 0.0),
+                checkLineCoverage(numberFormat, tempDir.getRoot(), CoverageType.Line, 0.0),
                 failsWith(OverallCheckTask.fileNotFoundErrorMsg(CoverageType.Line)))
     }
 
@@ -117,5 +123,4 @@ class OverallCheckTaskTest {
     void doesNotFailWhenBranchRateIsAboveTarget() {
         assertNull(checkLineCoverage(numberFormat, reportDir, CoverageType.Branch, 0.45))
     }
-
 }

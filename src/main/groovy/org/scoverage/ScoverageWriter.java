@@ -1,5 +1,6 @@
 package org.scoverage;
 
+import org.gradle.api.logging.Logger;
 import scoverage.Constants;
 import scoverage.Coverage;
 import scoverage.report.CoberturaXmlWriter;
@@ -15,6 +16,13 @@ import java.io.File;
  */
 public class ScoverageWriter {
 
+    private final Logger logger;
+
+    public ScoverageWriter(Logger logger) {
+
+        this.logger = logger;
+    }
+
     /**
      * Generates all reports from given data.
      *
@@ -26,7 +34,7 @@ public class ScoverageWriter {
      * @param coverageOutputHTML      switch for Scoverage HTML output
      * @param coverageDebug           switch for Scoverage Debug output
      */
-    public static void write(File sourceDir,
+    public void write(File sourceDir,
                              File reportDir,
                              Coverage coverage,
                              Boolean coverageOutputCobertura,
@@ -34,13 +42,13 @@ public class ScoverageWriter {
                              Boolean coverageOutputHTML,
                              Boolean coverageDebug) {
 
-        System.out.println("[scoverage] Generating scoverage reports...");
+        logger.info("[scoverage] Generating scoverage reports...");
 
         reportDir.mkdirs();
 
         if (coverageOutputCobertura) {
             new CoberturaXmlWriter(sourceDir, reportDir).write(coverage);
-            System.out.println("[scoverage] Written Cobertura XML report to " +
+            logger.info("[scoverage] Written Cobertura XML report to " +
                 reportDir.getAbsolutePath() +
                 File.separator +
                 "cobertura.xml");
@@ -48,13 +56,13 @@ public class ScoverageWriter {
 
         if (coverageOutputXML) {
             new ScoverageXmlWriter(sourceDir, reportDir, /* debug = */ false).write(coverage);
-            System.out.println("[scoverage] Written XML report to " +
+            logger.info("[scoverage] Written XML report to " +
                 reportDir.getAbsolutePath() +
                 File.separator +
                 Constants.XMLReportFilename());
             if (coverageDebug) {
                 new ScoverageXmlWriter(sourceDir, reportDir, /* debug = */ true).write(coverage);
-                System.out.println("[scoverage] Written XML report with debug information to " +
+                logger.info("[scoverage] Written XML report with debug information to " +
                     reportDir.getAbsolutePath() +
                     File.separator +
                     Constants.XMLReportFilenameWithDebug());
@@ -63,12 +71,12 @@ public class ScoverageWriter {
 
         if (coverageOutputHTML) {
             new ScoverageHtmlWriter(sourceDir, reportDir).write(coverage);
-            System.out.println("[scoverage] Written HTML report to " +
+            logger.info("[scoverage] Written HTML report to " +
                 reportDir.getAbsolutePath() +
                 File.separator +
                 "index.html");
         }
 
-        System.out.println("[scoverage] Coverage reports completed");
+        logger.info("[scoverage] Coverage reports completed");
     }
 }

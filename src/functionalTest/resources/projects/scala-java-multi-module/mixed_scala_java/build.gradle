@@ -1,0 +1,19 @@
+apply plugin: 'java'
+apply plugin: 'scala'
+apply plugin: 'org.scoverage'
+
+dependencies {
+    compile group: 'org.scala-lang', name: 'scala-library', version: "${scalaVersionMajor}.${scalaVersionMinor}.${scalaVersionBuild}"
+
+    testRuntime group: 'org.junit.vintage', name: 'junit-vintage-engine', version: junitVersion
+
+    testCompile group: 'org.scalatest', name: "scalatest_${scalaVersionMajor}.${scalaVersionMinor}", version: scalatestVersion
+}
+
+// A common practice in mixed java/scala modules to make Java code able to import Scala code
+ext.configureSources = { set, name ->
+    set.scala.srcDir("src/$name/java")
+    set.java.srcDirs = []
+}
+configureSources(sourceSets.main, 'main')
+configureSources(sourceSets.test, 'test')

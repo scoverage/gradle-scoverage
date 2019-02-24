@@ -1,18 +1,10 @@
 package org.scoverage
 
-import org.gradle.api.Action
-import org.gradle.api.GradleException
 import org.gradle.api.Project
-import org.gradle.api.artifacts.Configuration
-import org.gradle.api.file.FileCollection
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.scala.ScalaPlugin
-import org.gradle.api.tasks.SourceSet
-import org.gradle.api.tasks.bundling.Jar
-import org.gradle.api.tasks.testing.Test
-import org.gradle.util.GFileUtils
-
-import java.util.concurrent.Callable
+import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Property
 
 /**
  * Defines a new SourceSet for the code to be instrumented.
@@ -21,142 +13,84 @@ import java.util.concurrent.Callable
  */
 class ScoverageExtension {
 
-    /** a directory to write working files to */
-    File dataDir
-    /** a directory to write final output to */
-    File reportDir
-    /** sources to highlight */
-    File sources
-    /** range positioning for highlighting */
-    boolean highlighting = true
-    /** regex for each excluded package */
-    List<String> excludedPackages = []
-    /** regex for each excluded file */
-    List<String> excludedFiles = []
+    /** Version of scoverage to use for the scalac plugin */
+    final Property<String> scoverageVersion
 
-    FileCollection pluginClasspath
+    /** Version of scala to use for the scalac plugin */
+    final Property<String> scoverageScalaVersion
+
+    /** a directory to write working files to */
+    final Property<File> dataDir
+    /** a directory to write final output to */
+    final Property<File> reportDir
+    /** sources to highlight */
+    final Property<File> sources
+    /** range positioning for highlighting */
+    final Property<Boolean> highlighting
+    /** regex for each excluded package */
+    final ListProperty<String> excludedPackages
+    /** regex for each excluded file */
+    final ListProperty<String> excludedFiles
 
     /** Options for enabling and disabling output */
-    boolean coverageOutputCobertura = true
-    boolean coverageOutputXML = true
-    boolean coverageOutputHTML = true
-    boolean coverageDebug = false
+    final Property<Boolean> coverageOutputCobertura
+    final Property<Boolean> coverageOutputXML
+    final Property<Boolean> coverageOutputHTML
+    final Property<Boolean> coverageDebug
+
+    final Property<Boolean> deleteReportsOnAggregation
+
+    final Property<CoverageType> coverageType
+    final Property<BigDecimal> minimumRate
 
     ScoverageExtension(Project project) {
 
         project.plugins.apply(JavaPlugin.class)
         project.plugins.apply(ScalaPlugin.class)
-        project.afterEvaluate(configureRuntimeOptions)
 
-        project.configurations.create(ScoveragePlugin.CONFIGURATION_NAME) {
-            visible = false
-            transitive = true
-            description = 'Scoverage dependencies'
-        }
+        scoverageVersion = project.objects.property(String)
+        scoverageVersion.set('1.3.1')
 
-        def instrumentedSourceSet = project.sourceSets.create('scoverage') {
-            def original = project.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
+        scoverageScalaVersion = project.objects.property(String)
+        scoverageScalaVersion.set('2.12')
 
-            resources.source(original.resources)
-            scala.source(original.java)
-            scala.source(original.scala)
+        sources = project.objects.property(File)
+        sources.set(project.projectDir)
 
-            compileClasspath += original.compileClasspath + project.configurations.scoverage
-            runtimeClasspath = it.output + project.configurations.scoverage + original.runtimeClasspath
-        }
+        dataDir = project.objects.property(File)
+        dataDir.set(new File(project.buildDir, 'scoverage'))
 
-        def scoverageJar = project.tasks.create('jarScoverage', Jar.class) {
-            dependsOn('scoverageClasses')
-            classifier = ScoveragePlugin.CONFIGURATION_NAME
-            from instrumentedSourceSet.output
-        }
-        project.artifacts {
-            scoverage scoverageJar
-        }
+        reportDir = project.objects.property(File)
+        reportDir.set(new File(project.buildDir, ScoveragePlugin.DEFAULT_REPORT_DIR))
 
-        project.tasks.create(ScoveragePlugin.TEST_NAME, Test.class) {
-            conventionMapping.map("classpath", new Callable<Object>() {
-                Object call() throws Exception {
-                    def testSourceSet = project.sourceSets.getByName(SourceSet.TEST_SOURCE_SET_NAME)
-                    return testSourceSet.output +
-                            instrumentedSourceSet.output +
-                            project.configurations.scoverage +
-                            testSourceSet.runtimeClasspath
-                }
-            })
-            group = 'verification'
-        }
+        highlighting = project.objects.property(Boolean)
+        highlighting.set(true)
 
-        project.tasks.create(ScoveragePlugin.REPORT_NAME, ScoverageReport.class) {
-            dependsOn(project.tasks[ScoveragePlugin.TEST_NAME])
-            onlyIf { ScoveragePlugin.extensionIn(project).dataDir.list() }
-            group = 'verification'
-        }
+        excludedPackages = project.objects.listProperty(String)
+        excludedPackages.set([])
 
-        project.tasks.create(ScoveragePlugin.CHECK_NAME, OverallCheckTask.class) {
-            dependsOn(project.tasks[ScoveragePlugin.REPORT_NAME])
-            group = 'verification'
-        }
+        excludedFiles = project.objects.listProperty(String)
+        excludedFiles.set([])
 
-        sources = project.projectDir
-        dataDir = new File(project.buildDir, 'scoverage')
-        reportDir = new File(project.buildDir, 'reports' + File.separatorChar + 'scoverage')
-        def classLocation = ScoverageExtension.class.getProtectionDomain().getCodeSource().getLocation()
-        pluginClasspath = project.files(classLocation.file) + project.configurations.scoverage
-    }
+        coverageOutputCobertura = project.objects.property(Boolean)
+        coverageOutputCobertura.set(true)
 
-    private Action<Project> configureRuntimeOptions = new Action<Project>() {
+        coverageOutputXML = project.objects.property(Boolean)
+        coverageOutputXML.set(true)
 
-        @Override
-        void execute(Project t) {
+        coverageOutputHTML = project.objects.property(Boolean)
+        coverageOutputHTML.set(true)
 
-            def extension = ScoveragePlugin.extensionIn(t)
-            extension.dataDir.mkdirs()
+        coverageDebug = project.objects.property(Boolean)
+        coverageDebug.set(false)
 
-            Configuration configuration = t.configurations[ScoveragePlugin.CONFIGURATION_NAME]
-            File pluginFile
-            try {
-                pluginFile = configuration.filter { it.name.contains('plugin') }.iterator().next()
-            } catch(NoSuchElementException ignored) {
-                throw new GradleException("Could not find a plugin jar in configuration '${ScoveragePlugin.CONFIGURATION_NAME}'")
-            }
+        deleteReportsOnAggregation = project.objects.property(Boolean)
+        deleteReportsOnAggregation.set(false)
 
-            t.tasks[ScoveragePlugin.COMPILE_NAME].configure {
-                List<String> parameters = ['-Xplugin:' + pluginFile.absolutePath]
-                List<String> existingParameters = scalaCompileOptions.additionalParameters
-                if (existingParameters) {
-                    parameters.addAll(existingParameters)
-                }
-                parameters.add("-P:scoverage:dataDir:${extension.dataDir.absolutePath}".toString())
-                if (extension.excludedPackages) {
-                    parameters.add("-P:scoverage:excludedPackages:${extension.excludedPackages.join(';')}".toString())
-                }
-                if (extension.excludedFiles) {
-                    parameters.add("-P:scoverage:excludedFiles:${extension.excludedFiles.join(';')}".toString())
-                }
-                if (extension.highlighting) {
-                    parameters.add('-Yrangepos')
-                }
-                doFirst {
-                    GFileUtils.deleteDirectory(destinationDir)
-                }
-                scalaCompileOptions.additionalParameters = parameters
-                // the compile task creates a store of measured statements
-                outputs.file(new File(extension.dataDir, 'scoverage.coverage.xml'))
-            }
-            t.tasks[ScoveragePlugin.TEST_NAME].outputs.upToDateWhen { extension.dataDir.listFiles(measurementFile) }
-            t.tasks[ScoveragePlugin.REPORT_NAME].configure {
-                inputs.dir(extension.dataDir)
-                outputs.dir(extension.reportDir)
-            }
-        }
+        coverageType = project.objects.property(CoverageType)
+        coverageType.set(CoverageType.Statement)
 
-        FilenameFilter measurementFile = new FilenameFilter() {
-            @Override
-            boolean accept(File dir, String name) {
-                return name.startsWith("scoverage.measurements.")
-            }
-        }
-
+        minimumRate = project.objects.property(BigDecimal)
+        minimumRate.set(0.75)
     }
 }

@@ -1,0 +1,6 @@
+apply plugin: 'java'
+
+dependencies {
+
+    testRuntime group: 'org.junit.vintage', name: 'junit-vintage-engine', version: junitVersion
+}

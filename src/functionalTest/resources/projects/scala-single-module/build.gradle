@@ -1,0 +1,33 @@
+plugins {
+    id 'org.scoverage'
+}
+
+repositories {
+    jcenter()
+}
+
+description = 'a single-module Scala project that builds successfully with 50% coverage'
+
+apply plugin: 'java'
+apply plugin: 'scala'
+
+dependencies {
+    compile group: 'org.scala-lang', name: 'scala-library', version: "${scalaVersionMajor}.${scalaVersionMinor}.${scalaVersionBuild}"
+
+    testRuntime group: 'org.junit.vintage', name: 'junit-vintage-engine', version: junitVersion
+    testCompile group: 'org.junit.platform', name: 'junit-platform-runner', version: junitPlatformVersion
+
+    testCompile group: 'org.scalatest', name: "scalatest_${scalaVersionMajor}.${scalaVersionMinor}", version: scalatestVersion
+}
+
+test {
+    useJUnitPlatform()
+}
+
+scoverage {
+    minimumRate = 0.3
+}
+
+if (hasProperty("excludedFile")) {
+    scoverage.excludedFiles = [excludedFile]
+}

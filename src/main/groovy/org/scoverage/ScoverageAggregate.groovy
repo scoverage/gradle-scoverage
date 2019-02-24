@@ -1,32 +1,46 @@
 package org.scoverage
 
-import org.gradle.api.tasks.JavaExec
+import org.gradle.api.DefaultTask
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.TaskAction
+import scoverage.report.CoverageAggregator
 
-class ScoverageAggregate extends JavaExec {
+class ScoverageAggregate extends DefaultTask {
 
-    boolean clean = false
-    File reportDir
+    ScoverageRunner runner
 
-    @Override
-    void exec() {
-        def extension = ScoveragePlugin.extensionIn(project)
-        setClasspath(ScoveragePlugin.extensionIn(project).pluginClasspath)
-        setMain('org.scoverage.AggregateReportApp')
-        def reportPath = reportDirOrDefault()
-        setArgs([
-            project.projectDir,
-            reportPath.absolutePath,
-            clean,
-            // TODO - consider separate options for `report` and `aggregate` tasks
-            extension.coverageOutputCobertura,
-            extension.coverageOutputXML,
-            extension.coverageOutputHTML,
-            extension.coverageDebug
-        ])
-        super.exec()
-    }
+    @OutputDirectory
+    final Property<File> reportDir = project.objects.property(File)
 
-    def reportDirOrDefault() {
-        return reportDir ? reportDir : new File(project.buildDir, 'scoverage-aggregate')
+    final Property<Boolean> deleteReportsOnAggregation = project.objects.property(Boolean)
+
+    // TODO - consider separate options for `report` and `aggregate` tasks
+    final Property<Boolean> coverageOutputCobertura = project.objects.property(Boolean)
+    final Property<Boolean> coverageOutputXML = project.objects.property(Boolean)
+    final Property<Boolean> coverageOutputHTML = project.objects.property(Boolean)
+    final Property<Boolean> coverageDebug = project.objects.property(Boolean)
+
+    @TaskAction
+    def aggregate() {
+        runner.run {
+            def rootDir = project.projectDir
+
+            def coverage = CoverageAggregator.aggregate(rootDir, deleteReportsOnAggregation.get())
+
+            reportDir.get().deleteDir()
+
+            if (coverage.nonEmpty()) {
+                new ScoverageWriter(project.logger).write(
+                        rootDir,
+                        reportDir.get(),
+                        coverage.get(),
+                        coverageOutputCobertura.get(),
+                        coverageOutputXML.get(),
+                        coverageOutputHTML.get(),
+                        coverageDebug.get()
+                )
+            }
+        }
     }
 }

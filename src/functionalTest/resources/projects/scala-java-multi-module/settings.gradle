@@ -1,0 +1,1 @@
+include 'java_only', 'scala_only', 'mixed_scala_java'

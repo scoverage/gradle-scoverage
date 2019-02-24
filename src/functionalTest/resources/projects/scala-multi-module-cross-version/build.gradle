@@ -1,0 +1,36 @@
+plugins {
+    id 'org.scoverage'
+}
+
+allprojects {
+    repositories {
+        jcenter()
+    }
+}
+
+description = 'a multi-module Scala project with multiple Scala versions that builds successfully with 100% coverage'
+
+allprojects {
+
+    apply plugin: 'java'
+    apply plugin: 'scala'
+
+    dependencies {
+        testRuntime group: 'org.junit.vintage', name: 'junit-vintage-engine', version: junitVersion
+        testCompile group: 'org.junit.platform', name: 'junit-platform-runner', version: junitPlatformVersion
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+
+    scoverage {
+        minimumRate = 0.5
+    }
+}
+
+scoverage {
+    minimumRate = 0.5
+}
+
+project(":2_11").tasks.reportScoverage.mustRunAfter(project(":2_12").tasks.reportScoverage)
