@@ -26,9 +26,13 @@ class ScoverageReport extends DefaultTask {
     @OutputDirectory
     final Property<File> reportDir = project.objects.property(File)
 
+    @Input
     final Property<Boolean> coverageOutputCobertura = project.objects.property(Boolean)
+    @Input
     final Property<Boolean> coverageOutputXML = project.objects.property(Boolean)
+    @Input
     final Property<Boolean> coverageOutputHTML = project.objects.property(Boolean)
+    @Input
     final Property<Boolean> coverageDebug = project.objects.property(Boolean)
 
     @TaskAction

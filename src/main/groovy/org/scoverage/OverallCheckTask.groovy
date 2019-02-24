@@ -4,6 +4,7 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
 import org.gradle.internal.impldep.com.google.common.annotations.VisibleForTesting
 
@@ -44,9 +45,12 @@ enum CoverageType {
 class OverallCheckTask extends DefaultTask {
 
     /** Type of coverage to check. Available options: Line, Statement and Branch */
+    @Input
     final Property<CoverageType> coverageType = project.objects.property(CoverageType)
+    @Input
     final Property<BigDecimal> minimumRate = project.objects.property(BigDecimal)
 
+    @Input
     final Property<File> reportDir = project.objects.property(File)
 
     /** Overwrite to test for a specific locale. */
