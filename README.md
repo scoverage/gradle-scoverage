@@ -23,7 +23,7 @@ You can find instructions on how to apply the plugin at:  http://plugins.gradle.
 
     One can still use `reportScoverage` in order to generate a report without aggregation.
 
-3. `checkScoverage`: Validates coverage according status according the generated reports (aggregated or not).
+3. `checkScoverage`: Validates coverage status according to generated reports (aggregated or not).
 
     `gradle checkScoverage` will automatically invoke `reportScoverage` but it won't generate aggregated reports.
     In order to check coverage of aggregated reports one should use `gradle checkScoverage aggregateScoverage`.
@@ -32,8 +32,6 @@ You can find instructions on how to apply the plugin at:  http://plugins.gradle.
 
 The plugin exposes multiple options that can be configured by setting them in an `scoverage` block within the project's
 build script. These options are as follows:
-
-You can configure the version of Scoverage that will be used. This plugin should 
 
 * `scoverageVersion = <String>` (default `"1.3.1"`): The version of the scoverage scalac plugin. This (gradle) plugin
 should be compatible with all 1+ versions.
