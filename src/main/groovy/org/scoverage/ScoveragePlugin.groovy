@@ -10,6 +10,7 @@ import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.scala.ScalaCompile
 
 import java.nio.file.Files
+import java.util.concurrent.ConcurrentHashMap
 
 import static groovy.io.FileType.FILES
 
@@ -22,6 +23,9 @@ class ScoveragePlugin implements Plugin<PluginAware> {
     static final String AGGREGATE_NAME = 'aggregateScoverage'
 
     static final String DEFAULT_REPORT_DIR = 'reports' + File.separatorChar + 'scoverage'
+
+    private volatile File pluginFile = null
+    private ConcurrentHashMap<Task, Set<? extends Task>> taskDependencies = new ConcurrentHashMap<>();
 
     @Override
     void apply(PluginAware pluginAware) {
@@ -174,9 +178,12 @@ class ScoveragePlugin implements Plugin<PluginAware> {
             }
 
             compileTask.configure {
-                File pluginFile = project.configurations[CONFIGURATION_NAME].find {
-                    it.name.startsWith("scalac-scoverage-plugin")
+                if (pluginFile == null) {
+                    pluginFile = project.configurations[CONFIGURATION_NAME].find {
+                        it.name.startsWith("scalac-scoverage-plugin")
+                    }
                 }
+
                 List<String> parameters = ['-Xplugin:' + pluginFile.absolutePath]
                 List<String> existingParameters = scalaCompileOptions.additionalParameters
                 if (existingParameters) {
@@ -269,9 +276,15 @@ class ScoveragePlugin implements Plugin<PluginAware> {
     }
 
     private Set<? extends Task> recursiveDependenciesOf(Task task) {
+        if (!taskDependencies.containsKey(task)) {
+            def directDependencies = task.getTaskDependencies().getDependencies(task)
+            def nestedDependencies = directDependencies.collect {recursiveDependenciesOf(it) }.flatten()
+            def dependencies = directDependencies + nestedDependencies
 
-        def directDependencies = task.getTaskDependencies().getDependencies(task)
-        def nestedDependencies = directDependencies.collect {recursiveDependenciesOf(it) }.flatten()
-        return directDependencies + nestedDependencies
+            taskDependencies.put(task, dependencies)
+            return dependencies
+        } else {
+            return taskDependencies.get(task)
+        }
     }
 }
