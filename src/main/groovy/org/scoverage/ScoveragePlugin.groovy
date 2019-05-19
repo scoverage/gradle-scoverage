@@ -8,6 +8,7 @@ import org.gradle.api.invocation.Gradle
 import org.gradle.api.plugins.PluginAware
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.scala.ScalaCompile
+import org.gradle.api.tasks.testing.Test
 
 import java.nio.file.Files
 
@@ -112,39 +113,66 @@ class ScoveragePlugin implements Plugin<PluginAware> {
 
         def compileTask = project.tasks[instrumentedSourceSet.getCompileTaskName("scala")]
         compileTask.mustRunAfter(originalCompileTask)
-        project.test.mustRunAfter(compileTask)
         originalJarTask.mustRunAfter(compileTask)
 
-        def reportTask = project.tasks.create(REPORT_NAME, ScoverageReport.class) {
-            dependsOn compileTask, project.test
-            onlyIf { extension.dataDir.get().list() }
-            group = 'verification'
-            runner = scoverageRunner
-            reportDir = extension.reportDir
-            sources = extension.sources
-            dataDir = extension.dataDir
-            coverageOutputCobertura = extension.coverageOutputCobertura
-            coverageOutputXML = extension.coverageOutputXML
-            coverageOutputHTML = extension.coverageOutputHTML
-            coverageDebug = extension.coverageDebug
-        }
-
-        project.tasks.create(CHECK_NAME, OverallCheckTask.class) {
-            dependsOn(reportTask)
-            onlyIf { extension.reportDir.get().list() }
-            group = 'verification'
-            coverageType = extension.coverageType
-            minimumRate = extension.minimumRate
-            reportDir = extension.reportDir
-        }
+        def globalReportTask = project.tasks.register(REPORT_NAME, ScoverageAggregate)
+        def globalCheckTask = project.tasks.register(CHECK_NAME, OverallCheckTask)
 
         project.afterEvaluate {
+            List<ScoverageReport> reportTasks = project.tasks.withType(Test).collect { testTask ->
+                testTask.mustRunAfter(compileTask)
+
+                def reportTaskName = "report${testTask.name.capitalize()}Scoverage"
+                def taskReportDir = project.file("${project.buildDir}/reports/scoverage${testTask.name.capitalize()}")
+
+                project.tasks.create(reportTaskName, ScoverageReport) {
+                    dependsOn compileTask, testTask
+                    onlyIf { extension.dataDir.get().list() }
+                    group = 'verification'
+                    runner = scoverageRunner
+                    reportDir = taskReportDir
+                    sources = extension.sources
+                    dataDir = extension.dataDir
+                    coverageOutputCobertura = extension.coverageOutputCobertura
+                    coverageOutputXML = extension.coverageOutputXML
+                    coverageOutputHTML = extension.coverageOutputHTML
+                    coverageDebug = extension.coverageDebug
+                }
+            }
+
+            globalReportTask.configure {
+                dependsOn reportTasks
+                onlyIf { reportTasks.any { it.reportDir.get().list() } }
+                group = 'verification'
+                runner = scoverageRunner
+                reportDir = extension.reportDir
+                deleteReportsOnAggregation = extension.deleteReportsOnAggregation
+                coverageOutputCobertura = extension.coverageOutputCobertura
+                coverageOutputXML = extension.coverageOutputXML
+                coverageOutputHTML = extension.coverageOutputHTML
+                coverageDebug = extension.coverageDebug
+            }
+
+
+            globalCheckTask.configure {
+                dependsOn globalReportTask
+
+                onlyIf { extension.reportDir.get().list() }
+                group = 'verification'
+                coverageType = extension.coverageType
+                minimumRate = extension.minimumRate
+                reportDir = extension.reportDir
+            }
 
             // define aggregation task
             if (project.childProjects.size() > 0) {
-                def reportTasks = project.getAllprojects().collect { it.tasks.withType(ScoverageReport) }
+                def allReportTasks = project.getAllprojects().findResults {
+                    it.tasks.find { task ->
+                        task.name == REPORT_NAME && task instanceof ScoverageAggregate
+                    }
+                }
                 def aggregationTask = project.tasks.create(AGGREGATE_NAME, ScoverageAggregate.class) {
-                    dependsOn(reportTasks)
+                    dependsOn(allReportTasks)
                     group = 'verification'
                     runner = scoverageRunner
                     reportDir = extension.reportDir
@@ -198,68 +226,72 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                 // the compile task creates a store of measured statements
                 outputs.file(new File(extension.dataDir.get(), 'scoverage.coverage.xml'))
             }
-        }
 
-        project.gradle.taskGraph.whenReady { graph ->
-            if (graph.hasTask(reportTask)) {
-                project.test.configure {
-                    project.logger.debug("Adding instrumented classes to '${path}' classpath")
+            project.gradle.taskGraph.whenReady { graph ->
+                def hasAnyReportTask = reportTasks.any { graph.hasTask(it) }
 
-                    classpath = project.configurations.scoverage + instrumentedSourceSet.output + classpath
+                if (hasAnyReportTask) {
+                    project.tasks.withType(Test).each { testTask ->
+                        testTask.configure {
+                            project.logger.info("Adding instrumented classes to '${path}' classpath")
 
-                    outputs.upToDateWhen {
-                        extension.dataDir.get().listFiles(new FilenameFilter() {
-                            @Override
-                            boolean accept(File dir, String name) {
-                                return name.startsWith("scoverage.measurements.")
+                            classpath = project.configurations.scoverage + instrumentedSourceSet.output + classpath
+
+                            outputs.upToDateWhen {
+                                extension.dataDir.get().listFiles(new FilenameFilter() {
+                                    @Override
+                                    boolean accept(File dir, String name) {
+                                        name.startsWith("scoverage.measurements.")
+                                    }
+                                })
                             }
-                        })
-                    }
-                }
-
-                compileTask.configure {
-                    if (!graph.hasTask(originalCompileTask)) {
-                        destinationDir = originalCompileTask.destinationDir
-                    } else {
-                        doFirst {
-                            destinationDir.deleteDir()
                         }
+                    }
 
-                        // delete non-instrumented classes by comparing normally compiled classes to those compiled with scoverage
-                        doLast {
-                            def originalCompileTaskName = project.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
-                                    .getCompileTaskName("scala")
-                            def originalDestinationDir = project.tasks[originalCompileTaskName].destinationDir
+                    compileTask.configure {
+                        if (!graph.hasTask(originalCompileTask)) {
+                            destinationDir = originalCompileTask.destinationDir
+                        } else {
+                            doFirst {
+                                destinationDir.deleteDir()
+                            }
 
-                            def findFiles = { File dir, Closure<Boolean> condition = null ->
-                                def files = []
+                            // delete non-instrumented classes by comparing normally compiled classes to those compiled with scoverage
+                            doLast {
+                                def originalCompileTaskName = project.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
+                                        .getCompileTaskName("scala")
+                                def originalDestinationDir = project.tasks[originalCompileTaskName].destinationDir
 
-                                if (dir.exists()) {
-                                    dir.eachFileRecurse(FILES) { f ->
-                                        if (condition == null || condition(f)) {
-                                            def relativePath = dir.relativePath(f)
-                                            files << relativePath
+                                def findFiles = { File dir, Closure<Boolean> condition = null ->
+                                    def files = []
+
+                                    if (dir.exists()) {
+                                        dir.eachFileRecurse(FILES) { f ->
+                                            if (condition == null || condition(f)) {
+                                                def relativePath = dir.relativePath(f)
+                                                files << relativePath
+                                            }
                                         }
                                     }
+
+                                    files
                                 }
 
-                                return files
-                            }
+                                def isSameFile = { String relativePath ->
+                                    def fileA = new File(originalDestinationDir, relativePath)
+                                    def fileB = new File(destinationDir, relativePath)
+                                    FileUtils.contentEquals(fileA, fileB)
+                                }
 
-                            def isSameFile = { String relativePath ->
-                                def fileA = new File(originalDestinationDir, relativePath)
-                                def fileB = new File(destinationDir, relativePath)
-                                return FileUtils.contentEquals(fileA, fileB)
-                            }
+                                def originalClasses = findFiles(originalDestinationDir)
+                                def identicalInstrumentedClasses = findFiles(destinationDir, { f ->
+                                    def relativePath = destinationDir.relativePath(f)
+                                    originalClasses.contains(relativePath) && isSameFile(relativePath)
+                                })
 
-                            def originalClasses = findFiles(originalDestinationDir)
-                            def identicalInstrumentedClasses = findFiles(destinationDir, { f ->
-                                def relativePath = destinationDir.relativePath(f)
-                                return originalClasses.contains(relativePath) && isSameFile(relativePath)
-                            })
-
-                            identicalInstrumentedClasses.each { f ->
-                                Files.deleteIfExists(destinationDir.toPath().resolve(f))
+                                identicalInstrumentedClasses.each { f ->
+                                    Files.deleteIfExists(destinationDir.toPath().resolve(f))
+                                }
                             }
                         }
                     }
@@ -271,7 +303,7 @@ class ScoveragePlugin implements Plugin<PluginAware> {
     private Set<? extends Task> recursiveDependenciesOf(Task task) {
 
         def directDependencies = task.getTaskDependencies().getDependencies(task)
-        def nestedDependencies = directDependencies.collect {recursiveDependenciesOf(it) }.flatten()
-        return directDependencies + nestedDependencies
+        def nestedDependencies = directDependencies.collect { recursiveDependenciesOf(it) }.flatten()
+        directDependencies + nestedDependencies
     }
 }
