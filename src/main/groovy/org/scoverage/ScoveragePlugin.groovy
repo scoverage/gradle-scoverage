@@ -25,7 +25,7 @@ class ScoveragePlugin implements Plugin<PluginAware> {
     static final String DEFAULT_REPORT_DIR = 'reports' + File.separatorChar + 'scoverage'
 
     private volatile File pluginFile = null
-    private ConcurrentHashMap<Task, Set<? extends Task>> taskDependencies = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Task, Set<? extends Task>> taskDependencies = new ConcurrentHashMap<>();
 
     @Override
     void apply(PluginAware pluginAware) {
