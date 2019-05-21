@@ -119,7 +119,9 @@ class ScoveragePlugin implements Plugin<PluginAware> {
         def globalCheckTask = project.tasks.register(CHECK_NAME, OverallCheckTask)
 
         project.afterEvaluate {
-            List<ScoverageReport> reportTasks = project.tasks.withType(Test).collect { testTask ->
+            def testTasks = project.tasks.withType(Test)
+
+            List<ScoverageReport> reportTasks = testTasks.collect { testTask ->
                 testTask.mustRunAfter(compileTask)
 
                 def reportTaskName = "report${testTask.name.capitalize()}Scoverage"
@@ -171,7 +173,8 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                         task.name == REPORT_NAME && task instanceof ScoverageAggregate
                     }
                 }
-                def aggregationTask = project.tasks.create(AGGREGATE_NAME, ScoverageAggregate.class) {
+
+                def aggregationTask = project.tasks.create(AGGREGATE_NAME, ScoverageAggregate) {
                     dependsOn(allReportTasks)
                     group = 'verification'
                     runner = scoverageRunner
@@ -196,8 +199,10 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                 def dependencyProjectReportTask = it.project.tasks[REPORT_NAME]
                 if (dependencyProjectCompileTask != null) {
                     compileTask.dependsOn(dependencyProjectCompileTask)
-                    // we don't want this project's test to affect the other project's report
-                    project.test.mustRunAfter(dependencyProjectReportTask)
+                    // we don't want this project's tests to affect the other project's report
+                    testTasks.each {
+                        it.mustRunAfter(dependencyProjectReportTask)
+                    }
                 }
             }
 
