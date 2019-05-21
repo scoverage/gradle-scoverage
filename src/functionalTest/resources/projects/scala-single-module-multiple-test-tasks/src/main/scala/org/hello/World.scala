@@ -2,10 +2,10 @@ package org.hello
 
 class World {
 
-  def foo: String = {
+  def foo(): String = {
     val s = "a" + "b"
     s
   }
 
-  def bar: String = "bar"
+  def bar(): String = "bar"
 }

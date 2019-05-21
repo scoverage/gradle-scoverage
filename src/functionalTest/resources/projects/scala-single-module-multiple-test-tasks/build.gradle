@@ -66,6 +66,9 @@ check.dependsOn(intTest)
 intTest.mustRunAfter(test)
 
 scoverage {
-    minimumRate = 0.3
+    minimumRate = 0.6
 }
 
+if (hasProperty("excludedFile")) {
+    scoverage.excludedFiles = [excludedFile]
+}
