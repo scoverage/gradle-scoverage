@@ -143,12 +143,16 @@ class ScoveragePlugin implements Plugin<PluginAware> {
             }
 
             globalReportTask.configure {
+                def reportDirs = reportTasks.findResults { it.reportDir.get() }
+
                 dependsOn reportTasks
-                onlyIf { reportTasks.any { it.reportDir.get().list() } }
+                onlyIf { reportDirs.any { it.list() } }
+
                 group = 'verification'
                 runner = scoverageRunner
                 reportDir = extension.reportDir
-                deleteReportsOnAggregation = extension.deleteReportsOnAggregation
+                dirsToAggregateFrom = reportDirs
+                deleteReportsOnAggregation = false
                 coverageOutputCobertura = extension.coverageOutputCobertura
                 coverageOutputXML = extension.coverageOutputXML
                 coverageOutputHTML = extension.coverageOutputHTML
