@@ -1,6 +1,5 @@
 package org.scoverage
 
-import org.apache.tools.ant.taskdefs.Local
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.provider.Property
@@ -69,12 +68,12 @@ class OverallCheckTask extends DefaultTask {
 
     @VisibleForTesting
     protected static String errorMsg(String actual, String expected, CoverageType type) {
-        return "Only $actual% of project is covered by tests instead of $expected% (coverageType: $type)"
+        "Only $actual% of project is covered by tests instead of $expected% (coverageType: $type)"
     }
 
     @VisibleForTesting
     protected static String fileNotFoundErrorMsg(CoverageType coverageType) {
-        return "Coverage file (type: $coverageType) not found, check your configuration."
+        "Coverage file (type: $coverageType) not found, check your configuration."
     }
 
     @VisibleForTesting
@@ -100,6 +99,6 @@ class OverallCheckTask extends DefaultTask {
         } catch (FileNotFoundException fnfe) {
             return new GradleException(fileNotFoundErrorMsg(coverageType), fnfe)
         }
-        return null
+        null
     }
 }
