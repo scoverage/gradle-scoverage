@@ -1,10 +1,13 @@
 package org.scoverage
 
 import org.gradle.api.DefaultTask
+import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
+import scala.collection.JavaConverters
+import scoverage.IOUtils
 import scoverage.report.CoverageAggregator
 
 class ScoverageAggregate extends DefaultTask {
@@ -13,6 +16,9 @@ class ScoverageAggregate extends DefaultTask {
 
     @OutputDirectory
     final Property<File> reportDir = project.objects.property(File)
+
+    @Input
+    final ListProperty<File> dirsToAggregateFrom = project.objects.listProperty(File)
 
     @Input
     final Property<Boolean> deleteReportsOnAggregation = project.objects.property(Boolean)
@@ -27,12 +33,24 @@ class ScoverageAggregate extends DefaultTask {
     @Input
     final Property<Boolean> coverageDebug = project.objects.property(Boolean)
 
+    ScoverageAggregate() {
+        dirsToAggregateFrom.set([])
+    }
+
     @TaskAction
     def aggregate() {
         runner.run {
             def rootDir = project.projectDir
 
-            def coverage = CoverageAggregator.aggregate(rootDir, deleteReportsOnAggregation.get())
+            def coverage
+            if (dirsToAggregateFrom.get().isEmpty()) {
+                coverage = CoverageAggregator.aggregate(rootDir, deleteReportsOnAggregation.get())
+            } else {
+                def reportFiles = dirsToAggregateFrom.get().collectMany {
+                    JavaConverters.seqAsJavaList(IOUtils.reportFileSearch(it, IOUtils.isReportFile()))
+                }
+                coverage = CoverageAggregator.aggregate(JavaConverters.asScalaBuffer(reportFiles), deleteReportsOnAggregation.get())
+            }
 
             reportDir.get().deleteDir()
 

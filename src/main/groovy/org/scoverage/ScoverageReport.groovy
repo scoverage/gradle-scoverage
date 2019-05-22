@@ -6,6 +6,7 @@ import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
+import scala.collection.JavaConverters
 import scala.collection.Seq
 import scala.collection.Set
 import scoverage.Coverage
@@ -46,8 +47,7 @@ class ScoverageReport extends DefaultTask {
                 project.logger.info("[scoverage] Could not find coverage file, skipping...")
             } else {
                 File[] array = IOUtils.findMeasurementFiles(dataDir.get())
-                // TODO: patch scoverage core to use a consistent collection type?
-                Seq<File> measurementFiles = scala.collection.JavaConversions.asScalaBuffer(Arrays.asList(array))
+                Seq<File> measurementFiles = JavaConverters.asScalaBuffer(Arrays.asList(array))
 
                 Coverage coverage = Serializer.deserialize(coverageFile)
 
