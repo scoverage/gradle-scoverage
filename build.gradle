@@ -92,6 +92,9 @@ artifacts {
 
 if (project.properties.containsKey('signing.keyId')) {
     apply plugin: 'signing'
+    signing {
+        sign configurations.archives
+    }
 }
 
 uploadArchives {
