@@ -123,7 +123,9 @@ class ScoveragePlugin implements Plugin<PluginAware> {
         def globalCheckTask = project.tasks.register(CHECK_NAME, OverallCheckTask)
 
         project.afterEvaluate {
-            def testTasks = project.tasks.withType(Test)
+            // calling toList() on TaskCollection is required
+            // to avoid potential ConcurrentModificationException in multi-project builds
+            def testTasks = project.tasks.withType(Test).toList()
 
             List<ScoverageReport> reportTasks = testTasks.collect { testTask ->
                 testTask.mustRunAfter(compileTask)
@@ -319,7 +321,7 @@ class ScoveragePlugin implements Plugin<PluginAware> {
     private Set<? extends Task> recursiveDependenciesOf(Task task) {
         if (!taskDependencies.containsKey(task)) {
             def directDependencies = task.getTaskDependencies().getDependencies(task)
-            def nestedDependencies = directDependencies.collect {recursiveDependenciesOf(it) }.flatten()
+            def nestedDependencies = directDependencies.collect { recursiveDependenciesOf(it) }.flatten()
             def dependencies = directDependencies + nestedDependencies
 
             taskDependencies.put(task, dependencies)
