@@ -106,6 +106,7 @@ class ScoveragePlugin implements Plugin<PluginAware> {
         def instrumentedSourceSet = project.sourceSets.create('scoverage') {
 
             resources.source(originalSourceSet.resources)
+            java.source(originalSourceSet.java)
             scala.source(originalSourceSet.scala)
 
             compileClasspath += originalSourceSet.compileClasspath + project.configurations.scoverage
