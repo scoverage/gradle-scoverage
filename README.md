@@ -13,6 +13,11 @@ You can find instructions on how to apply the plugin at:  http://plugins.gradle.
 
 1. `reportScoverage`: Produces XML and HTML reports for analysing test code coverage.
 
+    The plugin automatically creates a `report{Task name}Scoverage` task for each test task in your
+    Gradle build.  The `reportScoverage` task will run all test tasks and you can use the individual
+    tasks to run only the desired tests.  For example, to run only the unit tests and no other test
+    tasks (e.g., integration tests), you can run `reportTestScoverage`.
+
 2. `aggregateScoverage`: An experimental support for aggregating coverage statistics in composite builds.
 
     When applied on a project with sub-projects, the plugin will create the aggregation task `aggregateScoverage`, which
