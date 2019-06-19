@@ -65,6 +65,9 @@ task functionalTest(type: Test) {
     group = 'verification'
     testClassesDirs = sourceSets.functionalTest.output.classesDirs
     classpath = sourceSets.functionalTest.runtimeClasspath
+
+    testLogging.showStandardStreams = true
+
     mustRunAfter test
 }
 
