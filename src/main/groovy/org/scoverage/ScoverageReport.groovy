@@ -6,6 +6,7 @@ import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
+// don't use scala.collection.JavaConverters as it breaks backward compatibility with scala 2.11
 import scala.collection.JavaConversions
 import scala.collection.Seq
 import scala.collection.Set
