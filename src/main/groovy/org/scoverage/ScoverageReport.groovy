@@ -8,11 +8,7 @@ import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 // don't use scala.collection.JavaConverters as it breaks backward compatibility with scala 2.11
 import scala.collection.JavaConversions
-import scala.collection.Seq
-import scala.collection.Set
-import scoverage.Coverage
-import scoverage.IOUtils
-import scoverage.Serializer
+import scoverage.report.CoverageAggregator
 
 @CacheableTask
 class ScoverageReport extends DefaultTask {
@@ -40,25 +36,18 @@ class ScoverageReport extends DefaultTask {
     @TaskAction
     def report() {
         runner.run {
+            reportDir.get().delete()
             reportDir.get().mkdirs()
 
-            File coverageFile = Serializer.coverageFile(dataDir.get())
+            def coverage = CoverageAggregator.aggregate(JavaConversions.asScalaBuffer(Arrays.asList(dataDir.get())))
 
-            if (!coverageFile.exists()) {
+            if (coverage.isEmpty()) {
                 project.logger.info("[scoverage] Could not find coverage file, skipping...")
             } else {
-                File[] array = IOUtils.findMeasurementFiles(dataDir.get())
-                Seq<File> measurementFiles = JavaConversions.asScalaBuffer(Arrays.asList(array))
-
-                Coverage coverage = Serializer.deserialize(coverageFile)
-
-                Set<Object> measurements = IOUtils.invoked(measurementFiles)
-                coverage.apply(measurements)
-
                 new ScoverageWriter(project.logger).write(
                         sources.get(),
                         reportDir.get(),
-                        coverage,
+                        coverage.get(),
                         coverageOutputCobertura.get(),
                         coverageOutputXML.get(),
                         coverageOutputHTML.get(),
