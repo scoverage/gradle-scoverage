@@ -39,7 +39,7 @@ class ScoverageReport extends DefaultTask {
             reportDir.get().delete()
             reportDir.get().mkdirs()
 
-            def coverage = CoverageAggregator.aggregate(JavaConversions.asScalaBuffer(Arrays.asList(dataDir.get())))
+            def coverage = CoverageAggregator.aggregate([dataDir.get()] as File[])
 
             if (coverage.isEmpty()) {
                 project.logger.info("[scoverage] Could not find coverage file, skipping...")

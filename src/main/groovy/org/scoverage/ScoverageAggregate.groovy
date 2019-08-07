@@ -43,7 +43,7 @@ class ScoverageAggregate extends DefaultTask {
             reportDir.get().deleteDir()
             reportDir.get().mkdirs()
 
-            def coverage = CoverageAggregator.aggregate(JavaConversions.asScalaBuffer(dirsToAggregateFrom.get()))
+            def coverage = CoverageAggregator.aggregate(dirsToAggregateFrom.get() as File[])
 
             if (coverage.nonEmpty()) {
                 new ScoverageWriter(project.logger).write(
