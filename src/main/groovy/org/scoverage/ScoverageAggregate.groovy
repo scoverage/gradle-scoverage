@@ -6,8 +6,8 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
-// don't use scala.collection.JavaConverters as it breaks backward compatibility with scala 2.11
-import scala.collection.JavaConversions
+// don't use scala.collection.JavaConversions as it doesn't exist in Scala 2.13
+import scala.collection.JavaConverters
 import scoverage.IOUtils
 import scoverage.report.CoverageAggregator
 
@@ -48,9 +48,9 @@ class ScoverageAggregate extends DefaultTask {
                 coverage = CoverageAggregator.aggregate(rootDir, deleteReportsOnAggregation.get())
             } else {
                 def reportFiles = dirsToAggregateFrom.get().collectMany {
-                    JavaConversions.seqAsJavaList(IOUtils.reportFileSearch(it, IOUtils.isReportFile()))
+                    JavaConverters.seqAsJavaList(IOUtils.reportFileSearch(it, IOUtils.isReportFile()))
                 }
-                coverage = CoverageAggregator.aggregate(JavaConversions.asScalaBuffer(reportFiles), deleteReportsOnAggregation.get())
+                coverage = CoverageAggregator.aggregate(JavaConverters.asScalaBuffer(reportFiles), deleteReportsOnAggregation.get())
             }
 
             reportDir.get().deleteDir()
