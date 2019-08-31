@@ -34,3 +34,4 @@ scoverage {
 }
 
 project(":2_11").tasks.reportScoverage.mustRunAfter(project(":2_12").tasks.reportScoverage)
+project(":2_12").tasks.reportScoverage.mustRunAfter(project(":2_13").tasks.reportScoverage)

@@ -20,9 +20,11 @@ public class ScalaMultiModuleCrossVersionTest extends ScoverageFunctionalTest {
         result.assertTaskSkipped(ScoveragePlugin.getREPORT_NAME());
         result.assertTaskSucceeded("2_11:" + ScoveragePlugin.getREPORT_NAME());
         result.assertTaskSucceeded("2_12:" + ScoveragePlugin.getREPORT_NAME());
+        result.assertTaskSucceeded("2_13:" + ScoveragePlugin.getREPORT_NAME());
         result.assertTaskSucceeded(ScoveragePlugin.getCHECK_NAME());
         result.assertTaskSucceeded("2_11:" + ScoveragePlugin.getCHECK_NAME());
         result.assertTaskSucceeded("2_12:" + ScoveragePlugin.getCHECK_NAME());
+        result.assertTaskSucceeded("2_13:" + ScoveragePlugin.getCHECK_NAME());
         result.assertTaskSucceeded(ScoveragePlugin.getAGGREGATE_NAME());
 
         assertAllReportFilesExist();
@@ -33,6 +35,7 @@ public class ScalaMultiModuleCrossVersionTest extends ScoverageFunctionalTest {
 
         assert211ReportFilesExist();
         assert212ReportFilesExist();
+        assert213ReportFilesExist();
         assertAggregationFilesExist();
     }
 
@@ -41,6 +44,7 @@ public class ScalaMultiModuleCrossVersionTest extends ScoverageFunctionalTest {
         Assert.assertTrue(resolve(reportDir(), "index.html").exists());
         Assert.assertTrue(resolve(reportDir(), "2_11/src/main/scala/org/hello/World211.scala.html").exists());
         Assert.assertTrue(resolve(reportDir(), "2_12/src/main/scala/org/hello/World212.scala.html").exists());
+        Assert.assertTrue(resolve(reportDir(), "2_13/src/main/scala/org/hello/World213.scala.html").exists());
     }
 
     private void assert211ReportFilesExist() {
@@ -55,5 +59,12 @@ public class ScalaMultiModuleCrossVersionTest extends ScoverageFunctionalTest {
         File reportDir = reportDir(projectDir().toPath().resolve("2_12").toFile());
         Assert.assertTrue(resolve(reportDir, "index.html").exists());
         Assert.assertTrue(resolve(reportDir, "src/main/scala/org/hello/World212.scala.html").exists());
+    }
+
+    private void assert213ReportFilesExist() {
+
+        File reportDir = reportDir(projectDir().toPath().resolve("2_13").toFile());
+        Assert.assertTrue(resolve(reportDir, "index.html").exists());
+        Assert.assertTrue(resolve(reportDir, "src/main/scala/org/hello/World213.scala.html").exists());
     }
 }
