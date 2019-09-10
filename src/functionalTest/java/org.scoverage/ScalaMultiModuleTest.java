@@ -36,12 +36,38 @@ public class ScalaMultiModuleTest extends ScoverageFunctionalTest {
     @Test
     public void reportScoverageOnlyA() {
 
-        AssertableBuildResult result = dryRun("clean", ":a:" + ScoveragePlugin.getREPORT_NAME());
+        AssertableBuildResult result = run("clean", ":a:" + ScoveragePlugin.getREPORT_NAME());
 
         result.assertTaskDoesntExist(ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskExists("a:" + ScoveragePlugin.getREPORT_NAME());
         result.assertTaskDoesntExist("b:" + ScoveragePlugin.getREPORT_NAME());
         result.assertTaskDoesntExist("common:" + ScoveragePlugin.getREPORT_NAME());
+
+        result.assertTaskSucceeded("a:" + ScoveragePlugin.getCOMPILE_NAME());
+        result.assertTaskSucceeded("a:" + ScoveragePlugin.getREPORT_NAME());
+
+        assertAReportFilesExist();
+    }
+
+    @Test
+    public void reportScoverageOnlyAWithoutNormalCompilation() {
+
+        AssertableBuildResult result = run("clean", ":a:" + ScoveragePlugin.getREPORT_NAME(),
+                "-x", "compileScala");
+
+        result.assertTaskSkipped("compileScala");
+        result.assertTaskSkipped("a:compileScala");
+        result.assertTaskSkipped("common:compileScala");
+        result.assertTaskSucceeded("common:" + ScoveragePlugin.getCOMPILE_NAME());
+        result.assertTaskSucceeded("a:" + ScoveragePlugin.getCOMPILE_NAME());
+        result.assertTaskSucceeded("a:" + ScoveragePlugin.getREPORT_NAME());
+
+        assertAReportFilesExist();
+
+        Assert.assertTrue(resolve(buildDir(resolve(projectDir(), "a")), "classes/scala/main/org/hello/a/WorldA.class").exists());
+        Assert.assertFalse(resolve(buildDir(resolve(projectDir(), "a")), "classes/scala/scoverage/org/hello/a/WorldA.class").exists());
+
+        Assert.assertTrue(resolve(buildDir(resolve(projectDir(), "common")), "classes/scala/main/org/hello/common/WorldCommon.class").exists());
+        Assert.assertFalse(resolve(buildDir(resolve(projectDir(), "common")), "classes/scala/scoverage/org/hello/common/WorldCommon.class").exists());
     }
 
     @Test
