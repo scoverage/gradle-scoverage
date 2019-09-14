@@ -1,0 +1,13 @@
+plugins {
+    id 'org.scoverage'
+}
+
+repositories {
+    jcenter()
+}
+
+description = 'defines scala library using the "compile" configuration'
+
+dependencies {
+    compile group: 'org.scala-lang', name: 'scala-library', version: "${detectedScalaLibraryVersion}"
+}

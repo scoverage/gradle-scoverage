@@ -133,15 +133,6 @@ public class ScalaSingleModuleTest extends ScoverageFunctionalTest {
         Assert.assertFalse(resolve(buildDir(), "classes/scala/scoverage/org/hello/World.class").exists());
     }
 
-    @Test
-    public void reportScoverageUnder2_11() throws Exception {
-        run("clean", ScoveragePlugin.getREPORT_NAME(),
-                "-PscalaVersionMinor=11",
-                "-PscalaVersionBuild=8",
-                "-Pscoverage.scoverageScalaVersion=2_11");
-        assertReportFilesExist();
-    }
-
     private void assertReportFilesExist() {
 
         Assert.assertTrue(resolve(reportDir(), "index.html").exists());
