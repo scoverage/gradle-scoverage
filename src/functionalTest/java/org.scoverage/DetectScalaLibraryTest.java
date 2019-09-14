@@ -11,9 +11,11 @@ import java.util.Collection;
 @RunWith(Parameterized.class)
 public class DetectScalaLibraryTest extends ScoverageFunctionalTest {
 
-    private static final String SCALA_VERSION = "0.0";
-    private static final String SCALA_LIBRARY_PARAMETER = "-PdetectedScalaLibraryVersion=" + SCALA_VERSION + ".0";
-    private static final String EXPECTED_OUTPUT = "Using scoverage scalac plugin version '" + SCALA_VERSION;
+    private static final String SCALA_VERSION = "2.12";
+    private static final String SCALA_LIBRARY_PARAMETER = "-PdetectedScalaLibraryVersion=";
+
+    private static final String EXPECTED_OUTPUT_A = "Detected scala library in compilation classpath";
+    private static final String EXPECTED_OUTPUT_B = "Using scoverage scalac plugin version '" + SCALA_VERSION;
 
     @Parameterized.Parameter(0)
     public String projectDir;
@@ -31,13 +33,15 @@ public class DetectScalaLibraryTest extends ScoverageFunctionalTest {
     @Test
     public void test() {
         setProjectName("detect-scala-library" + projectDir);
+        testWithParameter(SCALA_LIBRARY_PARAMETER + SCALA_VERSION + ".0");
+        testWithParameter(SCALA_LIBRARY_PARAMETER + SCALA_VERSION + ".+");
+    }
 
-        // build supposed to fail since repositories are not configured
-        AssertableBuildResult result = runAndFail("clean", SCALA_LIBRARY_PARAMETER, "--info");
-
-        // all we want to know is that the plugin detected our configured library version
+    private void testWithParameter(String parameter) {
+        AssertableBuildResult result = dryRun("clean", parameter, "--info");
         String output = result.getResult().getOutput();
-        Assert.assertTrue(output.contains(EXPECTED_OUTPUT));
+        Assert.assertTrue(output.contains(EXPECTED_OUTPUT_A));
+        Assert.assertTrue(output.contains(EXPECTED_OUTPUT_B));
     }
 
 }

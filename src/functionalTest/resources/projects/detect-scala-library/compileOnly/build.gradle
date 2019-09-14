@@ -2,6 +2,10 @@ plugins {
     id 'org.scoverage'
 }
 
+repositories {
+    jcenter()
+}
+
 description = 'defines scala library using the "compileOnly" configuration'
 
 dependencies {

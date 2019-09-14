@@ -301,36 +301,21 @@ class ScoveragePlugin implements Plugin<PluginAware> {
     }
 
     private String resolveScalaVersion(Project project) {
-        def scalaVersion = null
 
-        def configurations = [
-                project.configurations.compile,
-                project.configurations.compileOnly,
-                project.configurations.implementation
-        ]
-        def dependencies = configurations.collectMany { it.dependencies }
+        def resolvedDependencies = project.configurations.compileClasspath.resolvedConfiguration.firstLevelModuleDependencies
 
-        def scalaLibrary = dependencies.find {
-            it.group == "org.scala-lang" && it.name == "scala-library"
+        def scalaLibrary = resolvedDependencies.find {
+            it.moduleGroup == "org.scala-lang" && it.moduleName == "scala-library"
         }
 
-        if (scalaLibrary != null) {
-            scalaVersion = scalaLibrary.version
-        }
-
-        if (scalaVersion == null && project.pluginManager.hasPlugin("io.spring.dependency-management")) {
-            scalaVersion = project.dependencyManagement.compile.managedVersions["org.scala-lang:scala-library"]
-        }
-
-        if (scalaVersion == null) {
+        if (scalaLibrary == null) {
             project.logger.info("No scala library detected. Using property 'scoverageScalaVersion'")
-            scalaVersion = project.extensions.scoverage.scoverageScalaVersion.get()
+            return project.extensions.scoverage.scoverageScalaVersion.get()
         } else {
             project.logger.info("Detected scala library in compilation classpath")
-            scalaVersion = scalaVersion.substring(0, scalaVersion.lastIndexOf("."))
+            def fullScalaVersion = scalaLibrary.moduleVersion
+            return fullScalaVersion.substring(0, fullScalaVersion.lastIndexOf("."))
         }
-
-        return scalaVersion
     }
 
     private Set<? extends Task> recursiveDependenciesOf(Task task) {
