@@ -1,0 +1,9 @@
+plugins {
+    id 'org.scoverage'
+}
+
+description = 'defines scala library using the "compile" configuration'
+
+dependencies {
+    compile group: 'org.scala-lang', name: 'scala-library', version: "${detectedScalaLibraryVersion}"
+}

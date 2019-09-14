@@ -63,27 +63,8 @@ class ScoveragePlugin implements Plugin<PluginAware> {
             }
 
             project.afterEvaluate {
+                def scalaVersion = resolveScalaVersion(project)
                 def scoverageVersion = project.extensions.scoverage.scoverageVersion.get()
-                def scalaVersion = null
-
-                def scalaLibrary = project.configurations.compile.dependencies.find {
-                    it.group == "org.scala-lang" && it.name == "scala-library"
-                }
-
-                if (scalaLibrary != null) {
-                    scalaVersion = scalaLibrary.version
-                }
-
-                if (scalaVersion == null && project.pluginManager.hasPlugin("io.spring.dependency-management")) {
-                    scalaVersion = project.dependencyManagement.compile.managedVersions["org.scala-lang:scala-library"]
-                }
-
-                if (scalaVersion == null) {
-                    scalaVersion = project.extensions.scoverage.scoverageScalaVersion.get()
-                } else {
-                    scalaVersion = scalaVersion.substring(0, scalaVersion.lastIndexOf("."))
-                }
-
                 def fullScoverageVersion = "$scalaVersion:$scoverageVersion"
 
                 project.logger.info("Using scoverage scalac plugin version '$fullScoverageVersion'")
@@ -317,6 +298,39 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                 }
             }
         }
+    }
+
+    private String resolveScalaVersion(Project project) {
+        def scalaVersion = null
+
+        def configurations = [
+                project.configurations.compile,
+                project.configurations.compileOnly,
+                project.configurations.implementation
+        ]
+        def dependencies = configurations.collectMany { it.dependencies }
+
+        def scalaLibrary = dependencies.find {
+            it.group == "org.scala-lang" && it.name == "scala-library"
+        }
+
+        if (scalaLibrary != null) {
+            scalaVersion = scalaLibrary.version
+        }
+
+        if (scalaVersion == null && project.pluginManager.hasPlugin("io.spring.dependency-management")) {
+            scalaVersion = project.dependencyManagement.compile.managedVersions["org.scala-lang:scala-library"]
+        }
+
+        if (scalaVersion == null) {
+            project.logger.info("No scala library detected. Using property 'scoverageScalaVersion'")
+            scalaVersion = project.extensions.scoverage.scoverageScalaVersion.get()
+        } else {
+            project.logger.info("Detected scala library in compilation classpath")
+            scalaVersion = scalaVersion.substring(0, scalaVersion.lastIndexOf("."))
+        }
+
+        return scalaVersion
     }
 
     private Set<? extends Task> recursiveDependenciesOf(Task task) {
