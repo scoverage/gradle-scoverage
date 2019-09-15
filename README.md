@@ -55,9 +55,50 @@ be overridden by the version of the `scala-library` compile dependency (if the d
 * `minimumRate = <double>` (default `0.75`): The minimum amount of coverage in decimal proportion (`1.0` == 100%)
 required for the validation to pass (otherwise `checkScoverage` will fail the build). 
 
-* `coverageType = <"Statement" | "Branch" | "Line">` (default `"Statement"`): The type of coverage validated by the
+* `coverageType = <CoverageType.Statement | CoverageType.Branch | CoverageType.Line>` (default `CoverageType.Statement`): The type of coverage validated by the
 `checkScoverage` task. For more information on the different types, please refer to the documentation of the scalac
 plugin (https://github.com/scoverage/scalac-scoverage-plugin).
+
+#### Multiple check tasks
+
+It is possible to configure multiple checks; for instance, one check for a statement rate and another for a branch rate:
+```
+scoverage {
+    check {
+        minimumRate = 0.5
+        coverageType = CoverageType.Statement
+    }
+    check {
+        minimumRate = 0.8
+        coverageType = CoverageType.Branch
+    }
+}
+```
+
+Note that you cannot mix multiple-checks syntax with plain check configuration:
+```
+// ok
+scoverage {
+    check {
+        minimumRate = 0.5
+        coverageType = CoverageType.Statement
+    }
+}
+
+// ok
+scoverage {
+    minimumRate = 0.2
+}
+
+// NOT ok
+scoverage {
+    minimumRate = 0.2
+    check {
+        minimumRate = 0.5
+        coverageType = CoverageType.Statement
+    }
+}
+``` 
 
 ### Run without normal compilation
 
