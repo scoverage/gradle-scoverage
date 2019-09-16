@@ -29,6 +29,9 @@ class ScoverageReport extends DefaultTask {
     final Property<File> reportDir = project.objects.property(File)
 
     @Input
+    final Property<String> sourceEncoding = project.objects.property(String)
+
+    @Input
     final Property<Boolean> coverageOutputCobertura = project.objects.property(Boolean)
     @Input
     final Property<Boolean> coverageOutputXML = project.objects.property(Boolean)
@@ -59,6 +62,7 @@ class ScoverageReport extends DefaultTask {
                         sources.get(),
                         reportDir.get(),
                         coverage,
+                        sourceEncoding.get(),
                         coverageOutputCobertura.get(),
                         coverageOutputXML.get(),
                         coverageOutputHTML.get(),

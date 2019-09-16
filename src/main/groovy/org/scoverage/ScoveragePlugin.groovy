@@ -104,7 +104,13 @@ class ScoveragePlugin implements Plugin<PluginAware> {
         def globalReportTask = project.tasks.register(REPORT_NAME, ScoverageAggregate)
         def globalCheckTask = project.tasks.register(CHECK_NAME, OverallCheckTask)
 
+
         project.afterEvaluate {
+            def detectedSourceEncoding = compileTask.scalaCompileOptions.encoding
+            if (detectedSourceEncoding == null) {
+                detectedSourceEncoding = "UTF-8"
+            }
+
             // calling toList() on TaskCollection is required
             // to avoid potential ConcurrentModificationException in multi-project builds
             def testTasks = project.tasks.withType(Test).toList()
@@ -123,6 +129,7 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                     reportDir = taskReportDir
                     sources = extension.sources
                     dataDir = extension.dataDir
+                    sourceEncoding.set(detectedSourceEncoding)
                     coverageOutputCobertura = extension.coverageOutputCobertura
                     coverageOutputXML = extension.coverageOutputXML
                     coverageOutputHTML = extension.coverageOutputHTML
@@ -139,6 +146,7 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                 group = 'verification'
                 runner = scoverageRunner
                 reportDir = extension.reportDir
+                sourceEncoding.set(detectedSourceEncoding)
                 dirsToAggregateFrom = reportDirs
                 deleteReportsOnAggregation = false
                 coverageOutputCobertura = extension.coverageOutputCobertura
@@ -171,6 +179,7 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                     group = 'verification'
                     runner = scoverageRunner
                     reportDir = extension.reportDir
+                    sourceEncoding.set(detectedSourceEncoding)
                     deleteReportsOnAggregation = extension.deleteReportsOnAggregation
                     coverageOutputCobertura = extension.coverageOutputCobertura
                     coverageOutputXML = extension.coverageOutputXML
