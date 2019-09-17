@@ -24,6 +24,9 @@ class ScoverageAggregate extends DefaultTask {
     @Input
     final Property<Boolean> deleteReportsOnAggregation = project.objects.property(Boolean)
 
+    @Input
+    final Property<String> sourceEncoding = project.objects.property(String)
+
     // TODO - consider separate options for `report` and `aggregate` tasks
     @Input
     final Property<Boolean> coverageOutputCobertura = project.objects.property(Boolean)
@@ -60,6 +63,7 @@ class ScoverageAggregate extends DefaultTask {
                         rootDir,
                         reportDir.get(),
                         coverage.get(),
+                        sourceEncoding.get(),
                         coverageOutputCobertura.get(),
                         coverageOutputXML.get(),
                         coverageOutputHTML.get(),
