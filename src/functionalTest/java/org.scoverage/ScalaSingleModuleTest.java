@@ -134,15 +134,6 @@ public class ScalaSingleModuleTest extends ScoverageFunctionalTest {
     }
 
     @Test
-    public void reportScoverageUnder2_11() throws Exception {
-        run("clean", ScoveragePlugin.getREPORT_NAME(),
-                "-PscalaVersionMinor=11",
-                "-PscalaVersionBuild=8",
-                "-Pscoverage.scoverageScalaVersion=2_11");
-        assertReportFilesExist();
-    }
-
-    @Test
     public void reportScoverageUnder2_13() throws Exception {
         run("clean", ScoveragePlugin.getREPORT_NAME(),
                 "-PscalaVersionMinor=13",

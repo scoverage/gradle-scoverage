@@ -1,0 +1,20 @@
+plugins {
+    id 'io.spring.dependency-management' version "1.0.4.RELEASE"
+    id 'org.scoverage'
+}
+
+repositories {
+    jcenter()
+}
+
+description = 'defines scala library using the "implementation" configuration and the dependency-management plugin'
+
+dependencyManagement {
+    dependencies {
+        dependency group: 'org.scala-lang', name: 'scala-library', version: "${detectedScalaLibraryVersion}"
+    }
+}
+
+dependencies {
+    implementation group: 'org.scala-lang', name: 'scala-library'
+}

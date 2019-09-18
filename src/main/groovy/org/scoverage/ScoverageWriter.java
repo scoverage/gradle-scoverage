@@ -1,6 +1,9 @@
 package org.scoverage;
 
 import org.gradle.api.logging.Logger;
+import scala.Some;
+import scala.collection.JavaConverters;
+import scala.collection.mutable.Buffer;
 import scoverage.Constants;
 import scoverage.Coverage;
 import scoverage.report.CoberturaXmlWriter;
@@ -8,6 +11,8 @@ import scoverage.report.ScoverageHtmlWriter;
 import scoverage.report.ScoverageXmlWriter;
 
 import java.io.File;
+import java.nio.charset.Charset;
+import java.util.Arrays;
 
 /**
  * Util for generating and saving coverage files.
@@ -29,6 +34,7 @@ public class ScoverageWriter {
      * @param sourceDir               directory with project sources
      * @param reportDir               directory for generate reports
      * @param coverage                coverage data
+     * @param sourceEncoding          the encoding of the source files
      * @param coverageOutputCobertura switch for Cobertura output
      * @param coverageOutputXML       switch for Scoverage XML output
      * @param coverageOutputHTML      switch for Scoverage HTML output
@@ -37,6 +43,7 @@ public class ScoverageWriter {
     public void write(File sourceDir,
                              File reportDir,
                              Coverage coverage,
+                             String sourceEncoding,
                              Boolean coverageOutputCobertura,
                              Boolean coverageOutputXML,
                              Boolean coverageOutputHTML,
@@ -70,7 +77,8 @@ public class ScoverageWriter {
         }
 
         if (coverageOutputHTML) {
-            new ScoverageHtmlWriter(sourceDir, reportDir).write(coverage);
+            Buffer<File> sources = JavaConverters.asScalaBuffer(Arrays.asList(sourceDir));
+            new ScoverageHtmlWriter(sources, reportDir, new Some<>(sourceEncoding)).write(coverage);
             logger.info("[scoverage] Written HTML report to " +
                 reportDir.getAbsolutePath() +
                 File.separator +

@@ -23,24 +23,28 @@ import static org.junit.Assert.assertThat;
 
 public abstract class ScoverageFunctionalTest {
 
-    private final String projectName;
-    private final GradleRunner runner;
+    private String projectName;
+    private GradleRunner runner;
     private final XmlParser parser;
 
     protected ScoverageFunctionalTest(String projectName) {
-
-        this.projectName = projectName;
-        this.runner = GradleRunner.create()
-                .withProjectDir(projectDir())
-                .withPluginClasspath()
-                .forwardOutput();
-
+        setProjectName(projectName);
         try {
             this.parser = new XmlParser();
             parser.setFeature("http://apache.org/xml/features/disallow-doctype-decl", false);
             parser.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    protected void setProjectName(String projectName) {
+        if (projectName != null) {
+            this.projectName = projectName;
+            this.runner = GradleRunner.create()
+                    .withProjectDir(projectDir())
+                    .withPluginClasspath()
+                    .forwardOutput();
         }
     }
 

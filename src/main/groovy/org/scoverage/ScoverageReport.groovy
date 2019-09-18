@@ -6,8 +6,6 @@ import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
-// don't use scala.collection.JavaConverters as it breaks backward compatibility with scala 2.11
-import scala.collection.JavaConversions
 import scoverage.report.CoverageAggregator
 
 @CacheableTask
@@ -23,6 +21,9 @@ class ScoverageReport extends DefaultTask {
 
     @OutputDirectory
     final Property<File> reportDir = project.objects.property(File)
+
+    @Input
+    final Property<String> sourceEncoding = project.objects.property(String)
 
     @Input
     final Property<Boolean> coverageOutputCobertura = project.objects.property(Boolean)
@@ -48,6 +49,7 @@ class ScoverageReport extends DefaultTask {
                         sources.get(),
                         reportDir.get(),
                         coverage.get(),
+                        sourceEncoding.get(),
                         coverageOutputCobertura.get(),
                         coverageOutputXML.get(),
                         coverageOutputHTML.get(),

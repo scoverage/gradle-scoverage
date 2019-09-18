@@ -63,27 +63,8 @@ class ScoveragePlugin implements Plugin<PluginAware> {
             }
 
             project.afterEvaluate {
+                def scalaVersion = resolveScalaVersion(project)
                 def scoverageVersion = project.extensions.scoverage.scoverageVersion.get()
-                def scalaVersion = null
-
-                def scalaLibrary = project.configurations.compile.dependencies.find {
-                    it.group == "org.scala-lang" && it.name == "scala-library"
-                }
-
-                if (scalaLibrary != null) {
-                    scalaVersion = scalaLibrary.version
-                }
-
-                if (scalaVersion == null && project.pluginManager.hasPlugin("io.spring.dependency-management")) {
-                    scalaVersion = project.dependencyManagement.compile.managedVersions["org.scala-lang:scala-library"]
-                }
-
-                if (scalaVersion == null) {
-                    scalaVersion = project.extensions.scoverage.scoverageScalaVersion.get()
-                } else {
-                    scalaVersion = scalaVersion.substring(0, scalaVersion.lastIndexOf("."))
-                }
-
                 def fullScoverageVersion = "$scalaVersion:$scoverageVersion"
 
                 project.logger.info("Using scoverage scalac plugin version '$fullScoverageVersion'")
@@ -123,7 +104,13 @@ class ScoveragePlugin implements Plugin<PluginAware> {
         def globalReportTask = project.tasks.register(REPORT_NAME, ScoverageAggregate)
         def globalCheckTask = project.tasks.register(CHECK_NAME, OverallCheckTask)
 
+
         project.afterEvaluate {
+            def detectedSourceEncoding = compileTask.scalaCompileOptions.encoding
+            if (detectedSourceEncoding == null) {
+                detectedSourceEncoding = "UTF-8"
+            }
+
             // calling toList() on TaskCollection is required
             // to avoid potential ConcurrentModificationException in multi-project builds
             def testTasks = project.tasks.withType(Test).toList()
@@ -142,6 +129,7 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                     reportDir = taskReportDir
                     sources = extension.sources
                     dataDir = extension.dataDir
+                    sourceEncoding.set(detectedSourceEncoding)
                     coverageOutputCobertura = extension.coverageOutputCobertura
                     coverageOutputXML = extension.coverageOutputXML
                     coverageOutputHTML = extension.coverageOutputHTML
@@ -159,6 +147,7 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                 runner = scoverageRunner
                 reportDir = extension.reportDir
                 dirsToAggregateFrom = dataDirs
+                sourceEncoding.set(detectedSourceEncoding)
                 deleteReportsOnAggregation = false
                 coverageOutputCobertura = extension.coverageOutputCobertura
                 coverageOutputXML = extension.coverageOutputXML
@@ -192,6 +181,7 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                     group = 'verification'
                     runner = scoverageRunner
                     reportDir = extension.reportDir
+                    sourceEncoding.set(detectedSourceEncoding)
                     dirsToAggregateFrom = dataDirs
                     deleteReportsOnAggregation = extension.deleteReportsOnAggregation
                     coverageOutputCobertura = extension.coverageOutputCobertura
@@ -269,56 +259,76 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                             }
                         }
                     }
+                }
 
-                    compileTask.configure {
-                        if (!graph.hasTask(originalCompileTask)) {
-                            destinationDir = originalCompileTask.destinationDir
-                        } else {
-                            doFirst {
-                                destinationDir.deleteDir()
-                            }
+                compileTask.configure {
+                    if (!graph.hasTask(originalCompileTask)) {
+                        project.logger.info("Making scoverage compilation the primary compilation task (instead of compileScala)")
+                        destinationDir = originalCompileTask.destinationDir
+                    } else {
+                        doFirst {
+                            destinationDir.deleteDir()
+                        }
 
-                            // delete non-instrumented classes by comparing normally compiled classes to those compiled with scoverage
-                            doLast {
-                                def originalCompileTaskName = project.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
-                                        .getCompileTaskName("scala")
-                                def originalDestinationDir = project.tasks[originalCompileTaskName].destinationDir
+                        // delete non-instrumented classes by comparing normally compiled classes to those compiled with scoverage
+                        doLast {
+                            project.logger.info("Deleting classes compiled by scoverage but non-instrumented (identical to normal compilation)")
+                            def originalCompileTaskName = project.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
+                                    .getCompileTaskName("scala")
+                            def originalDestinationDir = project.tasks[originalCompileTaskName].destinationDir
 
-                                def findFiles = { File dir, Closure<Boolean> condition = null ->
-                                    def files = []
+                            def findFiles = { File dir, Closure<Boolean> condition = null ->
+                                def files = []
 
-                                    if (dir.exists()) {
-                                        dir.eachFileRecurse(FILES) { f ->
-                                            if (condition == null || condition(f)) {
-                                                def relativePath = dir.relativePath(f)
-                                                files << relativePath
-                                            }
+                                if (dir.exists()) {
+                                    dir.eachFileRecurse(FILES) { f ->
+                                        if (condition == null || condition(f)) {
+                                            def relativePath = dir.relativePath(f)
+                                            files << relativePath
                                         }
                                     }
-
-                                    files
                                 }
 
-                                def isSameFile = { String relativePath ->
-                                    def fileA = new File(originalDestinationDir, relativePath)
-                                    def fileB = new File(destinationDir, relativePath)
-                                    FileUtils.contentEquals(fileA, fileB)
-                                }
+                                files
+                            }
 
-                                def originalClasses = findFiles(originalDestinationDir)
-                                def identicalInstrumentedClasses = findFiles(destinationDir, { f ->
-                                    def relativePath = destinationDir.relativePath(f)
-                                    originalClasses.contains(relativePath) && isSameFile(relativePath)
-                                })
+                            def isSameFile = { String relativePath ->
+                                def fileA = new File(originalDestinationDir, relativePath)
+                                def fileB = new File(destinationDir, relativePath)
+                                FileUtils.contentEquals(fileA, fileB)
+                            }
 
-                                identicalInstrumentedClasses.each { f ->
-                                    Files.deleteIfExists(destinationDir.toPath().resolve(f))
-                                }
+                            def originalClasses = findFiles(originalDestinationDir)
+                            def identicalInstrumentedClasses = findFiles(destinationDir, { f ->
+                                def relativePath = destinationDir.relativePath(f)
+                                originalClasses.contains(relativePath) && isSameFile(relativePath)
+                            })
+
+                            identicalInstrumentedClasses.each { f ->
+                                Files.deleteIfExists(destinationDir.toPath().resolve(f))
                             }
                         }
                     }
                 }
             }
+        }
+    }
+
+    private String resolveScalaVersion(Project project) {
+
+        def resolvedDependencies = project.configurations.compileClasspath.resolvedConfiguration.firstLevelModuleDependencies
+
+        def scalaLibrary = resolvedDependencies.find {
+            it.moduleGroup == "org.scala-lang" && it.moduleName == "scala-library"
+        }
+
+        if (scalaLibrary == null) {
+            project.logger.info("No scala library detected. Using property 'scoverageScalaVersion'")
+            return project.extensions.scoverage.scoverageScalaVersion.get()
+        } else {
+            project.logger.info("Detected scala library in compilation classpath")
+            def fullScalaVersion = scalaLibrary.moduleVersion
+            return fullScalaVersion.substring(0, fullScalaVersion.lastIndexOf("."))
         }
     }
 
