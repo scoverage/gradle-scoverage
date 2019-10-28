@@ -1,34 +1,36 @@
 plugins {
-    id 'org.scoverage'
-}
-
-allprojects {
-    repositories {
-        jcenter()
-    }
+    id 'org.scoverage' apply false
 }
 
 description = 'a multi-module Scala project that builds successfully with 100% coverage'
 
-allprojects {
-
-    apply plugin: 'java'
-    apply plugin: 'scala'
-
-    dependencies {
-        compile group: 'org.scala-lang', name: 'scala-library', version: "${scalaVersionMajor}.${scalaVersionMinor}.${scalaVersionBuild}"
-
-        testRuntime group: 'org.junit.vintage', name: 'junit-vintage-engine', version: junitVersion
-        testCompile group: 'org.junit.platform', name: 'junit-platform-runner', version: junitPlatformVersion
-
-        testCompile group: 'org.scalatest', name: "scalatest_${scalaVersionMajor}.${scalaVersionMinor}", version: scalatestVersion
+allprojects { p ->
+    repositories {
+        jcenter()
     }
 
-    test {
-        useJUnitPlatform()
-    }
+    if (p.name != 'dependencies') {
+        apply plugin: 'java'
+        apply plugin: 'scala'
+        apply plugin: 'org.scoverage'
 
-    scoverage {
-        minimumRate = 0.5
+        dependencies {
+            implementation platform(project(':dependencies'))
+
+            compile group: 'org.scala-lang', name: 'scala-library'
+
+            testRuntime group: 'org.junit.vintage', name: 'junit-vintage-engine'
+            testCompile group: 'org.junit.platform', name: 'junit-platform-runner'
+
+            testCompile group: 'org.scalatest', name: "scalatest_${scalaVersionMajor}.${scalaVersionMinor}"
+        }
+
+        test {
+            useJUnitPlatform()
+        }
+
+        scoverage {
+            minimumRate = 0.5
+        }
     }
 }

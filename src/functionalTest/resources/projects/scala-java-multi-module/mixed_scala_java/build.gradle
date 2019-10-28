@@ -1,6 +1,4 @@
-apply plugin: 'java'
 apply plugin: 'scala'
-apply plugin: 'org.scoverage'
 
 dependencies {
     compile group: 'org.scala-lang', name: 'scala-library', version: "${scalaVersionMajor}.${scalaVersionMinor}.${scalaVersionBuild}"
@@ -17,3 +15,8 @@ ext.configureSources = { set, name ->
 }
 configureSources(sourceSets.main, 'main')
 configureSources(sourceSets.test, 'test')
+
+apply plugin: 'org.scoverage'
+scoverage {
+    minimumRate = 0.5
+}

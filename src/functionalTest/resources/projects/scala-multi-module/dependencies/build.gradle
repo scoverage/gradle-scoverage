@@ -1,0 +1,14 @@
+plugins {
+    id 'java-platform'
+}
+
+dependencies {
+    constraints {
+        api group: 'org.scala-lang', name: 'scala-library', version: "${scalaVersionMajor}.${scalaVersionMinor}.${scalaVersionBuild}"
+
+        api group: 'org.junit.vintage', name: 'junit-vintage-engine', version: junitVersion
+        api group: 'org.junit.platform', name: 'junit-platform-runner', version: junitPlatformVersion
+
+        api group: 'org.scalatest', name: "scalatest_${scalaVersionMajor}.${scalaVersionMinor}", version: scalatestVersion
+    }
+}

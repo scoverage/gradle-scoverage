@@ -1,1 +1,1 @@
-include 'a', 'b', 'common'
+include 'dependencies', 'a', 'b', 'common'
