@@ -1,0 +1,3 @@
+dependencies {
+    testRuntime group: 'org.junit.vintage', name: 'junit-vintage-engine'
+}

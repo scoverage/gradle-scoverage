@@ -6,6 +6,7 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.invocation.Gradle
 import org.gradle.api.plugins.PluginAware
+import org.gradle.api.plugins.scala.ScalaPlugin
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.scala.ScalaCompile
 import org.gradle.api.tasks.testing.Test
@@ -281,14 +282,23 @@ class ScoveragePlugin implements Plugin<PluginAware> {
             }
 
             // define aggregation task
-            if (project.childProjects.size() > 0) {
+            if (!project.subprojects.empty) {
                 project.gradle.projectsEvaluated {
-                    def allReportTasks = project.getAllprojects().findResults {
+                    project.subprojects.each {
+                        if (it.plugins.hasPlugin(ScalaPlugin) && !it.plugins.hasPlugin(ScoveragePlugin)) {
+                            it.logger.warn("Scala sub-project '${it.name}' doesn't have Scoverage applied and will be ignored in parent project aggregation")
+                        }
+                    }
+                    def childReportTasks = project.subprojects.findResults {
                         it.tasks.find { task ->
                             task.name == REPORT_NAME && task instanceof ScoverageAggregate
                         }
                     }
+                    def allReportTasks = childReportTasks + globalReportTask
                     def aggregationTask = project.tasks.create(AGGREGATE_NAME, ScoverageAggregate) {
+                        onlyIf {
+                            !childReportTasks.empty
+                        }
                         dependsOn(allReportTasks)
                         group = 'verification'
                         runner = scoverageRunner
