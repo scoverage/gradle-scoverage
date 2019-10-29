@@ -26,6 +26,7 @@ test {
 
 scoverage {
     minimumRate = 0.3
+    coverageType = "Line"
 }
 
 if (hasProperty("excludedFile")) {
