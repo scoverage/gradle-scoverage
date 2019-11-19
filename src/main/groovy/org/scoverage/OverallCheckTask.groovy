@@ -15,10 +15,12 @@ import java.text.NumberFormat
  * Handles different types of coverage Scoverage can measure.
  */
 enum CoverageType {
-    Line('cobertura.xml', 'line-rate', 1.0),
-    Statement('scoverage.xml', 'statement-rate', 100.0),
-    Branch('scoverage.xml', 'branch-rate', 100.0)
+    Line('Line', 'cobertura.xml', 'line-rate', 1.0),
+    Statement('Statement', 'scoverage.xml', 'statement-rate', 100.0),
+    Branch('Branch', 'scoverage.xml', 'branch-rate', 100.0)
 
+    /** Name of enum option the way it appears in the build configuration  */
+    String configurationName
     /** Name of file with coverage data */
     String fileName
     /** Name of param in XML file with coverage value */
@@ -26,7 +28,8 @@ enum CoverageType {
     /** Used to normalize coverage value */
     private double factor
 
-    private CoverageType(String fileName, String paramName, double factor) {
+    private CoverageType(String configurationName, String fileName, String paramName, double factor) {
+        this.configurationName = configurationName
         this.fileName = fileName
         this.paramName = paramName
         this.factor = factor
@@ -35,6 +38,12 @@ enum CoverageType {
     /** Normalize coverage value to [0, 1] */
     Double normalize(Double value) {
         return value / factor
+    }
+
+    static CoverageType find(String configurationName) {
+        CoverageType.values().find {
+            it.configurationName.toLowerCase() == configurationName.toLowerCase()
+        }
     }
 }
 
@@ -46,7 +55,7 @@ class OverallCheckTask extends DefaultTask {
 
     /** Type of coverage to check. Available options: Line, Statement and Branch */
     @Input
-    final Property<CoverageType> coverageType = project.objects.property(CoverageType)
+    final Property<String> coverageType = project.objects.property(String)
     @Input
     final Property<BigDecimal> minimumRate = project.objects.property(BigDecimal)
 
@@ -61,7 +70,11 @@ class OverallCheckTask extends DefaultTask {
     void requireLineCoverage() {
         NumberFormat nf = NumberFormat.getInstance(locale.get())
 
-        Exception failure = checkLineCoverage(nf, reportDir.get(), coverageType.get(), minimumRate.get().doubleValue())
+        CoverageType coverageType = CoverageType.find(this.coverageType.get())
+        if (coverageType == null) {
+            throw new GradleException("Unknown coverage type ${this.coverageType.get()}")
+        }
+        Exception failure = checkLineCoverage(nf, reportDir.get(), coverageType, minimumRate.get().doubleValue())
 
         if (failure) throw failure
     }
