@@ -33,4 +33,6 @@ scoverage {
     minimumRate = 0.5
 }
 
-project(":2_11").tasks.reportScoverage.mustRunAfter(project(":2_12").tasks.reportScoverage)
+project(":2_11").tasks.reportScoverage
+        .mustRunAfter(project(":2_12").tasks.reportScoverage)
+        .mustRunAfter(project(":2_13").tasks.reportScoverage)

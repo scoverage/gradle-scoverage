@@ -225,7 +225,7 @@ public class ScalaMultiModuleWithMultipleTestTasksTest extends ScoverageFunction
         result.assertTaskSucceeded(ScoveragePlugin.getAGGREGATE_NAME());
 
         assertAllReportFilesExist();
-        assertCoverage(93.33);
+        assertCoverage(88.24);
     }
 
     @Test

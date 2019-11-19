@@ -138,16 +138,16 @@ class ScoveragePlugin implements Plugin<PluginAware> {
             }
 
             globalReportTask.configure {
-                def reportDirs = reportTasks.findResults { it.reportDir.get() }
+                def dataDirs = reportTasks.findResults { it.dataDir.get() }
 
                 dependsOn reportTasks
-                onlyIf { reportDirs.any { it.list() } }
+                onlyIf { dataDirs.any { it.list() } }
 
                 group = 'verification'
                 runner = scoverageRunner
                 reportDir = extension.reportDir
+                dirsToAggregateFrom = dataDirs
                 sourceEncoding.set(detectedSourceEncoding)
-                dirsToAggregateFrom = reportDirs
                 deleteReportsOnAggregation = false
                 coverageOutputCobertura = extension.coverageOutputCobertura
                 coverageOutputXML = extension.coverageOutputXML
@@ -175,11 +175,14 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                 }
 
                 def aggregationTask = project.tasks.create(AGGREGATE_NAME, ScoverageAggregate) {
+                    def dataDirs = allReportTasks.findResults { it.dirsToAggregateFrom.get() }.flatten()
+
                     dependsOn(allReportTasks)
                     group = 'verification'
                     runner = scoverageRunner
                     reportDir = extension.reportDir
                     sourceEncoding.set(detectedSourceEncoding)
+                    dirsToAggregateFrom = dataDirs
                     deleteReportsOnAggregation = extension.deleteReportsOnAggregation
                     coverageOutputCobertura = extension.coverageOutputCobertura
                     coverageOutputXML = extension.coverageOutputXML

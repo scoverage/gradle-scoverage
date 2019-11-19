@@ -33,6 +33,7 @@ public class ScalaMultiModuleCrossVersionTest extends ScoverageFunctionalTest {
 
         assert211ReportFilesExist();
         assert212ReportFilesExist();
+        assert213ReportFilesExist();
         assertAggregationFilesExist();
     }
 
@@ -55,5 +56,12 @@ public class ScalaMultiModuleCrossVersionTest extends ScoverageFunctionalTest {
         File reportDir = reportDir(projectDir().toPath().resolve("2_12").toFile());
         Assert.assertTrue(resolve(reportDir, "index.html").exists());
         Assert.assertTrue(resolve(reportDir, "src/main/scala/org/hello/World212.scala.html").exists());
+    }
+
+    private void assert213ReportFilesExist() {
+
+        File reportDir = reportDir(projectDir().toPath().resolve("2_13").toFile());
+        Assert.assertTrue(resolve(reportDir, "index.html").exists());
+        Assert.assertTrue(resolve(reportDir, "src/main/scala/org/hello/World213.scala.html").exists());
     }
 }
