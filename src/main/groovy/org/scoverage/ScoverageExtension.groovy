@@ -13,6 +13,11 @@ import org.gradle.api.provider.Property
  */
 class ScoverageExtension {
 
+    public static final CoverageType DEFAULT_COVERAGE_TYPE = CoverageType.Statement
+    public static final double DEFAULT_MINIMUM_RATE = 0.75
+
+    final Project project
+
     /** Version of scoverage to use for the scalac plugin */
     final Property<String> scoverageVersion
 
@@ -40,11 +45,14 @@ class ScoverageExtension {
 
     final Property<Boolean> deleteReportsOnAggregation
 
-    final Property<String> coverageType
+    final List<CheckConfig> checks = new ArrayList<>()
+
+    final Property<CoverageType> coverageType
     final Property<BigDecimal> minimumRate
 
     ScoverageExtension(Project project) {
 
+        this.project = project
         project.plugins.apply(JavaPlugin.class)
         project.plugins.apply(ScalaPlugin.class)
 
@@ -87,10 +95,20 @@ class ScoverageExtension {
         deleteReportsOnAggregation = project.objects.property(Boolean)
         deleteReportsOnAggregation.set(false)
 
-        coverageType = project.objects.property(String)
-        coverageType.set(CoverageType.Statement.configurationName)
-
+        coverageType = project.objects.property(CoverageType)
         minimumRate = project.objects.property(BigDecimal)
-        minimumRate.set(0.75)
+    }
+
+    void check(Closure closure) {
+        CheckConfig check = new CheckConfig()
+        project.configure(check, closure)
+        checks.add(check)
+    }
+
+    static class CheckConfig {
+        CoverageType coverageType
+        BigDecimal minimumRate
+        CheckConfig() {
+        }
     }
 }

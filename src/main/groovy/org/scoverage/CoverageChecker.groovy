@@ -1,11 +1,8 @@
 package org.scoverage
 
-import org.gradle.api.DefaultTask
+
 import org.gradle.api.GradleException
-import org.gradle.api.provider.Property
-import org.gradle.api.tasks.CacheableTask
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.TaskAction
+import org.gradle.api.logging.Logger
 import org.gradle.internal.impldep.com.google.common.annotations.VisibleForTesting
 
 import java.text.DecimalFormat
@@ -50,47 +47,22 @@ enum CoverageType {
 /**
  * Throws a GradleException if overall coverage dips below the configured percentage.
  */
-@CacheableTask
-class OverallCheckTask extends DefaultTask {
+class CoverageChecker {
 
-    /** Type of coverage to check. Available options: Line, Statement and Branch */
-    @Input
-    final Property<String> coverageType = project.objects.property(String)
-    @Input
-    final Property<BigDecimal> minimumRate = project.objects.property(BigDecimal)
+    final Logger logger
 
-    @Input
-    final Property<File> reportDir = project.objects.property(File)
-
-    /** Overwrite to test for a specific locale. */
-    @Input
-    final Property<Locale> locale = project.objects.property(Locale).value(Locale.getDefault())
-
-    @TaskAction
-    void requireLineCoverage() {
-        NumberFormat nf = NumberFormat.getInstance(locale.get())
-
-        CoverageType coverageType = CoverageType.find(this.coverageType.get())
-        if (coverageType == null) {
-            throw new GradleException("Unknown coverage type ${this.coverageType.get()}")
-        }
-        Exception failure = checkLineCoverage(nf, reportDir.get(), coverageType, minimumRate.get().doubleValue())
-
-        if (failure) throw failure
+    CoverageChecker(Logger logger) {
+        this.logger = logger
     }
 
-    @VisibleForTesting
-    protected static String errorMsg(String actual, String expected, CoverageType type) {
-        "Only $actual% of project is covered by tests instead of $expected% (coverageType: $type)"
+    public void checkLineCoverage(File reportDir, CoverageType coverageType, double minimumRate) throws GradleException {
+        NumberFormat defaultNf = NumberFormat.getInstance(Locale.getDefault())
+        checkLineCoverage(reportDir, coverageType, minimumRate, defaultNf)
     }
 
-    @VisibleForTesting
-    protected static String fileNotFoundErrorMsg(CoverageType coverageType) {
-        "Coverage file (type: $coverageType) not found, check your configuration."
-    }
+    public void checkLineCoverage(File reportDir, CoverageType coverageType, double minimumRate, NumberFormat nf) throws GradleException {
+        logger.info("Checking coverage. Type: {}. Minimum rate: {}", coverageType, minimumRate)
 
-    @VisibleForTesting
-    protected static Exception checkLineCoverage(NumberFormat nf, File reportDir, CoverageType coverageType, double minimumRate) {
         XmlParser parser = new XmlParser()
         parser.setFeature('http://apache.org/xml/features/disallow-doctype-decl', false)
         parser.setFeature('http://apache.org/xml/features/nonvalidating/load-external-dtd', false)
@@ -107,11 +79,20 @@ class OverallCheckTask extends DefaultTask {
             if (difference > 1e-7) {
                 String is = df.format(overallRate * 100)
                 String needed = df.format(minimumRate * 100)
-                return new GradleException(errorMsg(is, needed, coverageType))
+                throw new GradleException(errorMsg(is, needed, coverageType))
             }
         } catch (FileNotFoundException fnfe) {
-            return new GradleException(fileNotFoundErrorMsg(coverageType), fnfe)
+            throw new GradleException(fileNotFoundErrorMsg(coverageType), fnfe)
         }
-        null
+    }
+
+    @VisibleForTesting
+    protected static String errorMsg(String actual, String expected, CoverageType type) {
+        "Only $actual% of project is covered by tests instead of $expected% (coverageType: $type)"
+    }
+
+    @VisibleForTesting
+    protected static String fileNotFoundErrorMsg(CoverageType coverageType) {
+        "Coverage file (type: $coverageType) not found, check your configuration."
     }
 }

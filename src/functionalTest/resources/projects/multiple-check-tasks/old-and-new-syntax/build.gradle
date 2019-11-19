@@ -6,7 +6,7 @@ repositories {
     jcenter()
 }
 
-description = 'a single-module Scala project that builds successfully with 50% coverage'
+description = 'a single-module Scala project that has multiple check configurations - some new syntax, some old'
 
 apply plugin: 'java'
 apply plugin: 'scala'
@@ -27,8 +27,12 @@ test {
 scoverage {
     minimumRate = 0.3
     coverageType = org.scoverage.CoverageType.Line
-}
-
-if (hasProperty("excludedFile")) {
-    scoverage.excludedFiles = [excludedFile]
+    check {
+        minimumRate = 0.1
+        coverageType = org.scoverage.CoverageType.Branch
+    }
+    check {
+        minimumRate = 0.6
+        coverageType = org.scoverage.CoverageType.Statement
+    }
 }

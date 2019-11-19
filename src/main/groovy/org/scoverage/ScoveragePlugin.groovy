@@ -1,12 +1,14 @@
 package org.scoverage
 
 import org.apache.commons.io.FileUtils
+import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.invocation.Gradle
 import org.gradle.api.plugins.PluginAware
 import org.gradle.api.tasks.SourceSet
+import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.scala.ScalaCompile
 import org.gradle.api.tasks.testing.Test
 
@@ -102,8 +104,7 @@ class ScoveragePlugin implements Plugin<PluginAware> {
         originalJarTask.mustRunAfter(compileTask)
 
         def globalReportTask = project.tasks.register(REPORT_NAME, ScoverageAggregate)
-        def globalCheckTask = project.tasks.register(CHECK_NAME, OverallCheckTask)
-
+        def globalCheckTask = project.tasks.register(CHECK_NAME)
 
         project.afterEvaluate {
             def detectedSourceEncoding = compileTask.scalaCompileOptions.encoding
@@ -155,16 +156,7 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                 coverageDebug = extension.coverageDebug
             }
 
-
-            globalCheckTask.configure {
-                dependsOn globalReportTask
-
-                onlyIf { extension.reportDir.get().list() }
-                group = 'verification'
-                coverageType = extension.coverageType
-                minimumRate = extension.minimumRate
-                reportDir = extension.reportDir
-            }
+            configureCheckTask(project, extension, globalCheckTask, globalReportTask)
 
             // define aggregation task
             if (project.childProjects.size() > 0) {
@@ -309,6 +301,36 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                             }
                         }
                     }
+                }
+            }
+        }
+    }
+
+    private void configureCheckTask(Project project, ScoverageExtension extension,
+                                    TaskProvider<Task> globalCheckTask,
+                                    TaskProvider<ScoverageAggregate> globalReportTask) {
+
+        if (extension.checks.isEmpty()) {
+            extension.check {
+                minimumRate = extension.minimumRate.getOrElse(BigDecimal.valueOf(ScoverageExtension.DEFAULT_MINIMUM_RATE))
+                coverageType = extension.coverageType.getOrElse(ScoverageExtension.DEFAULT_COVERAGE_TYPE)
+            }
+        } else if (extension.minimumRate.isPresent() || extension.coverageType.isPresent()) {
+            throw new IllegalArgumentException("Check configuration should be defined in either the new or the old syntax exclusively, not together")
+        }
+
+        def checker = new CoverageChecker(project.logger)
+
+        globalCheckTask.configure {
+            group = 'verification'
+            dependsOn globalReportTask
+            onlyIf { extension.reportDir.get().list() }
+        }
+
+        extension.checks.each { config ->
+            globalCheckTask.configure {
+                doLast {
+                    checker.checkLineCoverage(extension.reportDir.get(), config.coverageType, config.minimumRate.doubleValue())
                 }
             }
         }

@@ -6,7 +6,7 @@ repositories {
     jcenter()
 }
 
-description = 'a single-module Scala project that builds successfully with 50% coverage'
+description = 'a single-module Scala project with no check configured'
 
 apply plugin: 'java'
 apply plugin: 'scala'
@@ -22,13 +22,4 @@ dependencies {
 
 test {
     useJUnitPlatform()
-}
-
-scoverage {
-    minimumRate = 0.3
-    coverageType = org.scoverage.CoverageType.Line
-}
-
-if (hasProperty("excludedFile")) {
-    scoverage.excludedFiles = [excludedFile]
 }
