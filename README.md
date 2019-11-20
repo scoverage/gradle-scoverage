@@ -7,7 +7,7 @@ A plugin to enable the use of Scoverage in a gradle Scala project.
 Usage
 -----
 
-You can find instructions on how to apply the plugin at:  http://plugins.gradle.org/plugin/org.scoverage
+You can find instructions on how to apply the plugin at http://plugins.gradle.org/plugin/org.scoverage
 
 ### Available tasks
 
@@ -18,7 +18,7 @@ You can find instructions on how to apply the plugin at:  http://plugins.gradle.
     tasks to run only the desired tests.  For example, to run only the unit tests and no other test
     tasks (e.g., integration tests), you can run `reportTestScoverage`.
 
-2. `aggregateScoverage`: An experimental support for aggregating coverage statistics in composite builds.
+2. `aggregateScoverage`: Aggregates coverage statistics in composite builds.
 
     When applied on a project with sub-projects, the plugin will create the aggregation task `aggregateScoverage`, which
     will first generate reports for each project individually (including the parent project), and will then generate an
@@ -41,7 +41,7 @@ You can find instructions on how to apply the plugin at:  http://plugins.gradle.
 The plugin exposes multiple options that can be configured by setting them in an `scoverage` block within the project's
 build script. These options are as follows:
 
-* `scoverageVersion = <String>` (default `"1.3.1"`): The version of the scoverage scalac plugin. This (gradle) plugin
+* `scoverageVersion = <String>` (default `"1.4.1"`): The version of the scoverage scalac plugin. This (gradle) plugin
 should be compatible with all 1+ versions.
 
 * `scoverageScalaVersion = <String>` (default `"2.12"`): The scala version of the scoverage scalac plugin. This will
@@ -112,6 +112,21 @@ In cases where you only wish to generate reports / validate coverage, but are no
 it is possible to only compile the code with the scoverage scalac plugin, thus reducing build times significantly.
 In order to do so, simply add the arguments `-x compileScala` to the gradle execution.
 For example: `gradle reportScoverage -x compileScala`.
+
+Migration to 4.x
+----------------
+
+* Requires scoverage 1.4.1 or higher (and uses this version by default)
+* Requires application of the plugin to appropriate subprojects. A multi-module project might apply it to all.
+
+```groovy
+plugins {
+    id 'org.scoverage' version '4.0.0' apply false
+}
+allprojects {
+    apply plugin: 'org.scoverage'
+}
+```
 
 Migration to 3.x
 ----------------
