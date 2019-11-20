@@ -18,16 +18,18 @@ public class ScalaJavaMultiModuleTest extends ScoverageFunctionalTest {
         AssertableBuildResult result = run("clean", ScoveragePlugin.getCHECK_NAME(),
                 ScoveragePlugin.getAGGREGATE_NAME());
 
-        result.assertTaskOutcome("java_only:" + ScoveragePlugin.getCOMPILE_NAME(), TaskOutcome.NO_SOURCE);
+        result.assertTaskSkipped("java_only:" + ScoveragePlugin.getCOMPILE_NAME());
 
         result.assertTaskSkipped(ScoveragePlugin.getREPORT_NAME());
         result.assertTaskSucceeded("scala_only:" + ScoveragePlugin.getREPORT_NAME());
         result.assertTaskSucceeded("mixed_scala_java:" + ScoveragePlugin.getREPORT_NAME());
         result.assertTaskSkipped("java_only:" + ScoveragePlugin.getREPORT_NAME());
+
         result.assertTaskSucceeded(ScoveragePlugin.getCHECK_NAME());
         result.assertTaskSucceeded("scala_only:" + ScoveragePlugin.getCHECK_NAME());
         result.assertTaskSucceeded("mixed_scala_java:" + ScoveragePlugin.getCHECK_NAME());
         result.assertTaskSkipped("java_only:" + ScoveragePlugin.getCHECK_NAME());
+
         result.assertTaskSucceeded(ScoveragePlugin.getAGGREGATE_NAME());
 
         assertAllReportFilesExist();

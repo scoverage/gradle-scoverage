@@ -1,0 +1,30 @@
+plugins {
+    id 'org.scoverage' apply false
+}
+
+description = 'a multi-module Scala and Java project that defines scoverage only on root but not on subprojects'
+
+allprojects {
+    repositories {
+        jcenter()
+    }
+}
+
+subprojects { p ->
+    if (p.name != 'dependencies') {
+        apply plugin: 'java'
+        dependencies {
+            implementation platform(project(':dependencies'))
+            testCompile group: 'org.junit.platform', name: 'junit-platform-runner'
+        }
+
+        test {
+            useJUnitPlatform()
+        }
+    }
+}
+
+apply plugin: 'org.scoverage'
+scoverage {
+    minimumRate = 0.5
+}

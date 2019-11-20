@@ -2,17 +2,16 @@ plugins {
     id 'org.scoverage' apply false
 }
 
+description = 'a multi-module Scala and Java project that builds successfully with 100% coverage'
+
 allprojects {
     repositories {
         jcenter()
     }
 }
 
-description = 'a multi-module Scala and Java project that builds successfully with 100% coverage'
-
-apply plugin: 'org.scoverage'
-
-allprojects {
+subprojects {
+    apply plugin: 'java'
 
     dependencies {
         testCompile group: 'org.junit.platform', name: 'junit-platform-runner', version: junitPlatformVersion
@@ -21,12 +20,9 @@ allprojects {
     test {
         useJUnitPlatform()
     }
-
-    scoverage {
-        minimumRate = 0.5
-    }
 }
 
+apply plugin: 'org.scoverage'
 scoverage {
     minimumRate = 0.5
 }

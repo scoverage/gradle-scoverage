@@ -7,6 +7,7 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.invocation.Gradle
 import org.gradle.api.plugins.PluginAware
+import org.gradle.api.plugins.scala.ScalaPlugin
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.scala.ScalaCompile
@@ -34,11 +35,6 @@ class ScoveragePlugin implements Plugin<PluginAware> {
     void apply(PluginAware pluginAware) {
         if (pluginAware instanceof Project) {
             applyProject(pluginAware)
-            if (pluginAware == pluginAware.rootProject) {
-                pluginAware.subprojects { p ->
-                    p.plugins.apply(ScoveragePlugin)
-                }
-            }
         } else if (pluginAware instanceof Gradle) {
             pluginAware.allprojects { p ->
                 p.plugins.apply(ScoveragePlugin)
@@ -158,32 +154,6 @@ class ScoveragePlugin implements Plugin<PluginAware> {
 
             configureCheckTask(project, extension, globalCheckTask, globalReportTask)
 
-            // define aggregation task
-            if (project.childProjects.size() > 0) {
-                def allReportTasks = project.getAllprojects().findResults {
-                    it.tasks.find { task ->
-                        task.name == REPORT_NAME && task instanceof ScoverageAggregate
-                    }
-                }
-
-                def aggregationTask = project.tasks.create(AGGREGATE_NAME, ScoverageAggregate) {
-                    def dataDirs = allReportTasks.findResults { it.dirsToAggregateFrom.get() }.flatten()
-
-                    dependsOn(allReportTasks)
-                    group = 'verification'
-                    runner = scoverageRunner
-                    reportDir = extension.reportDir
-                    sourceEncoding.set(detectedSourceEncoding)
-                    dirsToAggregateFrom = dataDirs
-                    deleteReportsOnAggregation = extension.deleteReportsOnAggregation
-                    coverageOutputCobertura = extension.coverageOutputCobertura
-                    coverageOutputXML = extension.coverageOutputXML
-                    coverageOutputHTML = extension.coverageOutputHTML
-                    coverageDebug = extension.coverageDebug
-                }
-                project.tasks[CHECK_NAME].mustRunAfter(aggregationTask)
-            }
-
             // make this project's scoverage compilation depend on scoverage compilation of any other project
             // which this project depends on its normal compilation
             // (essential when running without normal compilation on multi-module projects with inner dependencies)
@@ -301,6 +271,41 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                             }
                         }
                     }
+                }
+            }
+
+            // define aggregation task
+            if (!project.subprojects.empty) {
+                project.gradle.projectsEvaluated {
+                    project.subprojects.each {
+                        if (it.plugins.hasPlugin(ScalaPlugin) && !it.plugins.hasPlugin(ScoveragePlugin)) {
+                            it.logger.warn("Scala sub-project '${it.name}' doesn't have Scoverage applied and will be ignored in parent project aggregation")
+                        }
+                    }
+                    def childReportTasks = project.subprojects.findResults {
+                        it.tasks.find { task ->
+                            task.name == REPORT_NAME && task instanceof ScoverageAggregate
+                        }
+                    }
+                    def allReportTasks = childReportTasks + globalReportTask.get()
+                    def aggregationTask = project.tasks.create(AGGREGATE_NAME, ScoverageAggregate) {
+                        def dataDirs = allReportTasks.findResults { it.dirsToAggregateFrom.get() }.flatten()
+                        onlyIf {
+                            !childReportTasks.empty
+                        }
+                        dependsOn(allReportTasks)
+                        group = 'verification'
+                        runner = scoverageRunner
+                        reportDir = extension.reportDir
+                        sourceEncoding.set(detectedSourceEncoding)
+                        dirsToAggregateFrom = dataDirs
+                        deleteReportsOnAggregation = extension.deleteReportsOnAggregation
+                        coverageOutputCobertura = extension.coverageOutputCobertura
+                        coverageOutputXML = extension.coverageOutputXML
+                        coverageOutputHTML = extension.coverageOutputHTML
+                        coverageDebug = extension.coverageDebug
+                    }
+                    project.tasks[CHECK_NAME].mustRunAfter(aggregationTask)
                 }
             }
         }

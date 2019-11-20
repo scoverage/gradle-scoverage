@@ -1,0 +1,9 @@
+apply plugin: 'scala'
+// apply plugin: 'org.scoverage' // Oops forgot to configure scoverage
+
+dependencies {
+    compile group: 'org.scala-lang', name: 'scala-library'
+
+    testRuntime group: 'org.junit.vintage', name: 'junit-vintage-engine'
+    testCompile group: 'org.scalatest', name: "scalatest_${scalaVersionMajor}.${scalaVersionMinor}"
+}

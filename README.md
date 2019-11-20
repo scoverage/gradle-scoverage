@@ -23,6 +23,9 @@ You can find instructions on how to apply the plugin at:  http://plugins.gradle.
     When applied on a project with sub-projects, the plugin will create the aggregation task `aggregateScoverage`, which
     will first generate reports for each project individually (including the parent project), and will then generate an
     aggregated result based on these reports.
+    
+    The plugin must be applied on a sub-project for it to be included in the aggregated; applying the plugin on a
+    project _does not_ automatically apply it on sub-projects.   
 
     The aggregated report will override the parent-project specific report (`parent-project/build/reports/scoverage`).
 
