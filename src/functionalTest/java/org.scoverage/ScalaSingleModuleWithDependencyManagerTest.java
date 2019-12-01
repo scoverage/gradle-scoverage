@@ -3,9 +3,9 @@ package org.scoverage;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class ScalaSingleModuleWithDepdencyManagerTest extends ScoverageFunctionalTest {
+public class ScalaSingleModuleWithDependencyManagerTest extends ScoverageFunctionalTest {
 
-    public ScalaSingleModuleWithDepdencyManagerTest() {
+    public ScalaSingleModuleWithDependencyManagerTest() {
         super("scala-single-module-dependency-manager");
     }
 
