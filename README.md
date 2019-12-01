@@ -121,9 +121,9 @@ Migration to 4.x
 
 ```groovy
 plugins {
-    id 'org.scoverage' version '4.0.0' apply false
+    id 'org.scoverage' version '4.0.0'
 }
-allprojects {
+subprojects {
     apply plugin: 'org.scoverage'
 }
 ```
