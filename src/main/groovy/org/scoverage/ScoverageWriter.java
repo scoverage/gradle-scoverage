@@ -11,7 +11,6 @@ import scoverage.report.ScoverageHtmlWriter;
 import scoverage.report.ScoverageXmlWriter;
 
 import java.io.File;
-import java.nio.charset.Charset;
 import java.util.Arrays;
 
 /**
@@ -77,7 +76,7 @@ public class ScoverageWriter {
         }
 
         if (coverageOutputHTML) {
-            Buffer<File> sources = JavaConverters.asScalaBuffer(Arrays.asList(sourceDir));
+            Buffer<File> sources = JavaConverters.asScalaBufferConverter(Arrays.asList(sourceDir)).asScala();
             new ScoverageHtmlWriter(sources, reportDir, new Some<>(sourceEncoding)).write(coverage);
             logger.info("[scoverage] Written HTML report to " +
                 reportDir.getAbsolutePath() +
