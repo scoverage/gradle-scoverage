@@ -5,6 +5,10 @@ import org.junit.Test;
 
 import java.io.File;
 
+/**
+ * Note that it is important to test the case of all of the modules together,
+ * along with the cases of each module individually, as they behave differently.
+ */
 public class ScalaMultiModuleCrossVersionTest extends ScoverageFunctionalTest {
 
     public ScalaMultiModuleCrossVersionTest() {
@@ -12,7 +16,7 @@ public class ScalaMultiModuleCrossVersionTest extends ScoverageFunctionalTest {
     }
 
     @Test
-    public void checkAndAggregateScoverage() throws Exception {
+    public void checkAndAggregateAll() throws Exception {
 
         AssertableBuildResult result = run("clean", ScoveragePlugin.getCHECK_NAME(),
                 ScoveragePlugin.getAGGREGATE_NAME());
@@ -20,13 +24,39 @@ public class ScalaMultiModuleCrossVersionTest extends ScoverageFunctionalTest {
         result.assertTaskSkipped(ScoveragePlugin.getREPORT_NAME());
         result.assertTaskSucceeded("2_11:" + ScoveragePlugin.getREPORT_NAME());
         result.assertTaskSucceeded("2_12:" + ScoveragePlugin.getREPORT_NAME());
+        result.assertTaskSucceeded("2_13:" + ScoveragePlugin.getREPORT_NAME());
         result.assertTaskSucceeded(ScoveragePlugin.getCHECK_NAME());
         result.assertTaskSucceeded("2_11:" + ScoveragePlugin.getCHECK_NAME());
         result.assertTaskSucceeded("2_12:" + ScoveragePlugin.getCHECK_NAME());
+        result.assertTaskSucceeded("2_13:" + ScoveragePlugin.getCHECK_NAME());
         result.assertTaskSucceeded(ScoveragePlugin.getAGGREGATE_NAME());
 
         assertAllReportFilesExist();
         assertCoverage(100.0);
+    }
+
+    @Test
+    public void report211() throws Exception {
+
+        AssertableBuildResult result = run("clean", ":2_11:" + ScoveragePlugin.getREPORT_NAME());
+        result.assertTaskSucceeded("2_11:" + ScoveragePlugin.getREPORT_NAME());
+        assert211ReportFilesExist();
+    }
+
+    @Test
+    public void report212() throws Exception {
+
+        AssertableBuildResult result = run("clean", ":2_12:" + ScoveragePlugin.getREPORT_NAME());
+        result.assertTaskSucceeded("2_12:" + ScoveragePlugin.getREPORT_NAME());
+        assert212ReportFilesExist();
+    }
+
+    @Test
+    public void report213() throws Exception {
+
+        AssertableBuildResult result = run("clean", ":2_13:" + ScoveragePlugin.getREPORT_NAME());
+        result.assertTaskSucceeded("2_13:" + ScoveragePlugin.getREPORT_NAME());
+        assert213ReportFilesExist();
     }
 
     private void assertAllReportFilesExist() {
@@ -42,6 +72,7 @@ public class ScalaMultiModuleCrossVersionTest extends ScoverageFunctionalTest {
         Assert.assertTrue(resolve(reportDir(), "index.html").exists());
         Assert.assertTrue(resolve(reportDir(), "2_11/src/main/scala/org/hello/World211.scala.html").exists());
         Assert.assertTrue(resolve(reportDir(), "2_12/src/main/scala/org/hello/World212.scala.html").exists());
+        Assert.assertTrue(resolve(reportDir(), "2_13/src/main/scala/org/hello/World213.scala.html").exists());
     }
 
     private void assert211ReportFilesExist() {
