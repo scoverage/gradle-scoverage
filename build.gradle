@@ -64,17 +64,29 @@ sourceSets {
     }
 }
 
-task functionalTest(type: Test) {
-    description = 'Runs the functional tests.'
+task crossScalaVersionFunctionalTest(type: Test) {
+    description = 'Runs the cross scala version functional test.'
     group = 'verification'
     testClassesDirs = sourceSets.functionalTest.output.classesDirs
     classpath = sourceSets.functionalTest.runtimeClasspath
+    include "**/ScalaMultiModuleCrossVersionTest.*"
 
     testLogging.showStandardStreams = true
 
     mustRunAfter test
 }
 
+task functionalTest(type: Test) {
+    description = 'Runs the functional tests.'
+    group = 'verification'
+    testClassesDirs = sourceSets.functionalTest.output.classesDirs
+    classpath = sourceSets.functionalTest.runtimeClasspath
+    exclude "**/ScalaMultiModuleCrossVersionTest.*"
+
+    testLogging.showStandardStreams = true
+
+    dependsOn crossScalaVersionFunctionalTest
+}
 check.dependsOn functionalTest
 
 gradlePlugin {
