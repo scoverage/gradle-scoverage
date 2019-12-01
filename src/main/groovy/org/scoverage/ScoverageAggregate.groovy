@@ -4,14 +4,14 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
-// don't use scala.collection.JavaConverters as it breaks backward compatibility with scala 2.11
-import scala.collection.JavaConversions
 import scoverage.report.CoverageAggregator
 
 class ScoverageAggregate extends DefaultTask {
 
+    @Nested
     ScoverageRunner runner
 
     @OutputDirectory

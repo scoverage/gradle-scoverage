@@ -4,6 +4,7 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import scoverage.report.CoverageAggregator
@@ -11,6 +12,7 @@ import scoverage.report.CoverageAggregator
 @CacheableTask
 class ScoverageReport extends DefaultTask {
 
+    @Nested
     ScoverageRunner runner
 
     @Input

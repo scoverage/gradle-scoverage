@@ -22,10 +22,6 @@ dependencyManagement {
 dependencies {
     compile group: 'org.scala-lang', name: 'scala-library'
 
-    // scala compilation with the dependency management plugin needs this (otherwise compilation will fail)
-    zinc group: 'com.typesafe.zinc', name: 'zinc', version: '0.3.15'
-    zinc group: 'org.scala-lang', name: 'scala-library', version: '2.10.5'
-
     testRuntime group: 'org.junit.vintage', name: 'junit-vintage-engine', version: junitVersion
     testCompile group: 'org.junit.platform', name: 'junit-platform-runner', version: junitPlatformVersion
 

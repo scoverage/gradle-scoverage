@@ -1,12 +1,14 @@
 package org.scoverage
 
 import org.gradle.api.file.FileCollection
+import org.gradle.api.tasks.Classpath
 
 import java.lang.reflect.Method
 
 class ScoverageRunner {
 
-    private FileCollection runtimeClasspath
+    @Classpath
+    final FileCollection runtimeClasspath
 
     ScoverageRunner(FileCollection runtimeClasspath) {
 
