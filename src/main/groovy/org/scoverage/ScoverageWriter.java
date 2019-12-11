@@ -76,7 +76,7 @@ public class ScoverageWriter {
         }
 
         if (coverageOutputHTML) {
-            Buffer<File> sources = JavaConverters.asScalaBufferConverter(Arrays.asList(sourceDir)).asScala();
+            Buffer<File> sources = JavaConverters.asScalaBuffer(Arrays.asList(sourceDir));
             new ScoverageHtmlWriter(sources, reportDir, new Some<>(sourceEncoding)).write(coverage);
             logger.info("[scoverage] Written HTML report to " +
                 reportDir.getAbsolutePath() +
