@@ -8,6 +8,6 @@ import org.scalatest.junit.JUnitRunner
 class World212Suite extends FunSuite {
 
   test("foo") {
-    new World213().foo()
+    new World2_13().foo()
   }
 }

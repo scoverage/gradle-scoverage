@@ -1,6 +1,6 @@
 package org.hello
 
-class World211 {
+class World2_11 {
 
   def foo(): String = {
     val s = "2" + "11"
