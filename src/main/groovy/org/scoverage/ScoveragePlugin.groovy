@@ -161,8 +161,8 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                 it instanceof ScalaCompile
             }
             originalCompilationDependencies.each {
-                def dependencyProjectCompileTask = it.project.tasks[COMPILE_NAME]
-                def dependencyProjectReportTask = it.project.tasks[REPORT_NAME]
+                def dependencyProjectCompileTask = it.project.tasks.findByName(COMPILE_NAME)
+                def dependencyProjectReportTask = it.project.tasks.findByName(REPORT_NAME)
                 if (dependencyProjectCompileTask != null) {
                     compileTask.dependsOn(dependencyProjectCompileTask)
                     // we don't want this project's tests to affect the other project's report
