@@ -4,10 +4,14 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.TaskAction
 import scoverage.report.CoverageAggregator
+
+import static org.gradle.api.tasks.PathSensitivity.RELATIVE
 
 @CacheableTask
 class ScoverageReport extends DefaultTask {
@@ -15,10 +19,12 @@ class ScoverageReport extends DefaultTask {
     @Nested
     ScoverageRunner runner
 
-    @Input
+    @InputDirectory
+    @PathSensitive(RELATIVE)
     final Property<File> dataDir = project.objects.property(File)
 
-    @Input
+    @InputDirectory
+    @PathSensitive(RELATIVE)
     final Property<File> sources = project.objects.property(File)
 
     @OutputDirectory
