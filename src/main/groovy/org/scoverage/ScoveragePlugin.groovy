@@ -1,7 +1,6 @@
 package org.scoverage
 
 import org.apache.commons.io.FileUtils
-import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -343,10 +342,10 @@ class ScoveragePlugin implements Plugin<PluginAware> {
 
     private String resolveScalaVersion(Project project) {
 
-        def resolvedDependencies = project.configurations.compileClasspath.resolvedConfiguration.firstLevelModuleDependencies
+        def components = project.configurations.compileClasspath.incoming.resolutionResult.getAllComponents()
 
-        def scalaLibrary = resolvedDependencies.find {
-            it.moduleGroup == "org.scala-lang" && it.moduleName == "scala-library"
+        def scalaLibrary = components.find {
+            it.moduleVersion.group == "org.scala-lang" && it.moduleVersion.name == "scala-library"
         }
 
         if (scalaLibrary == null) {
@@ -354,7 +353,7 @@ class ScoveragePlugin implements Plugin<PluginAware> {
             return project.extensions.scoverage.scoverageScalaVersion.get()
         } else {
             project.logger.info("Detected scala library in compilation classpath")
-            def fullScalaVersion = scalaLibrary.moduleVersion
+            def fullScalaVersion = scalaLibrary.moduleVersion.version
             return fullScalaVersion.substring(0, fullScalaVersion.lastIndexOf("."))
         }
     }
