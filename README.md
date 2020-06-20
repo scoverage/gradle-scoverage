@@ -35,6 +35,8 @@ You can find instructions on how to apply the plugin at http://plugins.gradle.or
 
     `gradle checkScoverage` will automatically invoke `reportScoverage` but it won't generate aggregated reports.
     In order to check coverage of aggregated reports one should use `gradle checkScoverage aggregateScoverage`.
+
+**Note:** The plugin is not compatible with composite builds. For more information, see [the relevant issue](https://github.com/scoverage/gradle-scoverage/issues/98).
     
 ### Configuration
 

@@ -1,0 +1,32 @@
+plugins {
+	id 'org.scoverage'
+}
+
+repositories {
+	jcenter()
+}
+
+description = 'a single-module Scala project taking part in a composite build (1)'
+
+apply plugin: 'java'
+apply plugin: 'scala'
+
+
+group "org.composite"
+version '1.0'
+
+dependencies {
+	compile group: 'org.scala-lang', name: 'scala-library', version: "${scalaVersionMajor}.${scalaVersionMinor}.${scalaVersionBuild}"
+
+	testRuntime group: 'org.junit.vintage', name: 'junit-vintage-engine', version: junitVersion
+	testCompile group: 'org.junit.platform', name: 'junit-platform-runner', version: junitPlatformVersion
+
+	testCompile group: 'org.scalatest', name: "scalatest_${scalaVersionMajor}.${scalaVersionMinor}", version: scalatestVersion
+
+    compile "org.composite:proj2:1.0"
+}
+
+test {
+	useJUnitPlatform()
+}
+
