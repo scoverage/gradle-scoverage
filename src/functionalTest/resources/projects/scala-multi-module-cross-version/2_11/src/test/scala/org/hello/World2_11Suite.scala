@@ -5,9 +5,9 @@ import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class World211Suite extends FunSuite {
+class World2_11Suite extends FunSuite {
 
   test("foo") {
-    new World211().foo()
+    new World2_11().foo()
   }
 }

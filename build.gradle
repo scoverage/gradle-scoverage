@@ -69,7 +69,8 @@ task crossScalaVersionFunctionalTest(type: Test) {
     group = 'verification'
     testClassesDirs = sourceSets.functionalTest.output.classesDirs
     classpath = sourceSets.functionalTest.runtimeClasspath
-    include "**/ScalaMultiModuleCrossVersionTest.*"
+    include '**/crossversion/*'
+    forkEvery = 1 // crucial to run every test in its own JVM
 
     testLogging.showStandardStreams = true
 
@@ -81,9 +82,7 @@ task functionalTest(type: Test) {
     group = 'verification'
     testClassesDirs = sourceSets.functionalTest.output.classesDirs
     classpath = sourceSets.functionalTest.runtimeClasspath
-    exclude "**/ScalaMultiModuleCrossVersionTest.*"
-
-    testLogging.showStandardStreams = true
+    exclude '**/crossversion/*'
 
     dependsOn crossScalaVersionFunctionalTest
 }
