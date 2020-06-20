@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * Tests are currently ignored as composite builds are not supported yet.
  *
- * See https://github.com/scoverage/gradle-scoverage/issues/98
+ * @see <a href="https://github.com/scoverage/gradle-scoverage/issues/98">Issue #94</a>.
  */
 public class CompositeBuildTest extends ScoverageFunctionalTest {
 
