@@ -50,7 +50,7 @@ public abstract class ScoverageFunctionalTest {
 
     protected File projectDir() {
 
-        return new File("src/functionalTest/resources/projects/" + projectName);
+        return new File(getClass().getClassLoader().getResource("projects/" + projectName).getFile());
     }
 
     protected File buildDir() {

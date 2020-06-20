@@ -1,4 +1,4 @@
-package org.scoverage.crossversion;
+package org.scoverage;
 
 public class Scala213Test extends ScalaVersionTest {
     public Scala213Test() {

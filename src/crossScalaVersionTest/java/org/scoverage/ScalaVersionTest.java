@@ -1,4 +1,4 @@
-package org.scoverage.crossversion;
+package org.scoverage;
 
 import org.junit.Assert;
 import org.junit.Test;
