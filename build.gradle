@@ -44,6 +44,7 @@ apply plugin: 'groovy'
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
 
+
 dependencies {
     compileOnly "org.scoverage:scalac-scoverage-plugin_2.12:1.4.1"
     implementation group: 'commons-io', name: 'commons-io', version: '2.6'
@@ -58,39 +59,51 @@ dependencies {
 sourceSets {
     functionalTest {
         java.srcDir file('src/functionalTest/java')
-        resources.srcDir file('src/functionalTest/resources')
-        compileClasspath += sourceSets.main.output  + configurations.testRuntimeClasspath
-        runtimeClasspath += output + compileClasspath
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
+    }
+    crossScalaVersionTest {
+        java.srcDir file('src/crossScalaVersionTest/java')
+        compileClasspath += sourceSets.main.output + sourceSets.functionalTest.output
+        runtimeClasspath += sourceSets.main.output + sourceSets.functionalTest.output
     }
 }
 
-task crossScalaVersionFunctionalTest(type: Test) {
+configurations {
+    functionalTestImplementation.extendsFrom testImplementation
+    functionalTestRuntimeOnly.extendsFrom testRuntimeOnly
+
+    crossScalaVersionTestImplementation.extendsFrom testImplementation
+    crossScalaVersionTestRuntimeOnly.extendsFrom testRuntimeOnly
+}
+
+task crossScalaVersionTest(type: Test) {
     description = 'Runs the cross scala version functional test.'
     group = 'verification'
-    testClassesDirs = sourceSets.functionalTest.output.classesDirs
-    classpath = sourceSets.functionalTest.runtimeClasspath
-    include "**/ScalaMultiModuleCrossVersionTest.*"
+    testClassesDirs = sourceSets.crossScalaVersionTest.output
+    classpath = sourceSets.crossScalaVersionTest.runtimeClasspath
+    forkEvery = 1 // crucial to run every test in its own JVM
 
     testLogging.showStandardStreams = true
 
     mustRunAfter test
 }
+check.dependsOn crossScalaVersionTest
 
 task functionalTest(type: Test) {
     description = 'Runs the functional tests.'
     group = 'verification'
-    testClassesDirs = sourceSets.functionalTest.output.classesDirs
+    testClassesDirs = sourceSets.functionalTest.output
     classpath = sourceSets.functionalTest.runtimeClasspath
-    exclude "**/ScalaMultiModuleCrossVersionTest.*"
 
     testLogging.showStandardStreams = true
 
-    dependsOn crossScalaVersionFunctionalTest
+    mustRunAfter crossScalaVersionTest
 }
 check.dependsOn functionalTest
 
 gradlePlugin {
-    testSourceSets sourceSets.functionalTest
+    testSourceSets sourceSets.functionalTest, sourceSets.crossScalaVersionTest
 }
 
 task groovydocJar(type: Jar, dependsOn: groovydoc) {
