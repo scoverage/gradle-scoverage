@@ -12,3 +12,8 @@ description = 'defines scala library using the "implementation" configuration an
 dependencies {
     implementation group: 'org.scala-lang', name: 'scala-library'
 }
+
+scoverage {
+    // 'detectedScalaLibraryVersion' is set by the test `DetectScalaLibraryTest.java`
+    scoverageScalaVersion = detectedScalaLibraryVersion
+}
