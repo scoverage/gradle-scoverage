@@ -27,7 +27,6 @@ class ScoveragePlugin implements Plugin<PluginAware> {
 
     static final String DEFAULT_REPORT_DIR = 'reports' + File.separatorChar + 'scoverage'
 
-    private volatile File pluginFile = null
     private final ConcurrentHashMap<Task, Set<? extends Task>> taskDependencies = new ConcurrentHashMap<>();
 
     @Override
@@ -172,13 +171,7 @@ class ScoveragePlugin implements Plugin<PluginAware> {
             }
 
             compileTask.configure {
-                if (pluginFile == null) {
-                    pluginFile = project.configurations[CONFIGURATION_NAME].find {
-                        it.name.startsWith("scalac-scoverage-plugin")
-                    }
-                }
-
-                List<String> parameters = ['-Xplugin:' + pluginFile.absolutePath]
+                List<String> parameters = []
                 List<String> existingParameters = scalaCompileOptions.additionalParameters
                 if (existingParameters) {
                     parameters.addAll(existingParameters)
@@ -198,6 +191,18 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                 scalaCompileOptions.additionalParameters = parameters
                 // the compile task creates a store of measured statements
                 outputs.file(new File(extension.dataDir.get(), 'scoverage.coverage.xml'))
+
+                dependsOn project.configurations[CONFIGURATION_NAME]
+                doFirst {
+                    /*
+                        It is crucial that this would run in `doFirst`, as this resolves the (dependencies of the)
+                        configuration, which we do not want to do at configuration time (but only at execution time).
+                     */
+                    def pluginFile = project.configurations[CONFIGURATION_NAME].find {
+                        it.name.startsWith("scalac-scoverage-plugin")
+                    }
+                    scalaCompileOptions.additionalParameters.add('-Xplugin:' + pluginFile.absolutePath)
+                }
             }
 
             project.gradle.taskGraph.whenReady { graph ->
