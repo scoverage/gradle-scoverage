@@ -1,0 +1,2 @@
+# Run ./gradlew --write-locks to regenerate this file
+org.scala-lang:scala-library:2.12.0 (1 constraints: 3705353b)

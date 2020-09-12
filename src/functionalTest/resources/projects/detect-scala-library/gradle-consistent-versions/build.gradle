@@ -1,0 +1,19 @@
+plugins {
+    id "com.palantir.consistent-versions" version "1.16.0"
+    id 'org.scoverage'
+}
+
+repositories {
+    jcenter()
+}
+
+description = 'defines scala library using the "implementation" configuration and the gradle-consistent-versions plugin'
+
+dependencies {
+    implementation group: 'org.scala-lang', name: 'scala-library'
+}
+
+scoverage {
+    // 'detectedScalaLibraryVersion' is set by the test `DetectScalaLibraryTest.java`
+    scoverageScalaVersion = detectedScalaLibraryVersion
+}

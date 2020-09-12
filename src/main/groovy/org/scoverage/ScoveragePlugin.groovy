@@ -1,7 +1,6 @@
 package org.scoverage
 
 import org.apache.commons.io.FileUtils
-import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -25,10 +24,10 @@ class ScoveragePlugin implements Plugin<PluginAware> {
     static final String CHECK_NAME = 'checkScoverage'
     static final String COMPILE_NAME = 'compileScoverageScala'
     static final String AGGREGATE_NAME = 'aggregateScoverage'
+    static final String DEFAULT_SCALA_VERSION = '2.12'
 
     static final String DEFAULT_REPORT_DIR = 'reports' + File.separatorChar + 'scoverage'
 
-    private volatile File pluginFile = null
     private final ConcurrentHashMap<Task, Set<? extends Task>> taskDependencies = new ConcurrentHashMap<>();
 
     @Override
@@ -173,13 +172,7 @@ class ScoveragePlugin implements Plugin<PluginAware> {
             }
 
             compileTask.configure {
-                if (pluginFile == null) {
-                    pluginFile = project.configurations[CONFIGURATION_NAME].find {
-                        it.name.startsWith("scalac-scoverage-plugin")
-                    }
-                }
-
-                List<String> parameters = ['-Xplugin:' + pluginFile.absolutePath]
+                List<String> parameters = []
                 List<String> existingParameters = scalaCompileOptions.additionalParameters
                 if (existingParameters) {
                     parameters.addAll(existingParameters)
@@ -199,6 +192,18 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                 scalaCompileOptions.additionalParameters = parameters
                 // the compile task creates a store of measured statements
                 outputs.file(new File(extension.dataDir.get(), 'scoverage.coverage.xml'))
+
+                dependsOn project.configurations[CONFIGURATION_NAME]
+                doFirst {
+                    /*
+                        It is crucial that this would run in `doFirst`, as this resolves the (dependencies of the)
+                        configuration, which we do not want to do at configuration time (but only at execution time).
+                     */
+                    def pluginFile = project.configurations[CONFIGURATION_NAME].find {
+                        it.name.startsWith("scalac-scoverage-plugin")
+                    }
+                    scalaCompileOptions.additionalParameters.add('-Xplugin:' + pluginFile.absolutePath)
+                }
             }
 
             project.gradle.taskGraph.whenReady { graph ->
@@ -343,19 +348,26 @@ class ScoveragePlugin implements Plugin<PluginAware> {
 
     private String resolveScalaVersion(Project project) {
 
-        def resolvedDependencies = project.configurations.compileClasspath.resolvedConfiguration.firstLevelModuleDependencies
-
-        def scalaLibrary = resolvedDependencies.find {
-            it.moduleGroup == "org.scala-lang" && it.moduleName == "scala-library"
-        }
-
-        if (scalaLibrary == null) {
-            project.logger.info("No scala library detected. Using property 'scoverageScalaVersion'")
-            return project.extensions.scoverage.scoverageScalaVersion.get()
+        def scalaVersionProperty = project.extensions.scoverage.scoverageScalaVersion
+        if (scalaVersionProperty.isPresent()) {
+            def configuredScalaVersion = scalaVersionProperty.get()
+            project.logger.info("Using configured Scala version: $configuredScalaVersion")
+            return configuredScalaVersion
         } else {
-            project.logger.info("Detected scala library in compilation classpath")
-            def fullScalaVersion = scalaLibrary.moduleVersion
-            return fullScalaVersion.substring(0, fullScalaVersion.lastIndexOf("."))
+            project.logger.info("No Scala version configured. Detecting scala library...")
+            def components = project.configurations.compileClasspath.incoming.resolutionResult.getAllComponents()
+            def scalaLibrary = components.find {
+                it.moduleVersion.group == "org.scala-lang" && it.moduleVersion.name == "scala-library"
+            }
+            if (scalaLibrary != null) {
+                def fullScalaVersion = scalaLibrary.moduleVersion.version
+                def scalaVersion = fullScalaVersion.substring(0, fullScalaVersion.lastIndexOf("."))
+                project.logger.info("Detected scala library in compilation classpath. Scala version: $scalaVersion")
+                return scalaVersion
+            } else {
+                project.logger.info("No scala library detected. Using default Scala version: $DEFAULT_SCALA_VERSION")
+                return DEFAULT_SCALA_VERSION
+            }
         }
     }
 

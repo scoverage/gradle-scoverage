@@ -60,7 +60,6 @@ class ScoverageExtension {
         scoverageVersion.set('1.4.1')
 
         scoverageScalaVersion = project.objects.property(String)
-        scoverageScalaVersion.set('2.12')
 
         sources = project.objects.property(File)
         sources.set(project.projectDir)
