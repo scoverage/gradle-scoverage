@@ -2,8 +2,6 @@ package org.scoverage;
 
 import org.gradle.api.logging.Logger;
 import scala.Some;
-import scala.collection.JavaConverters;
-import scala.collection.mutable.Buffer;
 import scoverage.Constants;
 import scoverage.Coverage;
 import scoverage.report.CoberturaXmlWriter;
@@ -11,7 +9,7 @@ import scoverage.report.ScoverageHtmlWriter;
 import scoverage.report.ScoverageXmlWriter;
 
 import java.io.File;
-import java.util.Arrays;
+import java.lang.reflect.Field;
 
 /**
  * Util for generating and saving coverage files.
@@ -46,7 +44,7 @@ public class ScoverageWriter {
                              Boolean coverageOutputCobertura,
                              Boolean coverageOutputXML,
                              Boolean coverageOutputHTML,
-                             Boolean coverageDebug) {
+                             Boolean coverageDebug) throws NoSuchFieldException, IllegalAccessException {
 
         logger.info("[scoverage] Generating scoverage reports...");
 
@@ -76,8 +74,11 @@ public class ScoverageWriter {
         }
 
         if (coverageOutputHTML) {
-            Buffer<File> sources = JavaConverters.asScalaBufferConverter(Arrays.asList(sourceDir)).asScala();
-            new ScoverageHtmlWriter(sources, reportDir, new Some<>(sourceEncoding)).write(coverage);
+            ScoverageHtmlWriter writer = new ScoverageHtmlWriter(sourceDir, reportDir);
+            Field field = ScoverageHtmlWriter.class.getDeclaredField("sourceEncoding");
+            field.setAccessible(true);
+            field.set(writer, new Some<>(sourceEncoding));
+            writer.write(coverage);
             logger.info("[scoverage] Written HTML report to " +
                 reportDir.getAbsolutePath() +
                 File.separator +
