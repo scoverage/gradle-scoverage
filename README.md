@@ -43,10 +43,10 @@ You can find instructions on how to apply the plugin at http://plugins.gradle.or
 The plugin exposes multiple options that can be configured by setting them in an `scoverage` block within the project's
 build script. These options are as follows:
 
-* `scoverageVersion = <String>` (default `"1.4.1"`): The version of the scoverage scalac plugin. This (gradle) plugin
+* `scoverageVersion = <String>` (default `"1.4.2`): The version of the scoverage scalac plugin. This (gradle) plugin
 should be compatible with all 1+ versions.
 
-* `scoverageScalaVersion = <String>` (default `"2.12"`): The scala version of the scoverage scalac plugin. This
+* `scoverageScalaVersion = <String>` (default `detected`): The scala version of the scoverage scalac plugin. This
 overrides the version of the `scala-library` compile dependency (if the dependency is configured).
   
 * `coverageOutputCobertura = <boolean>` (default `true`): Enables/disables cobertura.xml file generation (for both aggregated and non-aggregated reports).
@@ -121,6 +121,13 @@ For example: `gradle reportScoverage -x compileScala`.
 In order for the plugin to work alongside [Palantir's consistent versions plugin](https://github.com/palantir/gradle-consistent-versions),
 the Scala version must be manually configured (via `scoverageScalaVersion`); otherwise, the plugin will attempt to
 resolve the compilation classpath, which is prohibited by the versions plugin.
+
+Migration to 5.x
+----------------
+
+* Requires scoverage 1.4.2 or higher (and uses this version by default)
+* Adds support for Scala 2.13
+* Drops support for Scala 2.11
 
 Migration to 4.x
 ----------------

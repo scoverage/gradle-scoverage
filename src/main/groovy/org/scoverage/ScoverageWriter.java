@@ -2,8 +2,6 @@ package org.scoverage;
 
 import org.gradle.api.logging.Logger;
 import scala.Some;
-import scala.collection.JavaConverters;
-import scala.collection.mutable.Buffer;
 import scoverage.Constants;
 import scoverage.Coverage;
 import scoverage.report.CoberturaXmlWriter;
@@ -11,7 +9,6 @@ import scoverage.report.ScoverageHtmlWriter;
 import scoverage.report.ScoverageXmlWriter;
 
 import java.io.File;
-import java.util.Arrays;
 
 /**
  * Util for generating and saving coverage files.
@@ -76,8 +73,7 @@ public class ScoverageWriter {
         }
 
         if (coverageOutputHTML) {
-            Buffer<File> sources = JavaConverters.asScalaBufferConverter(Arrays.asList(sourceDir)).asScala();
-            new ScoverageHtmlWriter(sources, reportDir, new Some<>(sourceEncoding)).write(coverage);
+            new ScoverageHtmlWriter(new File[]{sourceDir}, reportDir, new Some<>(sourceEncoding)).write(coverage);
             logger.info("[scoverage] Written HTML report to " +
                 reportDir.getAbsolutePath() +
                 File.separator +

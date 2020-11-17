@@ -23,11 +23,9 @@ public class ScalaCrossVersionAggregationTest extends ScoverageFunctionalTest {
                 ScoveragePlugin.getAGGREGATE_NAME());
 
         result.assertTaskSkipped(ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskSucceeded("2_11:" + ScoveragePlugin.getREPORT_NAME());
         result.assertTaskSucceeded("2_12:" + ScoveragePlugin.getREPORT_NAME());
         result.assertTaskSucceeded("2_13:" + ScoveragePlugin.getREPORT_NAME());
         result.assertTaskSucceeded(ScoveragePlugin.getCHECK_NAME());
-        result.assertTaskSucceeded("2_11:" + ScoveragePlugin.getCHECK_NAME());
         result.assertTaskSucceeded("2_12:" + ScoveragePlugin.getCHECK_NAME());
         result.assertTaskSucceeded("2_13:" + ScoveragePlugin.getCHECK_NAME());
         result.assertTaskSucceeded(ScoveragePlugin.getAGGREGATE_NAME());
@@ -39,7 +37,6 @@ public class ScalaCrossVersionAggregationTest extends ScoverageFunctionalTest {
     private void assertAggregationFilesExist() {
 
         Assert.assertTrue(resolve(reportDir(), "index.html").exists());
-        Assert.assertTrue(resolve(reportDir(), "2_11/src/main/scala/org/hello/World2_11.scala.html").exists());
         Assert.assertTrue(resolve(reportDir(), "2_12/src/main/scala/org/hello/World2_12.scala.html").exists());
         Assert.assertTrue(resolve(reportDir(), "2_13/src/main/scala/org/hello/World2_13.scala.html").exists());
     }
