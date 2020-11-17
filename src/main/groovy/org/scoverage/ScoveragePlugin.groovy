@@ -191,7 +191,7 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                 }
                 scalaCompileOptions.additionalParameters = parameters
                 // the compile task creates a store of measured statements
-                outputs.file(new File(extension.dataDir.get(), 'scoverage.coverage.xml'))
+                outputs.file(new File(extension.dataDir.get(), 'scoverage.coverage'))
 
                 dependsOn project.configurations[CONFIGURATION_NAME]
                 doFirst {
