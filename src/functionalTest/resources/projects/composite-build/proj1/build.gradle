@@ -16,14 +16,14 @@ group "org.composite"
 version '1.0'
 
 dependencies {
-	compile group: 'org.scala-lang', name: 'scala-library', version: "${scalaVersionMajor}.${scalaVersionMinor}.${scalaVersionBuild}"
+	implementation group: 'org.scala-lang', name: 'scala-library', version: "${scalaVersionMajor}.${scalaVersionMinor}.${scalaVersionBuild}"
 
-	testRuntime group: 'org.junit.vintage', name: 'junit-vintage-engine', version: junitVersion
-	testCompile group: 'org.junit.platform', name: 'junit-platform-runner', version: junitPlatformVersion
+	testRuntimeOnly group: 'org.junit.vintage', name: 'junit-vintage-engine', version: junitVersion
+	testImplementation group: 'org.junit.platform', name: 'junit-platform-runner', version: junitPlatformVersion
 
-	testCompile group: 'org.scalatest', name: "scalatest_${scalaVersionMajor}.${scalaVersionMinor}", version: scalatestVersion
+	testImplementation group: 'org.scalatest', name: "scalatest_${scalaVersionMajor}.${scalaVersionMinor}", version: scalatestVersion
 
-    compile "org.composite:proj2:1.0"
+    implementation "org.composite:proj2:1.0"
 }
 
 test {

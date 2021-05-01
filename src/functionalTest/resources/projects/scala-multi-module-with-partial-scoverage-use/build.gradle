@@ -18,15 +18,15 @@ allprojects { p ->
 
     dependencies {
 
-        compile group: 'org.scala-lang', name: 'scala-library', version: "${scalaVersionMajor}.${scalaVersionMinor}.${scalaVersionBuild}"
+        implementation group: 'org.scala-lang', name: 'scala-library', version: "${scalaVersionMajor}.${scalaVersionMinor}.${scalaVersionBuild}"
 
-        testCompile group: 'org.junit.platform', name: 'junit-platform-runner'
+        testImplementation group: 'org.junit.platform', name: 'junit-platform-runner'
 
-        testCompile group: 'org.scalatest', name: "scalatest_${scalaVersionMajor}.${scalaVersionMinor}"
+        testImplementation group: 'org.scalatest', name: "scalatest_${scalaVersionMajor}.${scalaVersionMinor}"
     }
 }
 
 dependencies {
-    compile project(':a')
-    compile project(':b')
+    implementation project(':a')
+    implementation project(':b')
 }

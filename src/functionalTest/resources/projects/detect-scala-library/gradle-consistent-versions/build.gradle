@@ -1,5 +1,5 @@
 plugins {
-    id "com.palantir.consistent-versions" version "1.16.0"
+    id "com.palantir.consistent-versions" version "1.28.0"
     id 'org.scoverage'
 }
 

@@ -15,7 +15,7 @@ subprojects { p ->
         apply plugin: 'java'
         dependencies {
             implementation platform(project(':dependencies'))
-            testCompile group: 'org.junit.platform', name: 'junit-platform-runner'
+            testImplementation group: 'org.junit.platform', name: 'junit-platform-runner'
         }
 
         test {

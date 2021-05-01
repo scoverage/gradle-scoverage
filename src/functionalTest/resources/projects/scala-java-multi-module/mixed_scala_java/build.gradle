@@ -1,11 +1,11 @@
 apply plugin: 'scala'
 
 dependencies {
-    compile group: 'org.scala-lang', name: 'scala-library', version: "${scalaVersionMajor}.${scalaVersionMinor}.${scalaVersionBuild}"
+    implementation group: 'org.scala-lang', name: 'scala-library', version: "${scalaVersionMajor}.${scalaVersionMinor}.${scalaVersionBuild}"
 
-    testRuntime group: 'org.junit.vintage', name: 'junit-vintage-engine', version: junitVersion
+    testRuntimeOnly group: 'org.junit.vintage', name: 'junit-vintage-engine', version: junitVersion
 
-    testCompile group: 'org.scalatest', name: "scalatest_${scalaVersionMajor}.${scalaVersionMinor}", version: scalatestVersion
+    testImplementation group: 'org.scalatest', name: "scalatest_${scalaVersionMajor}.${scalaVersionMinor}", version: scalatestVersion
 }
 
 // A common practice in mixed java/scala modules to make Java code able to import Scala code

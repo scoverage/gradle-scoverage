@@ -14,7 +14,7 @@ subprojects {
     apply plugin: 'java'
 
     dependencies {
-        testCompile group: 'org.junit.platform', name: 'junit-platform-runner', version: junitPlatformVersion
+        testImplementation group: 'org.junit.platform', name: 'junit-platform-runner', version: junitPlatformVersion
     }
 
     test {
