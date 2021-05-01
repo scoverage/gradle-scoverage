@@ -1,7 +1,7 @@
 plugins {
     id 'java-gradle-plugin'
     id "com.gradle.plugin-publish" version "0.12.0"
-    id "org.jetbrains.gradle.plugin.idea-ext" version "0.4.2"
+    id "org.jetbrains.gradle.plugin.idea-ext" version "1.0"
 }
 
 repositories {
@@ -38,7 +38,7 @@ pluginBundle {
     tags = ['coverage', 'scala', 'scoverage']
 }
 
-apply plugin: 'maven'
+apply plugin: 'maven-publish'
 apply plugin: 'groovy'
 
 sourceCompatibility = '1.8'
@@ -107,76 +107,79 @@ gradlePlugin {
 }
 
 task groovydocJar(type: Jar, dependsOn: groovydoc) {
-    classifier = 'groovydoc'
     from "$buildDir/docs/groovydoc"
+    classifier 'groovydoc'
 }
 
 task sourcesJar(type: Jar) {
     from sourceSets.main.allSource
-    classifier = 'sources'
+    classifier 'sources'
 }
 
-artifacts {
-    archives groovydocJar
-    archives sourcesJar
-}
-
-if (project.properties.containsKey('signing.keyId')) {
-    apply plugin: 'signing'
-    signing {
-        sign configurations.archives
+def propOrDefault(String property) {
+    if (project.hasProperty(property)) {
+        return project.getProperty(property)
+    } else {
+        return ''
     }
 }
 
-uploadArchives {
+publishing {
     repositories {
-        mavenDeployer {
-            if (project.properties.containsKey('signing.keyId')) {
-                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+        maven {
+            url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+            credentials(PasswordCredentials) {
+                username = propOrDefault('sonatypeUser')
+                password = propOrDefault('sonatypePass')
             }
-
-            snapshotRepository(url: 'https://oss.sonatype.org/content/repositories/snapshots') {
-                authentication(userName: sonatypeUser, password: sonatypePass)
-            }
-
-            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                authentication(userName: sonatypeUser, password: sonatypePass)
-            }
-
-            pom.project {
-                name 'GradleScoverage'
-                description project.description
-                url project.website
+        }
+    }
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                name = 'GradleScoverage'
+                description = project.description
+                url = project.website
 
                 scm {
-                    url scmUrl
-                    developerConnection scmUrl
+                    url = scmUrl
+                    developerConnection = scmUrl
                 }
 
                 licenses {
                     license {
-                        name 'The Apache Software License, Version 2.0'
-                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                        distribution 'repo'
+                        name = 'The Apache Software License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        distribution = 'repo'
                     }
                 }
 
                 developers {
                     developer {
-                        id 'maiflai'
+                        id = 'maiflai'
                     }
                     developer {
-                        id 'ubourdon'
+                        id = 'ubourdon'
                     }
                     developer {
-                        id 'D-Roch'
+                        id = 'D-Roch'
                     }
                     developer {
-                        id 'eyalroth'
+                        id = 'eyalroth'
                     }
                 }
             }
+            from components.java
+            artifact groovydocJar
+            artifact sourcesJar
         }
+    }
+}
+
+if (project.properties.containsKey('signing.keyId')) {
+    apply plugin: 'signing'
+    signing {
+        sign publishing.publications.mavenJava
     }
 }
 
