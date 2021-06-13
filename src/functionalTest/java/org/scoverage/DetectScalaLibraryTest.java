@@ -39,7 +39,8 @@ public class DetectScalaLibraryTest extends ScoverageFunctionalTest {
                 {"/compileOnly", new String[] {".0", ".+"}, true, new String[0]},
                 {"/implementation", new String[] {".0", ".+"}, true, new String[0]},
                 {"/dependency-management", new String[] {".0", ".+"}, true, new String[0]},
-                {"/gradle-consistent-versions", new String[] {"ignored"}, false, new String[] {"--write-locks"}},
+// disabled until the consistent-versions plugin supports Gradle 7
+//                {"/gradle-consistent-versions", new String[] {"ignored"}, false, new String[] {"--write-locks"}},
         };
         return Arrays.asList(data);
     }

@@ -6,8 +6,8 @@ repositories {
     jcenter()
 }
 
-description = 'defines scala library using the "compile" configuration'
+description = 'defines scala library using the "implementation" configuration'
 
 dependencies {
-    compile group: 'org.scala-lang', name: 'scala-library', version: "${detectedScalaLibraryVersion}"
+    implementation group: 'org.scala-lang', name: 'scala-library', version: "${detectedScalaLibraryVersion}"
 }

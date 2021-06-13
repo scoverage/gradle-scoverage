@@ -19,12 +19,12 @@ dependencyManagement {
 }
 
 dependencies {
-    compile group: 'org.scala-lang', name: 'scala-library'
+    implementation group: 'org.scala-lang', name: 'scala-library'
 
-    testRuntime group: 'org.junit.vintage', name: 'junit-vintage-engine', version: junitVersion
-    testCompile group: 'org.junit.platform', name: 'junit-platform-runner', version: junitPlatformVersion
+    testRuntimeOnly group: 'org.junit.vintage', name: 'junit-vintage-engine', version: junitVersion
+    testImplementation group: 'org.junit.platform', name: 'junit-platform-runner', version: junitPlatformVersion
 
-    testCompile group: 'org.scalatest', name: "scalatest_${scalaVersionMajor}.${scalaVersionMinor}", version: scalatestVersion
+    testImplementation group: 'org.scalatest', name: "scalatest_${scalaVersionMajor}.${scalaVersionMinor}", version: scalatestVersion
 }
 
 test {
@@ -33,8 +33,8 @@ test {
 
 
 configurations {
-    intTestCompile.extendsFrom testCompile
-    intTestRuntime.extendsFrom testRuntime
+    intTestImplementation.extendsFrom testImplementation
+    intTestRuntimeOnly.extendsFrom testRuntimeOnly
 }
 sourceSets {
     intTest {

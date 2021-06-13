@@ -12,7 +12,6 @@ import java.io.File;
 
 /**
  * Util for generating and saving coverage files.
- * <p/>
  * Copied from sbt-scoverage and converted to Java to avoid dependency to Scala.
  */
 public class ScoverageWriter {

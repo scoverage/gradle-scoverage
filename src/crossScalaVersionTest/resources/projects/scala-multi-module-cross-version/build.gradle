@@ -17,8 +17,8 @@ allprojects {
     apply plugin: 'org.scoverage'
 
     dependencies {
-        testRuntime group: 'org.junit.vintage', name: 'junit-vintage-engine', version: junitVersion
-        testCompile group: 'org.junit.platform', name: 'junit-platform-runner', version: junitPlatformVersion
+        testRuntimeOnly group: 'org.junit.vintage', name: 'junit-vintage-engine', version: junitVersion
+        testImplementation group: 'org.junit.platform', name: 'junit-platform-runner', version: junitPlatformVersion
     }
 
     test {
