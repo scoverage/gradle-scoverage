@@ -1,24 +1,22 @@
 package org.scoverage;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import java.util.stream.Stream;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.stringContainsInOrder;
 
 @RunWith(Parameterized.class)
 public class DetectScalaLibraryTest extends ScoverageFunctionalTest {
 
-    private static final String SCALA_VERSION = "2.12";
+    private static final String SCALA_VERSION = "2.13";
     private static final String SCALA_LIBRARY_PARAMETER = "-PdetectedScalaLibraryVersion=";
-
-    private static final String EXPECTED_OUTPUT_CONFIGURED_VERSION = "Using configured Scala version";
-    private static final String EXPECTED_OUTPUT_DETECTED_VERSION = "Detected scala library in compilation classpath";
-    private static final String EXPECTED_OUTPUT_USING = "Using scoverage scalac plugin version '" + SCALA_VERSION;
 
     @Parameterized.Parameter(0)
     public String projectDir;
@@ -57,7 +55,7 @@ public class DetectScalaLibraryTest extends ScoverageFunctionalTest {
         }
     }
 
-    private void testWithParameter(String parameter, Boolean detect) {
+    private void testWithParameter(String parameter, boolean detect) {
 
         String[] basicParameters = {"clean", parameter, "--info"};
         String[] parameters = Stream.concat(Arrays.stream(basicParameters), Arrays.stream(additionalParameters))
@@ -66,11 +64,11 @@ public class DetectScalaLibraryTest extends ScoverageFunctionalTest {
 
         String output = result.getResult().getOutput();
         if (detect) {
-            Assert.assertTrue(output.contains(EXPECTED_OUTPUT_DETECTED_VERSION));
+            assertThat(output, containsString("Detected scala library in compilation classpath"));
         } else {
-            Assert.assertTrue(output.contains(EXPECTED_OUTPUT_CONFIGURED_VERSION));
+            assertThat(output, containsString("Using configured Scala version"));
         }
-        Assert.assertTrue(output.contains(EXPECTED_OUTPUT_USING));
+        assertThat(output, stringContainsInOrder("Using scoverage scalac plugin", "for scala", SCALA_VERSION));
     }
 
 }

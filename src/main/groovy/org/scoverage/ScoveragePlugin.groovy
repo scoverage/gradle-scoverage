@@ -24,7 +24,7 @@ class ScoveragePlugin implements Plugin<PluginAware> {
     static final String CHECK_NAME = 'checkScoverage'
     static final String COMPILE_NAME = 'compileScoverageScala'
     static final String AGGREGATE_NAME = 'aggregateScoverage'
-    static final String DEFAULT_SCALA_VERSION = '2.12'
+    static final String DEFAULT_SCALA_VERSION = '2.13.6'
 
     static final String DEFAULT_REPORT_DIR = 'reports' + File.separatorChar + 'scoverage'
 
@@ -60,15 +60,15 @@ class ScoveragePlugin implements Plugin<PluginAware> {
             }
 
             project.afterEvaluate {
-                def scalaVersion = resolveScalaVersion(project)
+                def scalaFullVersion = resolveScalaVersion(project)
+                def scalaBinaryVersion = scalaFullVersion.substring(0, scalaFullVersion.lastIndexOf('.'))
                 def scoverageVersion = project.extensions.scoverage.scoverageVersion.get()
-                def fullScoverageVersion = "$scalaVersion:$scoverageVersion"
 
-                project.logger.info("Using scoverage scalac plugin version '$fullScoverageVersion'")
+                project.logger.info("Using scoverage scalac plugin $scoverageVersion for scala $scalaFullVersion")
 
                 project.dependencies {
-                    scoverage("org.scoverage:scalac-scoverage-plugin_$fullScoverageVersion")
-                    scoverage("org.scoverage:scalac-scoverage-runtime_$fullScoverageVersion")
+                    scoverage("org.scoverage:scalac-scoverage-plugin_$scalaFullVersion:$scoverageVersion")
+                    scoverage("org.scoverage:scalac-scoverage-runtime_$scalaBinaryVersion:$scoverageVersion")
                 }
             }
         }
@@ -360,8 +360,7 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                 it.moduleVersion.group == "org.scala-lang" && it.moduleVersion.name == "scala-library"
             }
             if (scalaLibrary != null) {
-                def fullScalaVersion = scalaLibrary.moduleVersion.version
-                def scalaVersion = fullScalaVersion.substring(0, fullScalaVersion.lastIndexOf("."))
+                def scalaVersion = scalaLibrary.moduleVersion.version
                 project.logger.info("Detected scala library in compilation classpath. Scala version: $scalaVersion")
                 return scalaVersion
             } else {
