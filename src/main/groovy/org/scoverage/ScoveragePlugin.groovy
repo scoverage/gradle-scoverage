@@ -87,6 +87,7 @@ class ScoveragePlugin implements Plugin<PluginAware> {
             java.source(originalSourceSet.java)
             scala.source(originalSourceSet.scala)
 
+            annotationProcessorPath += originalSourceSet.annotationProcessorPath + project.configurations.scoverage
             compileClasspath += originalSourceSet.compileClasspath + project.configurations.scoverage
             runtimeClasspath = it.output + project.configurations.scoverage + originalSourceSet.runtimeClasspath
         }
