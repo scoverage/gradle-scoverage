@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/scoverage/gradle-scoverage.png?branch=master)](https://travis-ci.org/scoverage/gradle-scoverage)
+[![Build Status](https://travis-ci.com/scoverage/gradle-scoverage.png?branch=master)](https://travis-ci.com/scoverage/gradle-scoverage)
 
 gradle-scoverage
 ================
