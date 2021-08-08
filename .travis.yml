@@ -1,3 +1,0 @@
-language: groovy
-script:
-  - "./gradlew --info --stacktrace check"
