@@ -3,7 +3,7 @@ plugins {
 }
 
 repositories {
-	jcenter()
+	mavenCentral()
 }
 
 description = 'a single-module Scala project taking part in a composite build (2)'

@@ -6,7 +6,7 @@ description = 'a multi-module Scala and Java project that defines scoverage only
 
 allprojects {
     repositories {
-        jcenter()
+        mavenCentral()
     }
 }
 
