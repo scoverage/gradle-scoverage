@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/scoverage/gradle-scoverage.png?branch=master)](https://travis-ci.org/scoverage/gradle-scoverage)
+[![Java CI with Gradle](https://github.com/scoverage/gradle-scoverage/actions/workflows/gradle.yml/badge.svg)](https://github.com/scoverage/gradle-scoverage/actions/workflows/gradle.yml)
 
 gradle-scoverage
 ================
