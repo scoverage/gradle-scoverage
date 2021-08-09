@@ -3,7 +3,7 @@ plugins {
 }
 
 repositories {
-    jcenter()
+    mavenCentral()
 }
 
 description = 'a single-module Scala project with no check configured'

@@ -6,7 +6,7 @@ description = 'a multi-module Scala project that builds successfully and has mod
 
 allprojects { p ->
     repositories {
-        jcenter()
+        mavenCentral()
     }
 
     apply plugin: 'java'

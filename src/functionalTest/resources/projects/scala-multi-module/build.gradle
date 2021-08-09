@@ -6,7 +6,7 @@ description = 'a multi-module Scala project that builds successfully with 100% c
 
 allprojects { p ->
     repositories {
-        jcenter()
+        mavenCentral()
     }
 
     if (p.name != 'dependencies') {

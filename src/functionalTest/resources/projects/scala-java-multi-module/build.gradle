@@ -6,7 +6,7 @@ description = 'a multi-module Scala and Java project that builds successfully wi
 
 allprojects {
     repositories {
-        jcenter()
+        mavenCentral()
     }
 }
 

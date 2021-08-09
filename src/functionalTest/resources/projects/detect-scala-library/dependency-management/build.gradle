@@ -4,7 +4,7 @@ plugins {
 }
 
 repositories {
-    jcenter()
+    mavenCentral()
 }
 
 description = 'defines scala library using the "implementation" configuration and the dependency-management plugin'
