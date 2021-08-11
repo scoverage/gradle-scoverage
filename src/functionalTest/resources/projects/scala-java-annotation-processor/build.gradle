@@ -1,0 +1,50 @@
+plugins {
+    id 'org.scoverage' apply false
+}
+
+description = 'a multi-module Scala and Java project using a Java annotation processor'
+
+allprojects {
+    repositories {
+        jcenter()
+    }
+}
+
+def lombokVersion = '1.18.20'
+
+subprojects {
+    apply plugin: 'java'
+
+    dependencies {
+        testImplementation group: 'org.junit.platform', name: 'junit-platform-runner', version: junitPlatformVersion
+
+        compileOnly "org.projectlombok:lombok:$lombokVersion"
+        annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+
+        testCompileOnly "org.projectlombok:lombok:$lombokVersion"
+        testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+}
+
+/*
+Because the Scala compiler doesn't support annotation processors, Java files using a Java annotation
+processor MUST be compiled by the Java compiler. So we can't use the same
+configuration as in `scala-java-multi-module` here.
+
+// A common practice in mixed java/scala modules to make Java code able to import Scala code
+ext.configureSources = { set, name ->
+    set.scala.srcDir("src/$name/java")
+    set.java.srcDirs = []
+}
+configureSources(sourceSets.main, 'main')
+configureSources(sourceSets.test, 'test')
+*/
+
+apply plugin: 'org.scoverage'
+scoverage {
+    minimumRate = 0.5
+}

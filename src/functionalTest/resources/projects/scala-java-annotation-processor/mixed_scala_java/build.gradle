@@ -1,0 +1,14 @@
+apply plugin: 'scala'
+
+dependencies {
+    implementation group: 'org.scala-lang', name: 'scala-library', version: "${scalaVersionMajor}.${scalaVersionMinor}.${scalaVersionBuild}"
+
+    testRuntimeOnly group: 'org.junit.vintage', name: 'junit-vintage-engine', version: junitVersion
+
+    testImplementation group: 'org.scalatest', name: "scalatest_${scalaVersionMajor}.${scalaVersionMinor}", version: scalatestVersion
+}
+
+apply plugin: 'org.scoverage'
+scoverage {
+    minimumRate = 0.5
+}
