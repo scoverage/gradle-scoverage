@@ -28,7 +28,7 @@ class ScoveragePlugin implements Plugin<PluginAware> {
 
     static final String DEFAULT_REPORT_DIR = 'reports' + File.separatorChar + 'scoverage'
 
-    private final ConcurrentHashMap<Task, Set<? extends Task>> taskDependencies = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Task, Set<? extends Task>> taskDependencies = new ConcurrentHashMap<>()
 
     @Override
     void apply(PluginAware pluginAware) {
@@ -232,9 +232,10 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                 compileTask.configure {
                     if (!graph.hasTask(originalCompileTask)) {
                         project.logger.info("Making scoverage compilation the primary compilation task (instead of compileScala)")
-                        destinationDir = originalCompileTask.destinationDir
+                        destinationDirectory = originalCompileTask.destinationDirectory
                     } else {
                         doFirst {
+                            def destinationDir = destinationDirectory.get().asFile
                             destinationDir.deleteDir()
                         }
 
@@ -243,7 +244,9 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                             project.logger.info("Deleting classes compiled by scoverage but non-instrumented (identical to normal compilation)")
                             def originalCompileTaskName = project.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
                                     .getCompileTaskName("scala")
-                            def originalDestinationDir = project.tasks[originalCompileTaskName].destinationDir
+                            def originalDestinationDirectory = project.tasks[originalCompileTaskName].destinationDirectory
+                            def originalDestinationDir = originalDestinationDirectory.get().asFile
+                            def destinationDir = destinationDirectory.get().asFile
 
                             def findFiles = { File dir, Closure<Boolean> condition = null ->
                                 def files = []

@@ -23,7 +23,7 @@ class ScoverageRunner {
         method.setAccessible(true)
 
         runtimeClasspath.files.each { f ->
-            def url = f.toURL()
+            def url = f.toURI().toURL()
             if (!cloader.getURLs().contains(url)) {
                 method.invoke(cloader, url)
             }

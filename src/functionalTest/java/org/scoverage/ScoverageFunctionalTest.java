@@ -1,7 +1,7 @@
 package org.scoverage;
 
 import groovy.util.Node;
-import groovy.util.XmlParser;
+import groovy.xml.XmlParser;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.BuildTask;
 import org.gradle.testkit.runner.GradleRunner;
@@ -87,7 +87,7 @@ public abstract class ScoverageFunctionalTest {
 
     protected AssertableBuildResult dryRun(String... arguments) {
 
-        List<String> withDryArgument = new ArrayList<String>(Arrays.asList(arguments));
+        List<String> withDryArgument = new ArrayList<>(Arrays.asList(arguments));
         withDryArgument.add("--dry-run");
         return run(withDryArgument.toArray(new String[]{}));
     }
@@ -119,7 +119,7 @@ public abstract class ScoverageFunctionalTest {
 
     private void configureArguments(String... arguments) {
 
-        List<String> fullArguments = new ArrayList<String>();
+        List<String> fullArguments = new ArrayList<>();
 
         fullArguments.add("-PscalaVersionMajor=2");
         fullArguments.add("-PscalaVersionMinor=12");
@@ -127,6 +127,7 @@ public abstract class ScoverageFunctionalTest {
         fullArguments.add("-PjunitVersion=5.3.2");
         fullArguments.add("-PjunitPlatformVersion=1.3.2");
         fullArguments.add("-PscalatestVersion=3.0.8");
+        fullArguments.add("--warning-mode=all");
         fullArguments.addAll(Arrays.asList(arguments));
 
         runner.withArguments(fullArguments);
