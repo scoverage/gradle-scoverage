@@ -1,6 +1,5 @@
 package org.scoverage;
 
-import org.gradle.testkit.runner.TaskOutcome;
 import org.junit.Assert;
 import org.junit.Test;
 

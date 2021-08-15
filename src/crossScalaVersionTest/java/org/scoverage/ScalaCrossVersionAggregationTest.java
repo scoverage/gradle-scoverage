@@ -2,13 +2,6 @@ package org.scoverage;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.jupiter.api.Tag;
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.scoverage.ScoverageFunctionalTest;
-import org.scoverage.ScoveragePlugin;
-
-import java.io.File;
 
 public class ScalaCrossVersionAggregationTest extends ScoverageFunctionalTest {
 

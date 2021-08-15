@@ -1,6 +1,6 @@
 package org.scoverage
 
-
+import groovy.xml.XmlParser
 import org.gradle.api.GradleException
 import org.gradle.api.logging.Logger
 import org.gradle.internal.impldep.com.google.common.annotations.VisibleForTesting

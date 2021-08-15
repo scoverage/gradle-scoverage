@@ -34,7 +34,7 @@ public class CompositeBuildTest extends ScoverageFunctionalTest {
 
     private AssertableBuildResult runComposite(String... arguments) {
 
-        List<String> fullArguments = new ArrayList<String>();
+        List<String> fullArguments = new ArrayList<>();
         fullArguments.add("-p");
         fullArguments.add("proj1");
         fullArguments.add("--include-build");

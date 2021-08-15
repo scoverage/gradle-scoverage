@@ -84,7 +84,10 @@ task crossScalaVersionTest(type: Test) {
     classpath = sourceSets.crossScalaVersionTest.runtimeClasspath
     forkEvery = 1 // crucial to run every test in its own JVM
 
-    testLogging.showStandardStreams = true
+    testLogging {
+        events 'passed', 'failed', 'skipped'
+        showStandardStreams = System.env.CI == 'true'
+    }
 
     mustRunAfter test
 }
@@ -96,7 +99,10 @@ task functionalTest(type: Test) {
     testClassesDirs = sourceSets.functionalTest.output
     classpath = sourceSets.functionalTest.runtimeClasspath
 
-    testLogging.showStandardStreams = true
+    testLogging {
+        events 'passed', 'failed', 'skipped'
+        showStandardStreams = System.env.CI == 'true'
+    }
 
     mustRunAfter crossScalaVersionTest
 }
