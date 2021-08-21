@@ -25,6 +25,7 @@ class ScoveragePlugin implements Plugin<PluginAware> {
     static final String COMPILE_NAME = 'compileScoverageScala'
     static final String AGGREGATE_NAME = 'aggregateScoverage'
     static final String DEFAULT_SCALA_VERSION = '2.13.6'
+    static final String SCOVERAGE_COMPILE_ONLY_PROPERTY = 'scoverageCompileOnly';
 
     static final String DEFAULT_REPORT_DIR = 'reports' + File.separatorChar + 'scoverage'
 
@@ -97,7 +98,6 @@ class ScoveragePlugin implements Plugin<PluginAware> {
 
         def compileTask = project.tasks[instrumentedSourceSet.getCompileTaskName("scala")]
         compileTask.mustRunAfter(originalCompileTask)
-        originalJarTask.mustRunAfter(compileTask)
 
         def globalReportTask = project.tasks.register(REPORT_NAME, ScoverageAggregate)
         def globalCheckTask = project.tasks.register(CHECK_NAME)
@@ -154,24 +154,6 @@ class ScoveragePlugin implements Plugin<PluginAware> {
 
             configureCheckTask(project, extension, globalCheckTask, globalReportTask)
 
-            // make this project's scoverage compilation depend on scoverage compilation of any other project
-            // which this project depends on its normal compilation
-            // (essential when running without normal compilation on multi-module projects with inner dependencies)
-            def originalCompilationDependencies = recursiveDependenciesOf(compileTask).findAll {
-                it instanceof ScalaCompile
-            }
-            originalCompilationDependencies.each {
-                def dependencyProjectCompileTask = it.project.tasks.findByName(COMPILE_NAME)
-                def dependencyProjectReportTask = it.project.tasks.findByName(REPORT_NAME)
-                if (dependencyProjectCompileTask != null) {
-                    compileTask.dependsOn(dependencyProjectCompileTask)
-                    // we don't want this project's tests to affect the other project's report
-                    testTasks.each {
-                        it.mustRunAfter(dependencyProjectReportTask)
-                    }
-                }
-            }
-
             compileTask.configure {
                 List<String> parameters = []
                 List<String> existingParameters = scalaCompileOptions.additionalParameters
@@ -207,6 +189,79 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                 }
             }
 
+            if (project.hasProperty(SCOVERAGE_COMPILE_ONLY_PROPERTY)) {
+                project.logger.info("Making scoverage compilation the primary compilation task (instead of compileScala)")
+
+                originalCompileTask.enabled = false;
+                compileTask.destinationDirectory = originalCompileTask.destinationDirectory
+                originalJarTask.mustRunAfter(compileTask)
+
+                // make this project's scoverage compilation depend on scoverage compilation of any other project
+                // which this project depends on its normal compilation
+                def originalCompilationDependencies = recursiveDependenciesOf(compileTask).findAll {
+                    it instanceof ScalaCompile
+                }
+                originalCompilationDependencies.each {
+                    def dependencyProjectCompileTask = it.project.tasks.findByName(COMPILE_NAME)
+                    def dependencyProjectReportTask = it.project.tasks.findByName(REPORT_NAME)
+                    if (dependencyProjectCompileTask != null) {
+                        compileTask.dependsOn(dependencyProjectCompileTask)
+                        // we don't want this project's tests to affect the other project's report
+                        testTasks.each {
+                            it.mustRunAfter(dependencyProjectReportTask)
+                        }
+                    }
+                }
+            } else {
+                compileTask.configure {
+                    doFirst {
+                        destinationDir.deleteDir()
+                    }
+
+                    // delete non-instrumented classes by comparing normally compiled classes to those compiled with scoverage
+                    doLast {
+                        project.logger.info("Deleting classes compiled by scoverage but non-instrumented (identical to normal compilation)")
+                        def originalCompileTaskName = project.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
+                                .getCompileTaskName("scala")
+                        def originalDestinationDirectory = project.tasks[originalCompileTaskName].destinationDirectory
+                        def originalDestinationDir = originalDestinationDirectory.get().asFile
+                        def destinationDir = destinationDirectory.get().asFile
+
+
+                        def findFiles = { File dir, Closure<Boolean> condition = null ->
+                            def files = []
+
+                            if (dir.exists()) {
+                                dir.eachFileRecurse(FILES) { f ->
+                                    if (condition == null || condition(f)) {
+                                        def relativePath = dir.relativePath(f)
+                                        files << relativePath
+                                    }
+                                }
+                            }
+
+                            files
+                        }
+
+                        def isSameFile = { String relativePath ->
+                            def fileA = new File(originalDestinationDir, relativePath)
+                            def fileB = new File(destinationDir, relativePath)
+                            FileUtils.contentEquals(fileA, fileB)
+                        }
+
+                        def originalClasses = findFiles(originalDestinationDir)
+                        def identicalInstrumentedClasses = findFiles(destinationDir, { f ->
+                            def relativePath = destinationDir.relativePath(f)
+                            originalClasses.contains(relativePath) && isSameFile(relativePath)
+                        })
+
+                        identicalInstrumentedClasses.each { f ->
+                            Files.deleteIfExists(destinationDir.toPath().resolve(f))
+                        }
+                    }
+                }
+            }
+
             project.gradle.taskGraph.whenReady { graph ->
                 def hasAnyReportTask = reportTasks.any { graph.hasTask(it) }
 
@@ -224,59 +279,6 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                                         name.startsWith("scoverage.measurements.")
                                     }
                                 })
-                            }
-                        }
-                    }
-                }
-
-                compileTask.configure {
-                    if (!graph.hasTask(originalCompileTask)) {
-                        project.logger.info("Making scoverage compilation the primary compilation task (instead of compileScala)")
-                        destinationDirectory = originalCompileTask.destinationDirectory
-                    } else {
-                        doFirst {
-                            def destinationDir = destinationDirectory.get().asFile
-                            destinationDir.deleteDir()
-                        }
-
-                        // delete non-instrumented classes by comparing normally compiled classes to those compiled with scoverage
-                        doLast {
-                            project.logger.info("Deleting classes compiled by scoverage but non-instrumented (identical to normal compilation)")
-                            def originalCompileTaskName = project.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
-                                    .getCompileTaskName("scala")
-                            def originalDestinationDirectory = project.tasks[originalCompileTaskName].destinationDirectory
-                            def originalDestinationDir = originalDestinationDirectory.get().asFile
-                            def destinationDir = destinationDirectory.get().asFile
-
-                            def findFiles = { File dir, Closure<Boolean> condition = null ->
-                                def files = []
-
-                                if (dir.exists()) {
-                                    dir.eachFileRecurse(FILES) { f ->
-                                        if (condition == null || condition(f)) {
-                                            def relativePath = dir.relativePath(f)
-                                            files << relativePath
-                                        }
-                                    }
-                                }
-
-                                files
-                            }
-
-                            def isSameFile = { String relativePath ->
-                                def fileA = new File(originalDestinationDir, relativePath)
-                                def fileB = new File(destinationDir, relativePath)
-                                FileUtils.contentEquals(fileA, fileB)
-                            }
-
-                            def originalClasses = findFiles(originalDestinationDir)
-                            def identicalInstrumentedClasses = findFiles(destinationDir, { f ->
-                                def relativePath = destinationDir.relativePath(f)
-                                originalClasses.contains(relativePath) && isSameFile(relativePath)
-                            })
-
-                            identicalInstrumentedClasses.each { f ->
-                                Files.deleteIfExists(destinationDir.toPath().resolve(f))
                             }
                         }
                     }

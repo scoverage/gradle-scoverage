@@ -23,6 +23,17 @@ public class ScalaMultiModuleTest extends ScoverageFunctionalTest {
     }
 
     @Test
+    public void reportScoverageParallel() {
+
+        AssertableBuildResult result = dryRun("clean", ScoveragePlugin.getREPORT_NAME(), "--parallel");
+
+        result.assertTaskExists(ScoveragePlugin.getREPORT_NAME());
+        result.assertTaskExists("a:" + ScoveragePlugin.getREPORT_NAME());
+        result.assertTaskExists("b:" + ScoveragePlugin.getREPORT_NAME());
+        result.assertTaskExists("common:" + ScoveragePlugin.getREPORT_NAME());
+    }
+
+    @Test
     public void reportScoverageOnlyRoot() {
 
         AssertableBuildResult result = dryRun("clean", ":" + ScoveragePlugin.getREPORT_NAME());
@@ -52,7 +63,7 @@ public class ScalaMultiModuleTest extends ScoverageFunctionalTest {
     public void reportScoverageOnlyAWithoutNormalCompilation() {
 
         AssertableBuildResult result = run("clean", ":a:" + ScoveragePlugin.getREPORT_NAME(),
-                "-x", "compileScala");
+                "-P" + ScoveragePlugin.getSCOVERAGE_COMPILE_ONLY_PROPERTY());
 
         result.assertTaskSkipped("compileScala");
         result.assertTaskSkipped("a:compileScala");
@@ -186,7 +197,7 @@ public class ScalaMultiModuleTest extends ScoverageFunctionalTest {
         AssertableBuildResult result = runAndFail("clean",
                 ":a:test",
                 ":common:test", "--tests", "org.hello.common.TestNothingCommonSuite",
-                "-x", "compileScala",
+                "-P" + ScoveragePlugin.getSCOVERAGE_COMPILE_ONLY_PROPERTY(),
                 ScoveragePlugin.getCHECK_NAME());
 
         result.assertTaskFailed("common:" + ScoveragePlugin.getCHECK_NAME());
@@ -246,7 +257,7 @@ public class ScalaMultiModuleTest extends ScoverageFunctionalTest {
     public void aggregateScoverageWithoutNormalCompilation() throws Exception {
 
         AssertableBuildResult result = run("clean", ScoveragePlugin.getAGGREGATE_NAME(),
-                "-x", "compileScala");
+                "-P" + ScoveragePlugin.getSCOVERAGE_COMPILE_ONLY_PROPERTY());
 
         result.assertTaskSkipped("compileScala");
         result.assertTaskSkipped("a:compileScala");

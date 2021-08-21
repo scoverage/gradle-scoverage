@@ -193,7 +193,7 @@ public class ScalaMultiModuleWithMultipleTestTasksTest extends ScoverageFunction
         AssertableBuildResult result = runAndFail("clean",
                 ":a:test",
                 ":common:test", "--tests", "org.hello.common.TestNothingCommonSuite",
-                "-x", "compileScala",
+                "-P" + ScoveragePlugin.getSCOVERAGE_COMPILE_ONLY_PROPERTY(),
                 ScoveragePlugin.getCHECK_NAME());
 
         result.assertTaskFailed("common:" + ScoveragePlugin.getCHECK_NAME());
@@ -254,7 +254,7 @@ public class ScalaMultiModuleWithMultipleTestTasksTest extends ScoverageFunction
     public void aggregateScoverageWithoutNormalCompilation() throws Exception {
 
         AssertableBuildResult result = run("clean", ScoveragePlugin.getAGGREGATE_NAME(),
-                "-x", "compileScala");
+                "-P" + ScoveragePlugin.getSCOVERAGE_COMPILE_ONLY_PROPERTY());
 
         result.assertTaskSkipped("compileScala");
         result.assertTaskSkipped("a:compileScala");

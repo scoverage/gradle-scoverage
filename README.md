@@ -112,15 +112,21 @@ and using the scoverage scalac plugin (`compileScoverageScala`).
 
 In cases where you only wish to generate reports / validate coverage, but are not interested in publishing the code,
 it is possible to only compile the code with the scoverage scalac plugin, thus reducing build times significantly.
-In order to do so, simply add the arguments `-x compileScala` to the gradle execution.
-For example: `gradle reportScoverage -x compileScala`.
+In order to do so, simply add the arguments `-PscoverageCompileOnly` to the gradle execution.
+For example: `gradle reportScoverage -PscoverageCompileOnly`.
 
+Note that this mode is incompatible with parallel builds in multi-module projects.
 
 ### Compatibility with Consistent Versions Plugin
 
 In order for the plugin to work alongside [Palantir's consistent versions plugin](https://github.com/palantir/gradle-consistent-versions),
 the Scala version must be manually configured (via `scoverageScalaVersion`); otherwise, the plugin will attempt to
 resolve the compilation classpath, which is prohibited by the versions plugin.
+
+Migration to 6.1.1
+----------------
+
+* Running without normal compilation is now made with `-PscoverageCompileOnly` instead of `-x compileScala`.
 
 Migration to 5.x
 ----------------
