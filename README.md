@@ -123,7 +123,7 @@ In order for the plugin to work alongside [Palantir's consistent versions plugin
 the Scala version must be manually configured (via `scoverageScalaVersion`); otherwise, the plugin will attempt to
 resolve the compilation classpath, which is prohibited by the versions plugin.
 
-Migration to 6.1.1
+Migration to 7.x
 ----------------
 
 * Running without normal compilation is now made with `-PscoverageCompileOnly` instead of `-x compileScala`.
