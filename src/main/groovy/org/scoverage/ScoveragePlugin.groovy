@@ -119,7 +119,7 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                 def taskReportDir = project.file("${project.buildDir}/reports/scoverage${testTask.name.capitalize()}")
 
                 project.tasks.create(reportTaskName, ScoverageReport) {
-                    dependsOn compileTask, testTask
+                    dependsOn originalJarTask, compileTask, testTask
                     onlyIf { extension.dataDir.get().list() }
                     group = 'verification'
                     runner = scoverageRunner
