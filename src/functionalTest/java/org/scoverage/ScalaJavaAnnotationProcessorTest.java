@@ -44,13 +44,13 @@ public class ScalaJavaAnnotationProcessorTest extends ScoverageFunctionalTest {
 
     private void assertAggregationFilesExist() {
 
-        Assert.assertTrue(resolve(reportDir(), "mixed_scala_java/src/main/scala/org/hello/WorldScala.scala.html").exists());
+        Assert.assertTrue(resolve(reportDir(), "org/hello/WorldScala.scala.html").exists());
     }
 
     private void assertMixedScalaJavaReportFilesExist() {
 
         File reportDir = reportDir(projectDir().toPath().resolve("mixed_scala_java").toFile());
         Assert.assertTrue(resolve(reportDir, "index.html").exists());
-        Assert.assertTrue(resolve(reportDir, "src/main/scala/org/hello/WorldScala.scala.html").exists());
+        Assert.assertTrue(resolve(reportDir, "org/hello/WorldScala.scala.html").exists());
     }
 }

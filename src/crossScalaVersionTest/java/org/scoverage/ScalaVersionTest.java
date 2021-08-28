@@ -27,6 +27,6 @@ public abstract class ScalaVersionTest extends ScoverageFunctionalTest {
 
         File reportDir = reportDir(projectDir().toPath().resolve(scalaVersion).toFile());
         Assert.assertTrue(resolve(reportDir, "index.html").exists());
-        Assert.assertTrue(resolve(reportDir, "src/main/scala/org/hello/World" + scalaVersion + ".scala.html").exists());
+        Assert.assertTrue(resolve(reportDir, "org/hello/World" + scalaVersion + ".scala.html").exists());
     }
 }

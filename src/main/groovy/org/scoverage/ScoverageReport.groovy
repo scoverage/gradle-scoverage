@@ -1,10 +1,12 @@
 package org.scoverage
 
 import org.gradle.api.DefaultTask
+import org.gradle.api.file.FileCollection
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
@@ -23,9 +25,9 @@ class ScoverageReport extends DefaultTask {
     @PathSensitive(RELATIVE)
     final Property<File> dataDir = project.objects.property(File)
 
-    @InputDirectory
+    @InputFiles
     @PathSensitive(RELATIVE)
-    final Property<File> sources = project.objects.property(File)
+    final Property<FileCollection> sources = project.objects.property(FileCollection)
 
     @OutputDirectory
     final Property<File> reportDir = project.objects.property(File)
@@ -54,7 +56,7 @@ class ScoverageReport extends DefaultTask {
                 project.logger.info("[scoverage] Could not find coverage file, skipping...")
             } else {
                 new ScoverageWriter(project.logger).write(
-                        sources.get(),
+                        sources.get().getFiles(),
                         reportDir.get(),
                         coverage.get(),
                         sourceEncoding.get(),

@@ -294,35 +294,35 @@ public class ScalaMultiModuleWithMultipleTestTasksTest extends ScoverageFunction
 
     private void assertAggregationFilesExist() {
 
-        Assert.assertTrue(resolve(reportDir(), "a/src/main/scala/org/hello/a/WorldA.scala.html").exists());
-        Assert.assertTrue(resolve(reportDir(), "b/src/main/scala/org/hello/b/WorldB.scala.html").exists());
-        Assert.assertTrue(resolve(reportDir(), "common/src/main/scala/org/hello/common/WorldCommon.scala.html").exists());
+        Assert.assertTrue(resolve(reportDir(), "org/hello/a/WorldA.scala.html").exists());
+        Assert.assertTrue(resolve(reportDir(), "org/hello/b/WorldB.scala.html").exists());
+        Assert.assertTrue(resolve(reportDir(), "org/hello/common/WorldCommon.scala.html").exists());
     }
 
     private void assertRootReportFilesExist() {
 
         Assert.assertTrue(resolve(reportDir(), "index.html").exists());
-        Assert.assertTrue(resolve(reportDir(), "src/main/scala/org/hello/World.scala.html").exists());
+        Assert.assertTrue(resolve(reportDir(), "org/hello/World.scala.html").exists());
     }
 
     private void assertAReportFilesExist() {
 
         File reportDir = reportDir(projectDir().toPath().resolve("a").toFile());
         Assert.assertTrue(resolve(reportDir, "index.html").exists());
-        Assert.assertTrue(resolve(reportDir, "src/main/scala/org/hello/a/WorldA.scala.html").exists());
+        Assert.assertTrue(resolve(reportDir, "org/hello/a/WorldA.scala.html").exists());
     }
 
     private void assertBReportFilesExist() {
 
         File reportDir = reportDir(projectDir().toPath().resolve("b").toFile());
         Assert.assertTrue(resolve(reportDir, "index.html").exists());
-        Assert.assertTrue(resolve(reportDir, "src/main/scala/org/hello/b/WorldB.scala.html").exists());
+        Assert.assertTrue(resolve(reportDir, "org/hello/b/WorldB.scala.html").exists());
     }
 
     private void assertCommonReportFilesExist() {
 
         File reportDir = reportDir(projectDir().toPath().resolve("common").toFile());
         Assert.assertTrue(resolve(reportDir, "index.html").exists());
-        Assert.assertTrue(resolve(reportDir, "src/main/scala/org/hello/common/WorldCommon.scala.html").exists());
+        Assert.assertTrue(resolve(reportDir, "org/hello/common/WorldCommon.scala.html").exists());
     }
 }

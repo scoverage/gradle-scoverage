@@ -28,8 +28,6 @@ class ScoverageExtension {
     final Property<File> dataDir
     /** a directory to write final output to */
     final Property<File> reportDir
-    /** sources to highlight */
-    final Property<File> sources
     /** range positioning for highlighting */
     final Property<Boolean> highlighting
     /** regex for each excluded package */
@@ -60,9 +58,6 @@ class ScoverageExtension {
         scoverageVersion.set('1.4.8')
 
         scoverageScalaVersion = project.objects.property(String)
-
-        sources = project.objects.property(File)
-        sources.set(project.projectDir)
 
         dataDir = project.objects.property(File)
         dataDir.set(new File(project.buildDir, 'scoverage'))

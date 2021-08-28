@@ -124,7 +124,7 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                     group = 'verification'
                     runner = scoverageRunner
                     reportDir = taskReportDir
-                    sources = extension.sources
+                    sources = originalSourceSet.scala.getSourceDirectories()
                     dataDir = extension.dataDir
                     sourceEncoding.set(detectedSourceEncoding)
                     coverageOutputCobertura = extension.coverageOutputCobertura
@@ -143,6 +143,7 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                 group = 'verification'
                 runner = scoverageRunner
                 reportDir = extension.reportDir
+                sources = originalSourceSet.scala.getSourceDirectories()
                 dirsToAggregateFrom = dataDirs
                 sourceEncoding.set(detectedSourceEncoding)
                 deleteReportsOnAggregation = false
@@ -299,6 +300,10 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                         }
                     }
                     def allReportTasks = childReportTasks + globalReportTask.get()
+                    def allSources = project.objects.fileCollection()
+                    allReportTasks.each {
+                        allSources = allSources.plus(it.sources.get())
+                    }
                     def aggregationTask = project.tasks.create(AGGREGATE_NAME, ScoverageAggregate) {
                         def dataDirs = allReportTasks.findResults { it.dirsToAggregateFrom.get() }.flatten()
                         onlyIf {
@@ -308,6 +313,7 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                         group = 'verification'
                         runner = scoverageRunner
                         reportDir = extension.reportDir
+                        sources = allSources
                         sourceEncoding.set(detectedSourceEncoding)
                         dirsToAggregateFrom = dataDirs
                         deleteReportsOnAggregation = extension.deleteReportsOnAggregation
