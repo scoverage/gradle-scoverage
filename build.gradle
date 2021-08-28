@@ -104,6 +104,8 @@ task functionalTest(type: Test) {
         showStandardStreams = System.env.CI == 'true'
     }
 
+    systemProperty 'failOnWarning', project.hasProperty('failOnWarning')
+
     mustRunAfter crossScalaVersionTest
 }
 check.dependsOn functionalTest
