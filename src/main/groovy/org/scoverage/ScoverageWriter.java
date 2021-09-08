@@ -1,14 +1,23 @@
 package org.scoverage;
 
 import org.gradle.api.logging.Logger;
+import scala.Option;
 import scala.Some;
+import scala.collection.immutable.Seq;
+import scala.collection.mutable.Buffer;
 import scoverage.Constants;
 import scoverage.Coverage;
 import scoverage.report.CoberturaXmlWriter;
 import scoverage.report.ScoverageHtmlWriter;
 import scoverage.report.ScoverageXmlWriter;
+import scala.collection.JavaConverters;
 
 import java.io.File;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Set;
 
 /**
  * Util for generating and saving coverage files.
@@ -26,7 +35,7 @@ public class ScoverageWriter {
     /**
      * Generates all reports from given data.
      *
-     * @param sourceDir               directory with project sources
+     * @param sourceDirs               directories with project sources
      * @param reportDir               directory for generate reports
      * @param coverage                coverage data
      * @param sourceEncoding          the encoding of the source files
@@ -35,21 +44,33 @@ public class ScoverageWriter {
      * @param coverageOutputHTML      switch for Scoverage HTML output
      * @param coverageDebug           switch for Scoverage Debug output
      */
-    public void write(File sourceDir,
+    public void write(Set<File> sourceDirs,
                              File reportDir,
                              Coverage coverage,
                              String sourceEncoding,
                              Boolean coverageOutputCobertura,
                              Boolean coverageOutputXML,
                              Boolean coverageOutputHTML,
-                             Boolean coverageDebug) {
+                             Boolean coverageDebug) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException {
 
         logger.info("[scoverage] Generating scoverage reports...");
 
         reportDir.mkdirs();
 
+        Object scalaBuffer = Class.forName("scala.collection.JavaConverters")
+                .getMethod("asScalaBuffer", java.util.List.class)
+                .invoke(null, new ArrayList<>(sourceDirs));
+        Object sourceDirsSeq = scalaBuffer.getClass().getMethod("toIndexedSeq").invoke(scalaBuffer);
+
         if (coverageOutputCobertura) {
-            new CoberturaXmlWriter(sourceDir, reportDir).write(coverage);
+            Constructor<CoberturaXmlWriter> cst;
+            try {
+                cst = CoberturaXmlWriter.class.getConstructor(Class.forName("scala.collection.immutable.Seq"), File.class);
+            } catch (NoSuchMethodException | ClassNotFoundException e) {
+                cst = CoberturaXmlWriter.class.getConstructor(Class.forName("scala.collection.Seq"), File.class);
+            }
+            CoberturaXmlWriter writer = cst.newInstance(sourceDirsSeq, reportDir);
+            writer.write(coverage);
             logger.info("[scoverage] Written Cobertura XML report to " +
                 reportDir.getAbsolutePath() +
                 File.separator +
@@ -57,13 +78,21 @@ public class ScoverageWriter {
         }
 
         if (coverageOutputXML) {
-            new ScoverageXmlWriter(sourceDir, reportDir, /* debug = */ false).write(coverage);
+            Constructor<ScoverageXmlWriter> cst;
+            try {
+                cst = ScoverageXmlWriter.class.getConstructor(Class.forName("scala.collection.immutable.Seq"), File.class, boolean.class);
+            } catch (NoSuchMethodException | ClassNotFoundException e) {
+                cst = ScoverageXmlWriter.class.getConstructor(Class.forName("scala.collection.Seq"), File.class, boolean.class);
+            }
+            ScoverageXmlWriter writer = cst.newInstance(sourceDirsSeq, reportDir, false);
+            writer.write(coverage);
             logger.info("[scoverage] Written XML report to " +
                 reportDir.getAbsolutePath() +
                 File.separator +
                 Constants.XMLReportFilename());
             if (coverageDebug) {
-                new ScoverageXmlWriter(sourceDir, reportDir, /* debug = */ true).write(coverage);
+                ScoverageXmlWriter writerDebug = cst.newInstance(sourceDirsSeq, reportDir, true);
+                writerDebug.write(coverage);
                 logger.info("[scoverage] Written XML report with debug information to " +
                     reportDir.getAbsolutePath() +
                     File.separator +
@@ -72,7 +101,14 @@ public class ScoverageWriter {
         }
 
         if (coverageOutputHTML) {
-            new ScoverageHtmlWriter(new File[]{sourceDir}, reportDir, new Some<>(sourceEncoding)).write(coverage);
+            Constructor<ScoverageHtmlWriter> cst;
+            try {
+                cst = ScoverageHtmlWriter.class.getConstructor(Class.forName("scala.collection.immutable.Seq"), File.class, Option.class);
+            } catch (NoSuchMethodException | ClassNotFoundException e) {
+                cst = ScoverageHtmlWriter.class.getConstructor(Class.forName("scala.collection.Seq"), File.class, Option.class);
+            }
+            ScoverageHtmlWriter writer = cst.newInstance(sourceDirsSeq, reportDir, new Some<>(sourceEncoding));
+            writer.write(coverage);
             logger.info("[scoverage] Written HTML report to " +
                 reportDir.getAbsolutePath() +
                 File.separator +

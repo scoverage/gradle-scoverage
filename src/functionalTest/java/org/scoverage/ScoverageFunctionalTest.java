@@ -127,7 +127,11 @@ public abstract class ScoverageFunctionalTest {
         fullArguments.add("-PjunitVersion=5.3.2");
         fullArguments.add("-PjunitPlatformVersion=1.3.2");
         fullArguments.add("-PscalatestVersion=3.0.8");
-        fullArguments.add("--warning-mode=all");
+        if (Boolean.parseBoolean(System.getProperty("failOnWarning"))) {
+            fullArguments.add("--warning-mode=fail");
+        } else {
+            fullArguments.add("--warning-mode=all");
+        }
         fullArguments.addAll(Arrays.asList(arguments));
 
         runner.withArguments(fullArguments);

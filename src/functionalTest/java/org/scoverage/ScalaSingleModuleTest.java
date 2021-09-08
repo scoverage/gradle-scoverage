@@ -91,7 +91,7 @@ public class ScalaSingleModuleTest extends ScoverageFunctionalTest {
         result.assertTaskDoesntExist(ScoveragePlugin.getAGGREGATE_NAME());
 
         Assert.assertTrue(resolve(reportDir(), "index.html").exists());
-        Assert.assertFalse(resolve(reportDir(), "src/main/scala/org/hello/World.scala.html").exists());
+        Assert.assertFalse(resolve(reportDir(), "org/hello/World.scala.html").exists());
         assertCoverage(100.0); // coverage is 100 since no classes are covered
 
         // compiled class should exist in the default classes directory, but not in scoverage
@@ -125,7 +125,7 @@ public class ScalaSingleModuleTest extends ScoverageFunctionalTest {
                 "-PexcludedFile=.*", "-P" + ScoveragePlugin.getSCOVERAGE_COMPILE_ONLY_PROPERTY());
 
         Assert.assertTrue(resolve(reportDir(), "index.html").exists());
-        Assert.assertFalse(resolve(reportDir(), "src/main/scala/org/hello/World.scala.html").exists());
+        Assert.assertFalse(resolve(reportDir(), "org/hello/World.scala.html").exists());
         assertCoverage(100.0); // coverage is 100 since no classes are covered
 
         // compiled class should exist in the default classes directory, but not in scoverage
@@ -136,6 +136,6 @@ public class ScalaSingleModuleTest extends ScoverageFunctionalTest {
     private void assertReportFilesExist() {
 
         Assert.assertTrue(resolve(reportDir(), "index.html").exists());
-        Assert.assertTrue(resolve(reportDir(), "src/main/scala/org/hello/World.scala.html").exists());
+        Assert.assertTrue(resolve(reportDir(), "org/hello/World.scala.html").exists());
     }
 }

@@ -26,6 +26,6 @@ public class ScalaSingleModuleWithDependencyManagerTest extends ScoverageFunctio
     private void assertReportFilesExist() {
 
         Assert.assertTrue(resolve(reportDir(), "index.html").exists());
-        Assert.assertTrue(resolve(reportDir(), "src/main/scala/org/hello/World.scala.html").exists());
+        Assert.assertTrue(resolve(reportDir(), "org/hello/World.scala.html").exists());
     }
 }

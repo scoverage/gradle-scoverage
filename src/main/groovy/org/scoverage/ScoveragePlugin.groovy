@@ -29,7 +29,8 @@ class ScoveragePlugin implements Plugin<PluginAware> {
 
     static final String DEFAULT_REPORT_DIR = 'reports' + File.separatorChar + 'scoverage'
 
-    private final ConcurrentHashMap<Task, Set<? extends Task>> taskDependencies = new ConcurrentHashMap<>()
+    private final ConcurrentHashMap<Task, Set<? extends Task>> crossProjectTaskDependencies = new ConcurrentHashMap<>()
+    private final ConcurrentHashMap<Task, Set<? extends Task>> sameProjectTaskDependencies = new ConcurrentHashMap<>()
 
     @Override
     void apply(PluginAware pluginAware) {
@@ -124,7 +125,7 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                     group = 'verification'
                     runner = scoverageRunner
                     reportDir = taskReportDir
-                    sources = extension.sources
+                    sources = originalSourceSet.scala.getSourceDirectories()
                     dataDir = extension.dataDir
                     sourceEncoding.set(detectedSourceEncoding)
                     coverageOutputCobertura = extension.coverageOutputCobertura
@@ -143,6 +144,7 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                 group = 'verification'
                 runner = scoverageRunner
                 reportDir = extension.reportDir
+                sources = originalSourceSet.scala.getSourceDirectories()
                 dirsToAggregateFrom = dataDirs
                 sourceEncoding.set(detectedSourceEncoding)
                 deleteReportsOnAggregation = false
@@ -194,11 +196,16 @@ class ScoveragePlugin implements Plugin<PluginAware> {
 
                 originalCompileTask.enabled = false;
                 compileTask.destinationDirectory = originalCompileTask.destinationDirectory
-                originalJarTask.mustRunAfter(compileTask)
+
+                project.getTasks().each {
+                    if (recursiveDependenciesOf(it, true).contains(originalCompileTask)) {
+                        it.dependsOn(compileTask)
+                    }
+                }
 
                 // make this project's scoverage compilation depend on scoverage compilation of any other project
                 // which this project depends on its normal compilation
-                def originalCompilationDependencies = recursiveDependenciesOf(compileTask).findAll {
+                def originalCompilationDependencies = recursiveDependenciesOf(compileTask, false).findAll {
                     it instanceof ScalaCompile
                 }
                 originalCompilationDependencies.each {
@@ -299,6 +306,10 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                         }
                     }
                     def allReportTasks = childReportTasks + globalReportTask.get()
+                    def allSources = project.objects.fileCollection()
+                    allReportTasks.each {
+                        allSources = allSources.plus(it.sources.get())
+                    }
                     def aggregationTask = project.tasks.create(AGGREGATE_NAME, ScoverageAggregate) {
                         def dataDirs = allReportTasks.findResults { it.dirsToAggregateFrom.get() }.flatten()
                         onlyIf {
@@ -308,6 +319,7 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                         group = 'verification'
                         runner = scoverageRunner
                         reportDir = extension.reportDir
+                        sources = allSources
                         sourceEncoding.set(detectedSourceEncoding)
                         dirsToAggregateFrom = dataDirs
                         deleteReportsOnAggregation = extension.deleteReportsOnAggregation
@@ -376,16 +388,22 @@ class ScoveragePlugin implements Plugin<PluginAware> {
         }
     }
 
-    private Set<? extends Task> recursiveDependenciesOf(Task task) {
-        if (!taskDependencies.containsKey(task)) {
+    private Set<? extends Task> recursiveDependenciesOf(Task task, boolean sameProjectOnly) {
+        def cache = sameProjectOnly ? sameProjectTaskDependencies : crossProjectTaskDependencies
+        if (!cache.containsKey(task)) {
             def directDependencies = task.getTaskDependencies().getDependencies(task)
-            def nestedDependencies = directDependencies.collect { recursiveDependenciesOf(it) }.flatten()
+            if (sameProjectOnly) {
+                directDependencies = directDependencies.findAll {
+                    it.project == task.project
+                }
+            }
+            def nestedDependencies = directDependencies.collect { recursiveDependenciesOf(it, sameProjectOnly) }.flatten()
             def dependencies = directDependencies + nestedDependencies
 
-            taskDependencies.put(task, dependencies)
+            cache.put(task, dependencies)
             return dependencies
         } else {
-            return taskDependencies.get(task)
+            return cache.get(task)
         }
     }
 }

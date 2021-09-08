@@ -1,18 +1,27 @@
 package org.scoverage
 
 import org.gradle.api.DefaultTask
+import org.gradle.api.file.FileCollection
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.TaskAction
 import scoverage.report.CoverageAggregator
+
+import static org.gradle.api.tasks.PathSensitivity.RELATIVE
 
 class ScoverageAggregate extends DefaultTask {
 
     @Nested
     ScoverageRunner runner
+
+    @InputFiles
+    @PathSensitive(RELATIVE)
+    final Property<FileCollection> sources = project.objects.property(FileCollection)
 
     @OutputDirectory
     final Property<File> reportDir = project.objects.property(File)
@@ -52,7 +61,7 @@ class ScoverageAggregate extends DefaultTask {
 
             if (coverage.nonEmpty()) {
                 new ScoverageWriter(project.logger).write(
-                        project.projectDir,
+                        sources.get().getFiles(),
                         reportDir.get(),
                         coverage.get(),
                         sourceEncoding.get(),

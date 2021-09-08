@@ -11,8 +11,19 @@ on:
 
 jobs:
   build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: 'ignore warnings'
+            additional-check-args: ''
+            continue-on-error: false
+          - name: 'fail on warning'
+            additional-check-args: '--warning-mode=fail -PfailOnWarning'
+            continue-on-error: true
 
     runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.continue-on-error }}
 
     steps:
     - uses: actions/checkout@v2
@@ -24,4 +35,4 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build with Gradle
-      run: ./gradlew --info --stacktrace check
+      run: ./gradlew --info --stacktrace check ${{ matrix.additional-check-args }}
