@@ -2,6 +2,7 @@ plugins {
     `java-gradle-plugin`
     id("com.gradle.plugin-publish") version "0.15.0"
     id("org.jetbrains.gradle.plugin.idea-ext") version "1.0"
+    kotlin("jvm") version "1.5.31"
 }
 
 repositories {
@@ -38,6 +39,7 @@ pluginBundle {
 }
 
 apply(plugin = "maven-publish")
+// TODO #171 remove once all groovy classes are migrated to kotlin
 apply(plugin = "groovy")
 
 java {
@@ -45,9 +47,21 @@ java {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
+// TODO #171 remove once all groovy classes are migrated to kotlin
+val compileKotlinTask = tasks.compileKotlin.get()
+tasks {
+    named<GroovyCompile>("compileGroovy") {
+        dependsOn(compileKotlin)
+        classpath = classpath.plus(files(compileKotlinTask.destinationDirectory))
+    }
+}
+
 dependencies {
     compileOnly("org.scoverage:scalac-scoverage-plugin_2.13:1.4.2")
     implementation(group = "commons-io", name = "commons-io", version = "2.6")
+
+    implementation(kotlin("script-runtime"))
+    testImplementation(kotlin("test"))
 
     testImplementation("junit:junit:4.12")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.5.2")
@@ -122,6 +136,7 @@ gradlePlugin {
     testSourceSets(sourceSets["functionalTest"], sourceSets["crossScalaVersionTest"])
 }
 
+// TODO #171 remove once all groovy classes are migrated to kotlin
 val groovydocJar by tasks.registering(Jar::class) {
     from("$buildDir/docs/groovydoc")
     classifier = "groovydoc"
