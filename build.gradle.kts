@@ -3,6 +3,7 @@ plugins {
     id("com.gradle.plugin-publish") version "0.15.0"
     id("org.jetbrains.gradle.plugin.idea-ext") version "1.0"
     kotlin("jvm") version "1.5.31"
+    id("org.jetbrains.dokka") version "1.5.30"
 }
 
 repositories {
@@ -139,13 +140,19 @@ gradlePlugin {
 // TODO #171 remove once all groovy classes are migrated to kotlin
 val groovydocJar by tasks.registering(Jar::class) {
     from("$buildDir/docs/groovydoc")
-    classifier = "groovydoc"
+    archiveClassifier.set("groovydoc")
     dependsOn(tasks["groovydoc"])
+}
+
+val kotlindocJar by tasks.registering(Jar::class) {
+    from(tasks.dokkaHtml.get().outputDirectory)
+    archiveClassifier.set("kotlindoc")
+    dependsOn(tasks.dokkaHtml)
 }
 
 val sourcesJar by tasks.registering(Jar::class) {
     from(sourceSets["main"].allSource)
-    classifier = "sources"
+    archiveClassifier.set("sources")
 }
 
 fun propOrDefault(property: String): String {
@@ -203,6 +210,7 @@ configure<PublishingExtension> {
             }
             from(components["java"])
             artifact(groovydocJar)
+            artifact(kotlindocJar)
             artifact(sourcesJar)
         }
     }
