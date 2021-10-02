@@ -27,7 +27,7 @@ class ScoveragePlugin implements Plugin<PluginAware> {
     static final String DEFAULT_SCALA_VERSION = '2.13.6'
     static final String SCOVERAGE_COMPILE_ONLY_PROPERTY = 'scoverageCompileOnly';
 
-    static final String DEFAULT_REPORT_DIR = 'reports' + File.separatorChar + 'scoverage'
+    static final String DEFAULT_REPORT_DIR = ScoverageExtension.DEFAULT_REPORT_DIR
 
     private final ConcurrentHashMap<Task, Set<? extends Task>> crossProjectTaskDependencies = new ConcurrentHashMap<>()
     private final ConcurrentHashMap<Task, Set<? extends Task>> sameProjectTaskDependencies = new ConcurrentHashMap<>()
