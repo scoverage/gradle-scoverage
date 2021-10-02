@@ -23,9 +23,4 @@ class ScoverageRunner(@Classpath val runtimeClasspath: FileCollection) {
 
         action()
     }
-
-    // TODO delete when no longer used by groovy code
-    fun runGroovy(action: Closure<*>) {
-        run { action.call() }
-    }
 }
