@@ -8,8 +8,7 @@ import java.net.URLClassLoader
 
 class ScoverageRunner(@Classpath val runtimeClasspath: FileCollection) {
 
-    fun run(action: Closure<*>) {
-
+    fun run(action: () -> Unit) {
         val cloader = Thread.currentThread().getContextClassLoader() as URLClassLoader
 
         val method = URLClassLoader::class.java.getDeclaredMethod("addURL", URL::class.java)
@@ -22,6 +21,11 @@ class ScoverageRunner(@Classpath val runtimeClasspath: FileCollection) {
             }
         }
 
-        action.call()
+        action()
+    }
+
+    // TODO delete when no longer used by groovy code
+    fun runGroovy(action: Closure<*>) {
+        run { action.call() }
     }
 }

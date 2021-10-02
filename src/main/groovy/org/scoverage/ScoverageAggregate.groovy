@@ -51,7 +51,7 @@ class ScoverageAggregate extends DefaultTask {
 
     @TaskAction
     def aggregate() {
-        runner.run {
+        runner.runGroovy {
             reportDir.get().deleteDir()
             reportDir.get().mkdirs()
 
