@@ -12,16 +12,16 @@ public class MultiModulePluginNotConfiguredForScalaTest extends ScoverageFunctio
     @Test
     public void checkAndAggregateScoverage() throws Exception {
 
-        AssertableBuildResult result = run("clean", ScoveragePlugin.getCHECK_NAME(),
-                ScoveragePlugin.getAGGREGATE_NAME());
+        AssertableBuildResult result = run("clean", ScoveragePlugin.CHECK_NAME,
+                ScoveragePlugin.AGGREGATE_NAME);
 
-        result.assertTaskSkipped(ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskSkipped("scala_only:" + ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskSkipped("java_only:" + ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskSkipped(ScoveragePlugin.getCHECK_NAME());
-        result.assertTaskSkipped("scala_only:" + ScoveragePlugin.getCHECK_NAME());
-        result.assertTaskSkipped("java_only:" + ScoveragePlugin.getCHECK_NAME());
-        result.assertTaskSkipped(ScoveragePlugin.getAGGREGATE_NAME());
+        result.assertTaskSkipped(ScoveragePlugin.REPORT_NAME);
+        result.assertTaskSkipped("scala_only:" + ScoveragePlugin.REPORT_NAME);
+        result.assertTaskSkipped("java_only:" + ScoveragePlugin.REPORT_NAME);
+        result.assertTaskSkipped(ScoveragePlugin.CHECK_NAME);
+        result.assertTaskSkipped("scala_only:" + ScoveragePlugin.CHECK_NAME);
+        result.assertTaskSkipped("java_only:" + ScoveragePlugin.CHECK_NAME);
+        result.assertTaskSkipped(ScoveragePlugin.AGGREGATE_NAME);
 
         assertReportDirsEmpty();
 

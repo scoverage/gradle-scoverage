@@ -15,20 +15,20 @@ public class ScalaJavaAnnotationProcessorTest extends ScoverageFunctionalTest {
     @Test
     public void checkAndAggregateScoverage() throws Exception {
 
-        AssertableBuildResult result = run("clean", ScoveragePlugin.getCHECK_NAME(),
-                ScoveragePlugin.getAGGREGATE_NAME());
+        AssertableBuildResult result = run("clean", ScoveragePlugin.CHECK_NAME,
+                ScoveragePlugin.AGGREGATE_NAME);
 
-        result.assertTaskSkipped("java_only:" + ScoveragePlugin.getCOMPILE_NAME());
+        result.assertTaskSkipped("java_only:" + ScoveragePlugin.COMPILE_NAME);
 
-        result.assertTaskSkipped(ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskSucceeded("mixed_scala_java:" + ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskSkipped("java_only:" + ScoveragePlugin.getREPORT_NAME());
+        result.assertTaskSkipped(ScoveragePlugin.REPORT_NAME);
+        result.assertTaskSucceeded("mixed_scala_java:" + ScoveragePlugin.REPORT_NAME);
+        result.assertTaskSkipped("java_only:" + ScoveragePlugin.REPORT_NAME);
 
-        result.assertTaskSucceeded(ScoveragePlugin.getCHECK_NAME());
-        result.assertTaskSucceeded("mixed_scala_java:" + ScoveragePlugin.getCHECK_NAME());
-        result.assertTaskSkipped("java_only:" + ScoveragePlugin.getCHECK_NAME());
+        result.assertTaskSucceeded(ScoveragePlugin.CHECK_NAME);
+        result.assertTaskSucceeded("mixed_scala_java:" + ScoveragePlugin.CHECK_NAME);
+        result.assertTaskSkipped("java_only:" + ScoveragePlugin.CHECK_NAME);
 
-        result.assertTaskSucceeded(ScoveragePlugin.getAGGREGATE_NAME());
+        result.assertTaskSucceeded(ScoveragePlugin.AGGREGATE_NAME);
 
         assertAllReportFilesExist();
         assertCoverage(100.0);

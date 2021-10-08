@@ -28,9 +28,9 @@ public abstract class MultipleCheckTasksTest extends ScoverageFunctionalTest {
 
     private AssertableBuildResult run() {
         if (shouldSucceed) {
-            return run("clean", ScoveragePlugin.getCHECK_NAME(), "--info");
+            return run("clean", ScoveragePlugin.CHECK_NAME, "--info");
         } else {
-            return runAndFail(ScoveragePlugin.getCHECK_NAME(), "--info");
+            return runAndFail(ScoveragePlugin.CHECK_NAME, "--info");
         }
     }
 
@@ -40,51 +40,60 @@ public abstract class MultipleCheckTasksTest extends ScoverageFunctionalTest {
         public MultipleChecks() {
             super("multiple-checks", true);
         }
+
         @Override
         protected void assertResult(AssertableBuildResult result) {
 
-            result.assertTaskSucceeded(ScoveragePlugin.getCHECK_NAME());
+            result.assertTaskSucceeded(ScoveragePlugin.CHECK_NAME);
             assertOutput(result, CoverageType.Line, 0.3);
             assertOutput(result, CoverageType.Branch, 0.1);
             assertOutput(result, CoverageType.Statement, 0.6);
 
         }
     }
+
     public static class SingleCheckNewSyntax extends MultipleCheckTasksTest {
         public SingleCheckNewSyntax() {
             super("single-check-new-syntax", true);
         }
+
         @Override
         protected void assertResult(AssertableBuildResult result) {
-            result.assertTaskSucceeded(ScoveragePlugin.getCHECK_NAME());
+            result.assertTaskSucceeded(ScoveragePlugin.CHECK_NAME);
             assertOutput(result, CoverageType.Line, 0.3);
         }
     }
+
     public static class SingleCheckOldSyntax extends MultipleCheckTasksTest {
         public SingleCheckOldSyntax() {
             super("single-check-old-syntax", true);
         }
+
         @Override
         protected void assertResult(AssertableBuildResult result) {
-            result.assertTaskSucceeded(ScoveragePlugin.getCHECK_NAME());
+            result.assertTaskSucceeded(ScoveragePlugin.CHECK_NAME);
             assertOutput(result, CoverageType.Line, 0.3);
         }
     }
+
     public static class OldAndNewSyntax extends MultipleCheckTasksTest {
         public OldAndNewSyntax() {
             super("old-and-new-syntax", false);
         }
+
         @Override
         protected void assertResult(AssertableBuildResult result) {
         }
     }
+
     public static class NoCheck extends MultipleCheckTasksTest {
         public NoCheck() {
             super("no-check", true);
         }
+
         @Override
         protected void assertResult(AssertableBuildResult result) {
-            result.assertTaskSucceeded(ScoveragePlugin.getCHECK_NAME());
+            result.assertTaskSucceeded(ScoveragePlugin.CHECK_NAME);
             assertOutput(result, ScoverageExtension.DEFAULT_COVERAGE_TYPE, ScoverageExtension.DEFAULT_MINIMUM_RATE);
         }
     }

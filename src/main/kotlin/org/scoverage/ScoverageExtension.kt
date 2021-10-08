@@ -21,8 +21,7 @@ abstract class ScoverageExtension(val project: Project) {
         val DEFAULT_REPORT_DIR = "reports" + File.separatorChar + "scoverage"
         @JvmField
         val DEFAULT_COVERAGE_TYPE: CoverageType = CoverageType.Statement
-        @JvmField
-        val DEFAULT_MINIMUM_RATE: Double = 0.75
+        const val DEFAULT_MINIMUM_RATE: Double = 0.75
     }
 
     /** Version of scoverage to use for the scalac plugin */

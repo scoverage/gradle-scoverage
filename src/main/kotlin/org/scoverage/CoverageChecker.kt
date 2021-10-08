@@ -35,7 +35,7 @@ enum class CoverageType(
 
     companion object {
         fun find(configurationName: String): CoverageType? {
-            return values().find { it -> it.configurationName.lowercase() == configurationName.lowercase() }
+            return values().find { it -> it.configurationName.equals(configurationName, ignoreCase = true) }
         }
     }
 }

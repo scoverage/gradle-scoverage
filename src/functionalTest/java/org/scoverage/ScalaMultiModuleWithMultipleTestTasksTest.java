@@ -17,12 +17,12 @@ public class ScalaMultiModuleWithMultipleTestTasksTest extends ScoverageFunction
     @Test
     public void reportScoverage() {
 
-        AssertableBuildResult result = dryRun("clean", ScoveragePlugin.getREPORT_NAME());
+        AssertableBuildResult result = dryRun("clean", ScoveragePlugin.REPORT_NAME);
 
-        result.assertTaskExists(ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskExists("a:" + ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskExists("b:" + ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskExists("common:" + ScoveragePlugin.getREPORT_NAME());
+        result.assertTaskExists(ScoveragePlugin.REPORT_NAME);
+        result.assertTaskExists("a:" + ScoveragePlugin.REPORT_NAME);
+        result.assertTaskExists("b:" + ScoveragePlugin.REPORT_NAME);
+        result.assertTaskExists("common:" + ScoveragePlugin.REPORT_NAME);
         result.assertTaskExists("intTest");
         result.assertTaskExists("reportIntTestScoverage");
         result.assertTaskExists("a:intTest");
@@ -31,98 +31,98 @@ public class ScalaMultiModuleWithMultipleTestTasksTest extends ScoverageFunction
         result.assertTaskExists("a:reportIntTestScoverage");
         result.assertTaskExists("b:reportIntTestScoverage");
         result.assertTaskExists("common:reportIntTestScoverage");
-        result.assertTaskExists(ScoveragePlugin.getREPORT_NAME());
+        result.assertTaskExists(ScoveragePlugin.REPORT_NAME);
     }
 
     @Test
     public void reportScoverageOnlyRoot() {
 
-        AssertableBuildResult result = dryRun("clean", ":" + ScoveragePlugin.getREPORT_NAME());
+        AssertableBuildResult result = dryRun("clean", ":" + ScoveragePlugin.REPORT_NAME);
 
-        result.assertTaskExists(ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskDoesntExist("a:" + ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskDoesntExist("b:" + ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskDoesntExist("common:" + ScoveragePlugin.getREPORT_NAME());
+        result.assertTaskExists(ScoveragePlugin.REPORT_NAME);
+        result.assertTaskDoesntExist("a:" + ScoveragePlugin.REPORT_NAME);
+        result.assertTaskDoesntExist("b:" + ScoveragePlugin.REPORT_NAME);
+        result.assertTaskDoesntExist("common:" + ScoveragePlugin.REPORT_NAME);
     }
 
     @Test
     public void reportScoverageOnlyA() {
 
-        AssertableBuildResult result = dryRun("clean", ":a:" + ScoveragePlugin.getREPORT_NAME());
+        AssertableBuildResult result = dryRun("clean", ":a:" + ScoveragePlugin.REPORT_NAME);
 
-        result.assertTaskDoesntExist(ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskExists("a:" + ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskDoesntExist("b:" + ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskDoesntExist("common:" + ScoveragePlugin.getREPORT_NAME());
+        result.assertTaskDoesntExist(ScoveragePlugin.REPORT_NAME);
+        result.assertTaskExists("a:" + ScoveragePlugin.REPORT_NAME);
+        result.assertTaskDoesntExist("b:" + ScoveragePlugin.REPORT_NAME);
+        result.assertTaskDoesntExist("common:" + ScoveragePlugin.REPORT_NAME);
     }
 
     @Test
     public void aggregateScoverage() {
 
-        AssertableBuildResult result = dryRun("clean", ScoveragePlugin.getAGGREGATE_NAME());
+        AssertableBuildResult result = dryRun("clean", ScoveragePlugin.AGGREGATE_NAME);
 
-        result.assertTaskExists(ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskExists("a:" + ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskExists("b:" + ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskExists(ScoveragePlugin.getAGGREGATE_NAME());
-        result.assertTaskExists("common:" + ScoveragePlugin.getREPORT_NAME());
+        result.assertTaskExists(ScoveragePlugin.REPORT_NAME);
+        result.assertTaskExists("a:" + ScoveragePlugin.REPORT_NAME);
+        result.assertTaskExists("b:" + ScoveragePlugin.REPORT_NAME);
+        result.assertTaskExists(ScoveragePlugin.AGGREGATE_NAME);
+        result.assertTaskExists("common:" + ScoveragePlugin.REPORT_NAME);
     }
 
     @Test
     public void checkScoverage() {
 
-        AssertableBuildResult result = dryRun("clean", ScoveragePlugin.getCHECK_NAME());
+        AssertableBuildResult result = dryRun("clean", ScoveragePlugin.CHECK_NAME);
 
-        result.assertTaskExists(ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskExists("a:" + ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskExists("b:" + ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskExists("common:" + ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskExists(ScoveragePlugin.getCHECK_NAME());
-        result.assertTaskExists("a:" + ScoveragePlugin.getCHECK_NAME());
-        result.assertTaskExists("b:" + ScoveragePlugin.getCHECK_NAME());
-        result.assertTaskExists("common:" + ScoveragePlugin.getCHECK_NAME());
-        result.assertTaskDoesntExist(ScoveragePlugin.getAGGREGATE_NAME());
+        result.assertTaskExists(ScoveragePlugin.REPORT_NAME);
+        result.assertTaskExists("a:" + ScoveragePlugin.REPORT_NAME);
+        result.assertTaskExists("b:" + ScoveragePlugin.REPORT_NAME);
+        result.assertTaskExists("common:" + ScoveragePlugin.REPORT_NAME);
+        result.assertTaskExists(ScoveragePlugin.CHECK_NAME);
+        result.assertTaskExists("a:" + ScoveragePlugin.CHECK_NAME);
+        result.assertTaskExists("b:" + ScoveragePlugin.CHECK_NAME);
+        result.assertTaskExists("common:" + ScoveragePlugin.CHECK_NAME);
+        result.assertTaskDoesntExist(ScoveragePlugin.AGGREGATE_NAME);
     }
 
     @Test
     public void checkScoverageOnlyRoot() {
 
-        AssertableBuildResult result = dryRun("clean", ":" + ScoveragePlugin.getCHECK_NAME());
+        AssertableBuildResult result = dryRun("clean", ":" + ScoveragePlugin.CHECK_NAME);
 
-        result.assertTaskExists(ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskDoesntExist("a:" + ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskDoesntExist("b:" + ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskExists(ScoveragePlugin.getCHECK_NAME());
-        result.assertTaskDoesntExist("a:" + ScoveragePlugin.getCHECK_NAME());
-        result.assertTaskDoesntExist("b:" + ScoveragePlugin.getCHECK_NAME());
-        result.assertTaskDoesntExist(ScoveragePlugin.getAGGREGATE_NAME());
+        result.assertTaskExists(ScoveragePlugin.REPORT_NAME);
+        result.assertTaskDoesntExist("a:" + ScoveragePlugin.REPORT_NAME);
+        result.assertTaskDoesntExist("b:" + ScoveragePlugin.REPORT_NAME);
+        result.assertTaskExists(ScoveragePlugin.CHECK_NAME);
+        result.assertTaskDoesntExist("a:" + ScoveragePlugin.CHECK_NAME);
+        result.assertTaskDoesntExist("b:" + ScoveragePlugin.CHECK_NAME);
+        result.assertTaskDoesntExist(ScoveragePlugin.AGGREGATE_NAME);
     }
 
     @Test
     public void checkScoverageOnlyA() {
 
-        AssertableBuildResult result = dryRun("clean", ":a:" + ScoveragePlugin.getCHECK_NAME());
+        AssertableBuildResult result = dryRun("clean", ":a:" + ScoveragePlugin.CHECK_NAME);
 
-        result.assertTaskDoesntExist(ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskExists("a:" + ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskDoesntExist("b:" + ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskDoesntExist("common:" + ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskDoesntExist(ScoveragePlugin.getCHECK_NAME());
-        result.assertTaskExists("a:" + ScoveragePlugin.getCHECK_NAME());
-        result.assertTaskDoesntExist("b:" + ScoveragePlugin.getCHECK_NAME());
-        result.assertTaskDoesntExist("common:" + ScoveragePlugin.getCHECK_NAME());
-        result.assertTaskDoesntExist(ScoveragePlugin.getAGGREGATE_NAME());
+        result.assertTaskDoesntExist(ScoveragePlugin.REPORT_NAME);
+        result.assertTaskExists("a:" + ScoveragePlugin.REPORT_NAME);
+        result.assertTaskDoesntExist("b:" + ScoveragePlugin.REPORT_NAME);
+        result.assertTaskDoesntExist("common:" + ScoveragePlugin.REPORT_NAME);
+        result.assertTaskDoesntExist(ScoveragePlugin.CHECK_NAME);
+        result.assertTaskExists("a:" + ScoveragePlugin.CHECK_NAME);
+        result.assertTaskDoesntExist("b:" + ScoveragePlugin.CHECK_NAME);
+        result.assertTaskDoesntExist("common:" + ScoveragePlugin.CHECK_NAME);
+        result.assertTaskDoesntExist(ScoveragePlugin.AGGREGATE_NAME);
     }
 
     @Test
     public void checkScoverageWithoutIntTests() {
-        AssertableBuildResult result = dryRun("clean", ScoveragePlugin.getCHECK_NAME(),
+        AssertableBuildResult result = dryRun("clean", ScoveragePlugin.CHECK_NAME,
                 "-x", "intTest");
 
-        result.assertTaskExists(ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskExists("a:" + ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskExists("b:" + ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskExists("common:" + ScoveragePlugin.getREPORT_NAME());
+        result.assertTaskExists(ScoveragePlugin.REPORT_NAME);
+        result.assertTaskExists("a:" + ScoveragePlugin.REPORT_NAME);
+        result.assertTaskExists("b:" + ScoveragePlugin.REPORT_NAME);
+        result.assertTaskExists("common:" + ScoveragePlugin.REPORT_NAME);
         result.assertTaskDoesntExist("intTest");
         result.assertTaskExists("reportIntTestScoverage");
         result.assertTaskDoesntExist("a:intTest");
@@ -136,18 +136,18 @@ public class ScalaMultiModuleWithMultipleTestTasksTest extends ScoverageFunction
     @Test
     public void checkAndAggregateScoverage() throws Exception {
 
-        AssertableBuildResult result = run("clean", ScoveragePlugin.getCHECK_NAME(),
-                ScoveragePlugin.getAGGREGATE_NAME());
+        AssertableBuildResult result = run("clean", ScoveragePlugin.CHECK_NAME,
+                ScoveragePlugin.AGGREGATE_NAME);
 
-        result.assertTaskSucceeded(ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskSucceeded("a:" + ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskSucceeded("b:" + ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskSucceeded("common:" + ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskSucceeded(ScoveragePlugin.getCHECK_NAME());
-        result.assertTaskSucceeded("a:" + ScoveragePlugin.getCHECK_NAME());
-        result.assertTaskSucceeded("b:" + ScoveragePlugin.getCHECK_NAME());
-        result.assertTaskSucceeded("common:" + ScoveragePlugin.getCHECK_NAME());
-        result.assertTaskSucceeded(ScoveragePlugin.getAGGREGATE_NAME());
+        result.assertTaskSucceeded(ScoveragePlugin.REPORT_NAME);
+        result.assertTaskSucceeded("a:" + ScoveragePlugin.REPORT_NAME);
+        result.assertTaskSucceeded("b:" + ScoveragePlugin.REPORT_NAME);
+        result.assertTaskSucceeded("common:" + ScoveragePlugin.REPORT_NAME);
+        result.assertTaskSucceeded(ScoveragePlugin.CHECK_NAME);
+        result.assertTaskSucceeded("a:" + ScoveragePlugin.CHECK_NAME);
+        result.assertTaskSucceeded("b:" + ScoveragePlugin.CHECK_NAME);
+        result.assertTaskSucceeded("common:" + ScoveragePlugin.CHECK_NAME);
+        result.assertTaskSucceeded(ScoveragePlugin.AGGREGATE_NAME);
 
         assertAllReportFilesExist();
         assertCoverage(100.0);
@@ -156,7 +156,7 @@ public class ScalaMultiModuleWithMultipleTestTasksTest extends ScoverageFunction
     @Test
     public void checkScoverageWithoutCoverageInRoot() throws Exception {
 
-        AssertableBuildResult result = runAndFail("clean", ScoveragePlugin.getCHECK_NAME(),
+        AssertableBuildResult result = runAndFail("clean", ScoveragePlugin.CHECK_NAME,
                 "test",
                 "--tests", "org.hello.TestNothingSuite",
                 "--tests", "org.hello.a.WorldASuite",
@@ -164,7 +164,7 @@ public class ScalaMultiModuleWithMultipleTestTasksTest extends ScoverageFunction
                 "--tests", "org.hello.common.WorldCommonSuite",
                 "-x", "intTest");
 
-        result.assertTaskFailed(ScoveragePlugin.getCHECK_NAME());
+        result.assertTaskFailed(ScoveragePlugin.CHECK_NAME);
 
         assertRootReportFilesExist();
         assertCoverage(0.0);
@@ -173,7 +173,7 @@ public class ScalaMultiModuleWithMultipleTestTasksTest extends ScoverageFunction
     @Test
     public void checkScoverageWithoutCoverageInA() throws Exception {
 
-        AssertableBuildResult result = runAndFail("clean", ScoveragePlugin.getCHECK_NAME(),
+        AssertableBuildResult result = runAndFail("clean", ScoveragePlugin.CHECK_NAME,
                 "test",
                 "--tests", "org.hello.a.TestNothingASuite",
                 "--tests", "org.hello.WorldSuite",
@@ -181,7 +181,7 @@ public class ScalaMultiModuleWithMultipleTestTasksTest extends ScoverageFunction
                 "--tests", "org.hello.common.WorldCommonSuite",
                 "-x", ":a:intTest");
 
-        result.assertTaskFailed("a:" + ScoveragePlugin.getCHECK_NAME());
+        result.assertTaskFailed("a:" + ScoveragePlugin.CHECK_NAME);
 
         assertAReportFilesExist();
         assertCoverage(0.0, reportDir(projectDir().toPath().resolve("a").toFile()));
@@ -193,10 +193,10 @@ public class ScalaMultiModuleWithMultipleTestTasksTest extends ScoverageFunction
         AssertableBuildResult result = runAndFail("clean",
                 ":a:test",
                 ":common:test", "--tests", "org.hello.common.TestNothingCommonSuite",
-                "-P" + ScoveragePlugin.getSCOVERAGE_COMPILE_ONLY_PROPERTY(),
-                ScoveragePlugin.getCHECK_NAME());
+                "-P" + ScoveragePlugin.SCOVERAGE_COMPILE_ONLY_PROPERTY,
+                ScoveragePlugin.CHECK_NAME);
 
-        result.assertTaskFailed("common:" + ScoveragePlugin.getCHECK_NAME());
+        result.assertTaskFailed("common:" + ScoveragePlugin.CHECK_NAME);
 
         assertCommonReportFilesExist();
         assertCoverage(0.0, reportDir(projectDir().toPath().resolve("common").toFile()));
@@ -207,22 +207,22 @@ public class ScalaMultiModuleWithMultipleTestTasksTest extends ScoverageFunction
 
         // should pass as the check on the root is for the aggregation (which covers > 50%)
 
-        AssertableBuildResult result = run("clean", ScoveragePlugin.getCHECK_NAME(),
-                ScoveragePlugin.getAGGREGATE_NAME(), "test",
+        AssertableBuildResult result = run("clean", ScoveragePlugin.CHECK_NAME,
+                ScoveragePlugin.AGGREGATE_NAME, "test",
                 "--tests", "org.hello.TestNothingSuite",
                 "--tests", "org.hello.a.WorldASuite",
                 "--tests", "org.hello.b.WorldBSuite",
                 "--tests", "org.hello.common.WorldCommonSuite");
 
-        result.assertTaskSucceeded(ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskSucceeded("a:" + ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskSucceeded("b:" + ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskSucceeded("common:" + ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskSucceeded(ScoveragePlugin.getCHECK_NAME());
-        result.assertTaskSucceeded("a:" + ScoveragePlugin.getCHECK_NAME());
-        result.assertTaskSucceeded("b:" + ScoveragePlugin.getCHECK_NAME());
-        result.assertTaskSucceeded("common:" + ScoveragePlugin.getCHECK_NAME());
-        result.assertTaskSucceeded(ScoveragePlugin.getAGGREGATE_NAME());
+        result.assertTaskSucceeded(ScoveragePlugin.REPORT_NAME);
+        result.assertTaskSucceeded("a:" + ScoveragePlugin.REPORT_NAME);
+        result.assertTaskSucceeded("b:" + ScoveragePlugin.REPORT_NAME);
+        result.assertTaskSucceeded("common:" + ScoveragePlugin.REPORT_NAME);
+        result.assertTaskSucceeded(ScoveragePlugin.CHECK_NAME);
+        result.assertTaskSucceeded("a:" + ScoveragePlugin.CHECK_NAME);
+        result.assertTaskSucceeded("b:" + ScoveragePlugin.CHECK_NAME);
+        result.assertTaskSucceeded("common:" + ScoveragePlugin.CHECK_NAME);
+        result.assertTaskSucceeded(ScoveragePlugin.AGGREGATE_NAME);
 
         assertAllReportFilesExist();
         assertCoverage(93.33);
@@ -231,20 +231,20 @@ public class ScalaMultiModuleWithMultipleTestTasksTest extends ScoverageFunction
     @Test
     public void checkAndAggregateScoverageWithoutCoverageInAll() throws Exception {
 
-        AssertableBuildResult result = runAndFail("clean", ScoveragePlugin.getCHECK_NAME(),
-                ScoveragePlugin.getAGGREGATE_NAME(), "test",
+        AssertableBuildResult result = runAndFail("clean", ScoveragePlugin.CHECK_NAME,
+                ScoveragePlugin.AGGREGATE_NAME, "test",
                 "--tests", "org.hello.TestNothingSuite",
                 "--tests", "org.hello.a.TestNothingASuite",
                 "--tests", "org.hello.b.TestNothingBSuite",
                 "--tests", "org.hello.common.TestNothingCommonSuite",
                 "-x", "intTest");
 
-        result.assertTaskSucceeded(ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskSucceeded("a:" + ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskSucceeded("b:" + ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskSucceeded("common:" + ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskSucceeded(ScoveragePlugin.getAGGREGATE_NAME());
-        result.assertTaskFailed(ScoveragePlugin.getCHECK_NAME());
+        result.assertTaskSucceeded(ScoveragePlugin.REPORT_NAME);
+        result.assertTaskSucceeded("a:" + ScoveragePlugin.REPORT_NAME);
+        result.assertTaskSucceeded("b:" + ScoveragePlugin.REPORT_NAME);
+        result.assertTaskSucceeded("common:" + ScoveragePlugin.REPORT_NAME);
+        result.assertTaskSucceeded(ScoveragePlugin.AGGREGATE_NAME);
+        result.assertTaskFailed(ScoveragePlugin.CHECK_NAME);
 
         assertAllReportFilesExist();
         assertCoverage(0.0);
@@ -253,22 +253,22 @@ public class ScalaMultiModuleWithMultipleTestTasksTest extends ScoverageFunction
     @Test
     public void aggregateScoverageWithoutNormalCompilation() throws Exception {
 
-        AssertableBuildResult result = run("clean", ScoveragePlugin.getAGGREGATE_NAME(),
-                "-P" + ScoveragePlugin.getSCOVERAGE_COMPILE_ONLY_PROPERTY());
+        AssertableBuildResult result = run("clean", ScoveragePlugin.AGGREGATE_NAME,
+                "-P" + ScoveragePlugin.SCOVERAGE_COMPILE_ONLY_PROPERTY);
 
         result.assertTaskSkipped("compileScala");
         result.assertTaskSkipped("a:compileScala");
         result.assertTaskSkipped("b:compileScala");
         result.assertTaskSkipped("common:compileScala");
-        result.assertTaskSucceeded(ScoveragePlugin.getCOMPILE_NAME());
-        result.assertTaskSucceeded("a:" + ScoveragePlugin.getCOMPILE_NAME());
-        result.assertTaskSucceeded("b:" + ScoveragePlugin.getCOMPILE_NAME());
-        result.assertTaskSucceeded("common:" + ScoveragePlugin.getCOMPILE_NAME());
-        result.assertTaskSucceeded(ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskSucceeded("a:" + ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskSucceeded("b:" + ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskSucceeded("common:" + ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskSucceeded(ScoveragePlugin.getAGGREGATE_NAME());
+        result.assertTaskSucceeded(ScoveragePlugin.COMPILE_NAME);
+        result.assertTaskSucceeded("a:" + ScoveragePlugin.COMPILE_NAME);
+        result.assertTaskSucceeded("b:" + ScoveragePlugin.COMPILE_NAME);
+        result.assertTaskSucceeded("common:" + ScoveragePlugin.COMPILE_NAME);
+        result.assertTaskSucceeded(ScoveragePlugin.REPORT_NAME);
+        result.assertTaskSucceeded("a:" + ScoveragePlugin.REPORT_NAME);
+        result.assertTaskSucceeded("b:" + ScoveragePlugin.REPORT_NAME);
+        result.assertTaskSucceeded("common:" + ScoveragePlugin.REPORT_NAME);
+        result.assertTaskSucceeded(ScoveragePlugin.AGGREGATE_NAME);
 
         assertAllReportFilesExist();
         assertCoverage(100.0);

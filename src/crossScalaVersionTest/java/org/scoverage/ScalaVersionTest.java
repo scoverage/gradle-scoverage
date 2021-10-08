@@ -22,8 +22,8 @@ public abstract class ScalaVersionTest extends ScoverageFunctionalTest {
     @Test
     public void report() throws Exception {
 
-        AssertableBuildResult result = run("clean", ":" + scalaVersion + ":" + ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskSucceeded(scalaVersion + ":" + ScoveragePlugin.getREPORT_NAME());
+        AssertableBuildResult result = run("clean", ":" + scalaVersion + ":" + ScoveragePlugin.REPORT_NAME);
+        result.assertTaskSucceeded(scalaVersion + ":" + ScoveragePlugin.REPORT_NAME);
 
         File reportDir = reportDir(projectDir().toPath().resolve(scalaVersion).toFile());
         Assert.assertTrue(resolve(reportDir, "index.html").exists());

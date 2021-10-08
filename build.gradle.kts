@@ -1,8 +1,8 @@
 plugins {
     `java-gradle-plugin`
+    `kotlin-dsl`
     id("com.gradle.plugin-publish") version "0.15.0"
     id("org.jetbrains.gradle.plugin.idea-ext") version "1.0"
-    kotlin("jvm") version "1.5.31"
     id("org.jetbrains.dokka") version "1.5.30"
 }
 

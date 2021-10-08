@@ -1,6 +1,7 @@
 package org.scoverage
 
 import org.gradle.api.DefaultTask
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.FileCollection
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
@@ -22,7 +23,7 @@ abstract class ScoverageAggregate: DefaultTask() {
 
     @InputFiles
     @PathSensitive(RELATIVE)
-    val sources: Property<FileCollection> = project.objects.property(FileCollection::class.java)
+    val sources: ConfigurableFileCollection = project.objects.fileCollection()
 
     @OutputDirectory
     val reportDir: Property<File> = project.objects.property(File::class.java)
@@ -58,7 +59,7 @@ abstract class ScoverageAggregate: DefaultTask() {
 
             if (coverage.nonEmpty()) {
                 ScoverageWriter(project.logger).write(
-                        sources.get().getFiles(),
+                        sources.files,
                         reportDir.get(),
                         coverage.get(),
                         sourceEncoding.get(),
