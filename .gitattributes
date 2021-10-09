@@ -4,3 +4,5 @@
 *.groovy text eol=lf
 *.properties text eol=lf
 *.scala text eol=lf
+*.kt text eol=lf
+*.kts text eol=lf
