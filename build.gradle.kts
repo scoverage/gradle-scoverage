@@ -40,21 +40,10 @@ pluginBundle {
 }
 
 apply(plugin = "maven-publish")
-// TODO #171 remove once all groovy classes are migrated to kotlin
-apply(plugin = "groovy")
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
-}
-
-// TODO #171 remove once all groovy classes are migrated to kotlin
-val compileKotlinTask = tasks.compileKotlin.get()
-tasks {
-    named<GroovyCompile>("compileGroovy") {
-        dependsOn(compileKotlin)
-        classpath = classpath.plus(files(compileKotlinTask.destinationDirectory))
-    }
 }
 
 dependencies {
@@ -137,13 +126,6 @@ gradlePlugin {
     testSourceSets(sourceSets["functionalTest"], sourceSets["crossScalaVersionTest"])
 }
 
-// TODO #171 remove once all groovy classes are migrated to kotlin
-val groovydocJar by tasks.registering(Jar::class) {
-    from("$buildDir/docs/groovydoc")
-    archiveClassifier.set("groovydoc")
-    dependsOn(tasks["groovydoc"])
-}
-
 val kotlindocJar by tasks.registering(Jar::class) {
     from(tasks.dokkaHtml.get().outputDirectory)
     archiveClassifier.set("kotlindoc")
@@ -209,7 +191,6 @@ configure<PublishingExtension> {
                 }
             }
             from(components["java"])
-            artifact(groovydocJar)
             artifact(kotlindocJar)
             artifact(sourcesJar)
         }
