@@ -11,25 +11,26 @@ import org.slf4j.LoggerFactory
 
 import java.nio.file.Paths
 import java.text.NumberFormat
+import java.util.*
 
-import static org.junit.Assert.assertThat
-import static org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.Assert.assertThat
+import org.junit.jupiter.api.Assertions.assertThrows
 
 class CoverageCheckerTest {
 
-    private NumberFormat numberFormat = NumberFormat.getInstance(Locale.US)
+    private val numberFormat = NumberFormat.getInstance(Locale.US)
 
-    private File reportDir = Paths.get(getClass().getClassLoader().getResource("checkTask").toURI()).toFile()
+    private val reportDir = Paths.get(javaClass.getClassLoader().getResource("checkTask").toURI()).toFile()
 
-    private CoverageChecker checker = new CoverageChecker(LoggerFactory.getLogger(CoverageCheckerTest.class))
+    private val checker = CoverageChecker(LoggerFactory.getLogger(CoverageCheckerTest::class.java))
 
-    @Rule
-    public TemporaryFolder tempDir = new TemporaryFolder()
+    @get:Rule
+    val tempDir = TemporaryFolder()
 
     // error when report file is not there
 
     @Test
-    void failsWhenReportFileIsNotFound() {
+    fun failsWhenReportFileIsNotFound() {
         assertFailure(CoverageChecker.fileNotFoundErrorMsg(CoverageType.Line), {
             checker.checkLineCoverage(tempDir.getRoot(), CoverageType.Line, 0.0, numberFormat)
         })
@@ -38,84 +39,77 @@ class CoverageCheckerTest {
     // line coverage
 
     @Test
-    void failsWhenLineRateIsBelowTarget() {
+    fun failsWhenLineRateIsBelowTarget() {
         assertFailure(CoverageChecker.errorMsg("66", "100", CoverageType.Line), {
             checker.checkLineCoverage(reportDir, CoverageType.Line, 1.0, numberFormat)
         })
     }
 
     @Test
-    void doesNotFailWhenLineRateIsAtTarget() {
+    fun doesNotFailWhenLineRateIsAtTarget() {
         checker.checkLineCoverage(reportDir, CoverageType.Line, 0.66, numberFormat)
     }
 
     @Test
-    void doesNotFailWhenLineRateIsAboveTarget() {
+    fun doesNotFailWhenLineRateIsAboveTarget() {
         checker.checkLineCoverage(reportDir, CoverageType.Line, 0.6, numberFormat)
     }
 
     // Statement coverage
 
     @Test
-    void failsWhenStatementRateIsBelowTarget() {
-        assertFailure(CoverageChecker.errorMsg(numberFormat.format(new Double(33.33)), "100", CoverageType.Statement), {
+    fun failsWhenStatementRateIsBelowTarget() {
+        assertFailure(CoverageChecker.errorMsg(numberFormat.format(33.33), "100", CoverageType.Statement), {
             checker.checkLineCoverage(reportDir, CoverageType.Statement, 1.0, numberFormat)
         })
     }
 
     @Test
-    void doesNotFailWhenStatementRateIsAtTarget() {
+    fun doesNotFailWhenStatementRateIsAtTarget() {
         checker.checkLineCoverage(reportDir, CoverageType.Statement, 0.33, numberFormat)
     }
 
     @Test
-    void doesNotFailWhenStatementRateIsAboveTarget() {
+    fun doesNotFailWhenStatementRateIsAboveTarget() {
         checker.checkLineCoverage(reportDir, CoverageType.Statement, 0.3, numberFormat)
     }
 
     // Branch coverage
 
     @Test
-    void failsWhenBranchRateIsBelowTarget() {
+    fun failsWhenBranchRateIsBelowTarget() {
         assertFailure(CoverageChecker.errorMsg("50", "100", CoverageType.Branch), {
             checker.checkLineCoverage(reportDir, CoverageType.Branch, 1.0, numberFormat)
         })
     }
 
     @Test
-    void doesNotFailWhenBranchRateIsAtTarget() {
+    fun doesNotFailWhenBranchRateIsAtTarget() {
         checker.checkLineCoverage(reportDir, CoverageType.Branch, 0.5, numberFormat)
     }
 
     @Test
-    void doesNotFailWhenBranchRateIsAboveTarget() {
+    fun doesNotFailWhenBranchRateIsAboveTarget() {
         checker.checkLineCoverage(reportDir, CoverageType.Branch, 0.45, numberFormat)
     }
 
-    private void assertFailure(String message, Executable executable) {
-        GradleException e = assertThrows(GradleException.class, executable)
-        assertThat(e, new CauseMatcher(message))
+    private fun assertFailure(message: String, executable: Executable) {
+        val e: GradleException = assertThrows(GradleException::class.java, executable)
+        assertThat(e, CauseMatcher(message))
     }
 }
 
 /**
  * Copied from the Internet, just to check if we have correct exception thrown.
  */
-class CauseMatcher extends TypeSafeMatcher<GradleException> {
-
-    private final String expectedMessage
-
-    CauseMatcher(String expectedMessage) {
-        this.expectedMessage = expectedMessage
-    }
+class CauseMatcher(private val expectedMessage: String): TypeSafeMatcher<GradleException>() {
 
     @Override
-    protected boolean matchesSafely(GradleException item) {
-        return item.getMessage().contains(expectedMessage)
+    protected override fun matchesSafely(item: GradleException): Boolean {
+        return item.message?.contains(expectedMessage) == true
     }
 
-    @Override
-    void describeTo(Description description) {
+    override fun describeTo(description: Description) {
         description.appendText("expects message ")
                 .appendValue(expectedMessage)
     }

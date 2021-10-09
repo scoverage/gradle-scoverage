@@ -11,10 +11,10 @@ public class ScalaMultiModuleWithPartialScoverageUseTest extends ScoverageFuncti
     @Test
     public void reportScoverage() {
 
-        AssertableBuildResult result = dryRun("clean", ScoveragePlugin.getREPORT_NAME());
+        AssertableBuildResult result = dryRun("clean", ScoveragePlugin.REPORT_NAME);
 
-        result.assertTaskExists(ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskExists("b:" + ScoveragePlugin.getREPORT_NAME());
+        result.assertTaskExists(ScoveragePlugin.REPORT_NAME);
+        result.assertTaskExists("b:" + ScoveragePlugin.REPORT_NAME);
     }
 
 }

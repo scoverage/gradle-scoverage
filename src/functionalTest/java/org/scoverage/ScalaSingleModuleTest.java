@@ -14,10 +14,10 @@ public class ScalaSingleModuleTest extends ScoverageFunctionalTest {
 
         AssertableBuildResult result = dryRun("clean", "test");
 
-        result.assertTaskDoesntExist(ScoveragePlugin.getCOMPILE_NAME());
-        result.assertTaskDoesntExist(ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskDoesntExist(ScoveragePlugin.getAGGREGATE_NAME());
-        result.assertTaskDoesntExist(ScoveragePlugin.getCHECK_NAME());
+        result.assertTaskDoesntExist(ScoveragePlugin.COMPILE_NAME);
+        result.assertTaskDoesntExist(ScoveragePlugin.REPORT_NAME);
+        result.assertTaskDoesntExist(ScoveragePlugin.AGGREGATE_NAME);
+        result.assertTaskDoesntExist(ScoveragePlugin.CHECK_NAME);
     }
 
     @Test
@@ -25,27 +25,27 @@ public class ScalaSingleModuleTest extends ScoverageFunctionalTest {
 
         AssertableBuildResult result = dryRun("clean", "build");
 
-        result.assertTaskDoesntExist(ScoveragePlugin.getCOMPILE_NAME());
-        result.assertTaskDoesntExist(ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskDoesntExist(ScoveragePlugin.getAGGREGATE_NAME());
-        result.assertTaskDoesntExist(ScoveragePlugin.getCHECK_NAME());
+        result.assertTaskDoesntExist(ScoveragePlugin.COMPILE_NAME);
+        result.assertTaskDoesntExist(ScoveragePlugin.REPORT_NAME);
+        result.assertTaskDoesntExist(ScoveragePlugin.AGGREGATE_NAME);
+        result.assertTaskDoesntExist(ScoveragePlugin.CHECK_NAME);
     }
 
     @Test
     public void reportScoverage() {
 
-        AssertableBuildResult result = dryRun("clean", ScoveragePlugin.getREPORT_NAME());
+        AssertableBuildResult result = dryRun("clean", ScoveragePlugin.REPORT_NAME);
 
-        result.assertTaskExists(ScoveragePlugin.getCOMPILE_NAME());
-        result.assertTaskExists(ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskDoesntExist(ScoveragePlugin.getAGGREGATE_NAME());
-        result.assertTaskDoesntExist(ScoveragePlugin.getCHECK_NAME());
+        result.assertTaskExists(ScoveragePlugin.COMPILE_NAME);
+        result.assertTaskExists(ScoveragePlugin.REPORT_NAME);
+        result.assertTaskDoesntExist(ScoveragePlugin.AGGREGATE_NAME);
+        result.assertTaskDoesntExist(ScoveragePlugin.CHECK_NAME);
     }
 
     @Test
     public void aggregateScoverage() {
 
-        AssertableBuildResult result = runAndFail("clean", ScoveragePlugin.getAGGREGATE_NAME());
+        AssertableBuildResult result = runAndFail("clean", ScoveragePlugin.AGGREGATE_NAME);
 
         result.assertNoTasks();
     }
@@ -53,12 +53,12 @@ public class ScalaSingleModuleTest extends ScoverageFunctionalTest {
     @Test
     public void checkScoverage() throws Exception {
 
-        AssertableBuildResult result = run("clean", ScoveragePlugin.getCHECK_NAME());
+        AssertableBuildResult result = run("clean", ScoveragePlugin.CHECK_NAME);
 
-        result.assertTaskSucceeded(ScoveragePlugin.getCOMPILE_NAME());
-        result.assertTaskSucceeded(ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskSucceeded(ScoveragePlugin.getCHECK_NAME());
-        result.assertTaskDoesntExist(ScoveragePlugin.getAGGREGATE_NAME());
+        result.assertTaskSucceeded(ScoveragePlugin.COMPILE_NAME);
+        result.assertTaskSucceeded(ScoveragePlugin.REPORT_NAME);
+        result.assertTaskSucceeded(ScoveragePlugin.CHECK_NAME);
+        result.assertTaskDoesntExist(ScoveragePlugin.AGGREGATE_NAME);
 
         assertReportFilesExist();
         assertCoverage(50.0);
@@ -67,13 +67,13 @@ public class ScalaSingleModuleTest extends ScoverageFunctionalTest {
     @Test
     public void checkScoverageFails() throws Exception {
 
-        AssertableBuildResult result = runAndFail("clean", ScoveragePlugin.getCHECK_NAME(),
+        AssertableBuildResult result = runAndFail("clean", ScoveragePlugin.CHECK_NAME,
                 "test", "--tests", "org.hello.TestNothingSuite");
 
-        result.assertTaskSucceeded(ScoveragePlugin.getCOMPILE_NAME());
-        result.assertTaskSucceeded(ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskFailed(ScoveragePlugin.getCHECK_NAME());
-        result.assertTaskDoesntExist(ScoveragePlugin.getAGGREGATE_NAME());
+        result.assertTaskSucceeded(ScoveragePlugin.COMPILE_NAME);
+        result.assertTaskSucceeded(ScoveragePlugin.REPORT_NAME);
+        result.assertTaskFailed(ScoveragePlugin.CHECK_NAME);
+        result.assertTaskDoesntExist(ScoveragePlugin.AGGREGATE_NAME);
 
         assertReportFilesExist();
         assertCoverage(0.0);
@@ -82,13 +82,13 @@ public class ScalaSingleModuleTest extends ScoverageFunctionalTest {
     @Test
     public void reportScoverageWithExcludedClasses() throws Exception {
 
-        AssertableBuildResult result = run("clean", ScoveragePlugin.getREPORT_NAME(),
+        AssertableBuildResult result = run("clean", ScoveragePlugin.REPORT_NAME,
                 "-PexcludedFile=.*");
 
-        result.assertTaskSucceeded(ScoveragePlugin.getCOMPILE_NAME());
-        result.assertTaskSucceeded(ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskDoesntExist(ScoveragePlugin.getCHECK_NAME());
-        result.assertTaskDoesntExist(ScoveragePlugin.getAGGREGATE_NAME());
+        result.assertTaskSucceeded(ScoveragePlugin.COMPILE_NAME);
+        result.assertTaskSucceeded(ScoveragePlugin.REPORT_NAME);
+        result.assertTaskDoesntExist(ScoveragePlugin.CHECK_NAME);
+        result.assertTaskDoesntExist(ScoveragePlugin.AGGREGATE_NAME);
 
         Assert.assertTrue(resolve(reportDir(), "index.html").exists());
         Assert.assertFalse(resolve(reportDir(), "org/hello/World.scala.html").exists());
@@ -102,14 +102,14 @@ public class ScalaSingleModuleTest extends ScoverageFunctionalTest {
     @Test
     public void reportScoverageWithoutNormalCompilation() throws Exception {
 
-        AssertableBuildResult result = run("clean", ScoveragePlugin.getREPORT_NAME(),
-                "-P" + ScoveragePlugin.getSCOVERAGE_COMPILE_ONLY_PROPERTY());
+        AssertableBuildResult result = run("clean", ScoveragePlugin.REPORT_NAME,
+                "-P" + ScoveragePlugin.SCOVERAGE_COMPILE_ONLY_PROPERTY);
 
         result.assertTaskSkipped("compileScala");
-        result.assertTaskSucceeded(ScoveragePlugin.getCOMPILE_NAME());
-        result.assertTaskSucceeded(ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskDoesntExist(ScoveragePlugin.getCHECK_NAME());
-        result.assertTaskDoesntExist(ScoveragePlugin.getAGGREGATE_NAME());
+        result.assertTaskSucceeded(ScoveragePlugin.COMPILE_NAME);
+        result.assertTaskSucceeded(ScoveragePlugin.REPORT_NAME);
+        result.assertTaskDoesntExist(ScoveragePlugin.CHECK_NAME);
+        result.assertTaskDoesntExist(ScoveragePlugin.AGGREGATE_NAME);
 
         assertReportFilesExist();
         assertCoverage(50.0);
@@ -121,8 +121,8 @@ public class ScalaSingleModuleTest extends ScoverageFunctionalTest {
     @Test
     public void reportScoverageWithoutNormalCompilationAndWithExcludedClasses() throws Exception {
 
-        AssertableBuildResult result = run("clean", ScoveragePlugin.getREPORT_NAME(),
-                "-PexcludedFile=.*", "-P" + ScoveragePlugin.getSCOVERAGE_COMPILE_ONLY_PROPERTY());
+        AssertableBuildResult result = run("clean", ScoveragePlugin.REPORT_NAME,
+                "-PexcludedFile=.*", "-P" + ScoveragePlugin.SCOVERAGE_COMPILE_ONLY_PROPERTY);
 
         Assert.assertTrue(resolve(reportDir(), "index.html").exists());
         Assert.assertFalse(resolve(reportDir(), "org/hello/World.scala.html").exists());

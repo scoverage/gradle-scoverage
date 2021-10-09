@@ -29,7 +29,7 @@ public class CompositeBuildTest extends ScoverageFunctionalTest {
     @Test
     public void reportComposite() {
 
-        runComposite("clean", ScoveragePlugin.getREPORT_NAME());
+        runComposite("clean", ScoveragePlugin.REPORT_NAME);
     }
 
     private AssertableBuildResult runComposite(String... arguments) {

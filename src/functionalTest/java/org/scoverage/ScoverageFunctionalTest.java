@@ -70,7 +70,7 @@ public abstract class ScoverageFunctionalTest {
 
     protected File reportDir(File projectDir) {
 
-        return buildDir(projectDir).toPath().resolve(ScoveragePlugin.getDEFAULT_REPORT_DIR()).toFile();
+        return buildDir(projectDir).toPath().resolve(ScoveragePlugin.DEFAULT_REPORT_DIR).toFile();
     }
 
     protected AssertableBuildResult run(String... arguments) {

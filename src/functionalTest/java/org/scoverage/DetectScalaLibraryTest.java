@@ -33,10 +33,10 @@ public class DetectScalaLibraryTest extends ScoverageFunctionalTest {
     @Parameterized.Parameters(name = "{index}: Project {0} ")
     public static Collection<Object[]> data() {
         Object[][] data = new Object[][]{
-                {"/compile", new String[] {".0", ".+"}, true, new String[0]},
-                {"/compileOnly", new String[] {".0", ".+"}, true, new String[0]},
-                {"/implementation", new String[] {".0", ".+"}, true, new String[0]},
-                {"/dependency-management", new String[] {".0", ".+"}, true, new String[0]},
+                {"/compile", new String[]{".0", ".+"}, true, new String[0]},
+                {"/compileOnly", new String[]{".0", ".+"}, true, new String[0]},
+                {"/implementation", new String[]{".0", ".+"}, true, new String[0]},
+                {"/dependency-management", new String[]{".0", ".+"}, true, new String[0]},
 // disabled until the consistent-versions plugin supports Gradle 7
 //                {"/gradle-consistent-versions", new String[] {"ignored"}, false, new String[] {"--write-locks"}},
         };

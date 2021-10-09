@@ -12,12 +12,12 @@ public class ScalaSingleModuleWithDependencyManagerTest extends ScoverageFunctio
     @Test
     public void checkScoverage() throws Exception {
 
-        AssertableBuildResult result = run("clean", ScoveragePlugin.getCHECK_NAME());
+        AssertableBuildResult result = run("clean", ScoveragePlugin.CHECK_NAME);
 
-        result.assertTaskSucceeded(ScoveragePlugin.getCOMPILE_NAME());
-        result.assertTaskSucceeded(ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskSucceeded(ScoveragePlugin.getCHECK_NAME());
-        result.assertTaskDoesntExist(ScoveragePlugin.getAGGREGATE_NAME());
+        result.assertTaskSucceeded(ScoveragePlugin.COMPILE_NAME);
+        result.assertTaskSucceeded(ScoveragePlugin.REPORT_NAME);
+        result.assertTaskSucceeded(ScoveragePlugin.CHECK_NAME);
+        result.assertTaskDoesntExist(ScoveragePlugin.AGGREGATE_NAME);
 
         assertReportFilesExist();
         assertCoverage(100.0);

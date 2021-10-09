@@ -13,49 +13,50 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.TaskAction
 import scoverage.report.CoverageAggregator
 
-import static org.gradle.api.tasks.PathSensitivity.RELATIVE
+import org.gradle.api.tasks.PathSensitivity.RELATIVE
+import java.io.File
 
 @CacheableTask
-class ScoverageReport extends DefaultTask {
+abstract class ScoverageReport: DefaultTask() {
 
     @Nested
-    ScoverageRunner runner
+    var runner: ScoverageRunner? = null
 
     @InputDirectory
     @PathSensitive(RELATIVE)
-    final Property<File> dataDir = project.objects.property(File)
+    val dataDir: Property<File> = project.objects.property(File::class.java)
 
     @InputFiles
     @PathSensitive(RELATIVE)
-    final Property<FileCollection> sources = project.objects.property(FileCollection)
+    val sources: Property<FileCollection> = project.objects.property(FileCollection::class.java)
 
     @OutputDirectory
-    final Property<File> reportDir = project.objects.property(File)
+    val reportDir: Property<File> = project.objects.property(File::class.java)
 
     @Input
-    final Property<String> sourceEncoding = project.objects.property(String)
+    val sourceEncoding: Property<String> = project.objects.property(String::class.java)
 
     @Input
-    final Property<Boolean> coverageOutputCobertura = project.objects.property(Boolean)
+    val coverageOutputCobertura: Property<Boolean> = project.objects.property(Boolean::class.java)
     @Input
-    final Property<Boolean> coverageOutputXML = project.objects.property(Boolean)
+    val coverageOutputXML: Property<Boolean> = project.objects.property(Boolean::class.java)
     @Input
-    final Property<Boolean> coverageOutputHTML = project.objects.property(Boolean)
+    val coverageOutputHTML: Property<Boolean> = project.objects.property(Boolean::class.java)
     @Input
-    final Property<Boolean> coverageDebug = project.objects.property(Boolean)
+    val coverageDebug: Property<Boolean> = project.objects.property(Boolean::class.java)
 
     @TaskAction
-    def report() {
-        runner.run {
+    fun report() {
+        runner?.run {
             reportDir.get().delete()
             reportDir.get().mkdirs()
 
-            def coverage = CoverageAggregator.aggregate([dataDir.get()] as File[])
+            val coverage = CoverageAggregator.aggregate(arrayOf(dataDir.get()))
 
-            if (coverage.isEmpty()) {
+            if (coverage.isEmpty) {
                 project.logger.info("[scoverage] Could not find coverage file, skipping...")
             } else {
-                new ScoverageWriter(project.logger).write(
+                ScoverageWriter(project.logger).write(
                         sources.get().getFiles(),
                         reportDir.get(),
                         coverage.get(),

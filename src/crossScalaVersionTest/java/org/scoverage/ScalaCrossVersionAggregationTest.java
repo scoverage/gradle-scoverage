@@ -12,16 +12,16 @@ public class ScalaCrossVersionAggregationTest extends ScoverageFunctionalTest {
     @Test
     public void checkAndAggregateAll() throws Exception {
 
-        AssertableBuildResult result = run("clean", ScoveragePlugin.getCHECK_NAME(),
-                ScoveragePlugin.getAGGREGATE_NAME());
+        AssertableBuildResult result = run("clean", ScoveragePlugin.CHECK_NAME,
+                ScoveragePlugin.AGGREGATE_NAME);
 
-        result.assertTaskSkipped(ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskSucceeded("2_12:" + ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskSucceeded("2_13:" + ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskSucceeded(ScoveragePlugin.getCHECK_NAME());
-        result.assertTaskSucceeded("2_12:" + ScoveragePlugin.getCHECK_NAME());
-        result.assertTaskSucceeded("2_13:" + ScoveragePlugin.getCHECK_NAME());
-        result.assertTaskSucceeded(ScoveragePlugin.getAGGREGATE_NAME());
+        result.assertTaskSkipped(ScoveragePlugin.REPORT_NAME);
+        result.assertTaskSucceeded("2_12:" + ScoveragePlugin.REPORT_NAME);
+        result.assertTaskSucceeded("2_13:" + ScoveragePlugin.REPORT_NAME);
+        result.assertTaskSucceeded(ScoveragePlugin.CHECK_NAME);
+        result.assertTaskSucceeded("2_12:" + ScoveragePlugin.CHECK_NAME);
+        result.assertTaskSucceeded("2_13:" + ScoveragePlugin.CHECK_NAME);
+        result.assertTaskSucceeded(ScoveragePlugin.AGGREGATE_NAME);
 
         assertAggregationFilesExist();
         assertCoverage(100.0);
