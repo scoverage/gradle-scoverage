@@ -48,7 +48,7 @@ sourceSets {
 }
 
 test {
-    maxParallelForks = 1
+    maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
 }
 
 task intTest(type: Test) {
@@ -56,7 +56,7 @@ task intTest(type: Test) {
     classpath = sourceSets.intTest.runtimeClasspath
     outputs.upToDateWhen { false }
 
-    maxParallelForks = 1
+    maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
 }
 check.dependsOn(intTest)
 intTest.mustRunAfter(test)
