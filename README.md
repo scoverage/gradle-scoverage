@@ -43,7 +43,7 @@ You can find instructions on how to apply the plugin at http://plugins.gradle.or
 The plugin exposes multiple options that can be configured by setting them in an `scoverage` block within the project's
 build script. These options are as follows:
 
-* `scoverageVersion = <String>` (default `"1.4.8`): The version of the scoverage scalac plugin. This (gradle) plugin
+* `scoverageVersion = <String>` (default `1.4.11`): The version of the scoverage scalac plugin. This (gradle) plugin
 should be compatible with all 1+ versions.
 
 * `scoverageScalaVersion = <String>` (default `detected`): The scala version of the scoverage scalac plugin. This
