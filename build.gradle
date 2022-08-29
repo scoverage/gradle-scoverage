@@ -119,11 +119,6 @@ task groovydocJar(type: Jar, dependsOn: groovydoc) {
     classifier 'groovydoc'
 }
 
-task sourcesJar(type: Jar) {
-    from sourceSets.main.allSource
-    classifier 'sources'
-}
-
 def propOrDefault(String property) {
     if (project.hasProperty(property)) {
         return project.getProperty(property)
@@ -179,7 +174,6 @@ publishing {
             }
             from components.java
             artifact groovydocJar
-            artifact sourcesJar
         }
     }
 }
