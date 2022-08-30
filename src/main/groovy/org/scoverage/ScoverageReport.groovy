@@ -1,16 +1,13 @@
 package org.scoverage
 
 import org.gradle.api.DefaultTask
-import org.gradle.api.file.FileCollection
+import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.logging.Logging
 import org.gradle.api.provider.Property
-import org.gradle.api.tasks.CacheableTask
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputDirectory
-import org.gradle.api.tasks.InputFiles
-import org.gradle.api.tasks.Nested
-import org.gradle.api.tasks.OutputDirectory
-import org.gradle.api.tasks.PathSensitive
-import org.gradle.api.tasks.TaskAction
+import org.gradle.api.provider.SetProperty
+import org.gradle.api.tasks.*
+import org.gradle.workers.WorkAction
+import org.gradle.workers.WorkParameters
 import scoverage.report.CoverageAggregator
 
 import static org.gradle.api.tasks.PathSensitivity.RELATIVE
@@ -27,7 +24,7 @@ class ScoverageReport extends DefaultTask {
 
     @InputFiles
     @PathSensitive(RELATIVE)
-    final Property<FileCollection> sources = project.objects.property(FileCollection)
+    final ConfigurableFileCollection sources = project.objects.fileCollection()
 
     @OutputDirectory
     final Property<File> reportDir = project.objects.property(File)
@@ -46,25 +43,55 @@ class ScoverageReport extends DefaultTask {
 
     @TaskAction
     def report() {
-        runner.run {
-            reportDir.get().delete()
-            reportDir.get().mkdirs()
+        runner.run(ReportAction.class) { parameters ->
+            parameters.dataDir = dataDir
+            parameters.sources.from(sources)
+            parameters.reportDir = reportDir
+            parameters.sourceEncoding = sourceEncoding
+            parameters.coverageOutputCobertura = coverageOutputCobertura
+            parameters.coverageOutputXML = coverageOutputXML
+            parameters.coverageOutputHTML = coverageOutputHTML
+            parameters.coverageDebug = coverageDebug
+        }
+    }
 
-            def coverage = CoverageAggregator.aggregate([dataDir.get()] as File[])
+    static interface Parameters extends WorkParameters {
+        Property<File> getDataDir()
+        ConfigurableFileCollection getSources()
+        Property<File> getReportDir()
+        Property<String> getSourceEncoding()
+        Property<Boolean> getCoverageOutputCobertura()
+        Property<Boolean> getCoverageOutputXML()
+        Property<Boolean> getCoverageOutputHTML()
+        Property<Boolean> getCoverageDebug()
+    }
+
+    static abstract class ReportAction implements WorkAction<Parameters> {
+
+        @Override
+        void execute() {
+            getParameters().reportDir.get().delete()
+            getParameters().reportDir.get().mkdirs()
+
+            def coverage = CoverageAggregator.aggregate([getParameters().dataDir.get()] as File[])
+
+            def logger = Logging.getLogger(ReportAction.class)
 
             if (coverage.isEmpty()) {
-                project.logger.info("[scoverage] Could not find coverage file, skipping...")
+                logger.info("[scoverage] Could not find coverage file, skipping...")
             } else {
-                new ScoverageWriter(project.logger).write(
-                        sources.get().getFiles(),
-                        reportDir.get(),
+                new ScoverageWriter(logger).write(
+                        getParameters().sources.getFiles(),
+                        getParameters().reportDir.get(),
                         coverage.get(),
-                        sourceEncoding.get(),
-                        coverageOutputCobertura.get(),
-                        coverageOutputXML.get(),
-                        coverageOutputHTML.get(),
-                        coverageDebug.get())
+                        getParameters().sourceEncoding.get(),
+                        getParameters().coverageOutputCobertura.get(),
+                        getParameters().coverageOutputXML.get(),
+                        getParameters().coverageOutputHTML.get(),
+                        getParameters().coverageDebug.get())
             }
+
         }
+
     }
 }

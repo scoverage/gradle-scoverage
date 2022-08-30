@@ -11,7 +11,9 @@ import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.scala.ScalaCompile
 import org.gradle.api.tasks.testing.Test
+import org.gradle.workers.WorkerExecutor
 
+import javax.inject.Inject
 import java.nio.file.Files
 import java.util.concurrent.ConcurrentHashMap
 
@@ -29,8 +31,14 @@ class ScoveragePlugin implements Plugin<PluginAware> {
 
     static final String DEFAULT_REPORT_DIR = 'reports' + File.separatorChar + 'scoverage'
 
+    private final WorkerExecutor workerExecutor
     private final ConcurrentHashMap<Task, Set<? extends Task>> crossProjectTaskDependencies = new ConcurrentHashMap<>()
     private final ConcurrentHashMap<Task, Set<? extends Task>> sameProjectTaskDependencies = new ConcurrentHashMap<>()
+
+    @Inject
+    ScoveragePlugin(WorkerExecutor workerExecutor) {
+        this.workerExecutor = workerExecutor
+    }
 
     @Override
     void apply(PluginAware pluginAware) {
@@ -80,7 +88,7 @@ class ScoveragePlugin implements Plugin<PluginAware> {
 
     private void createTasks(Project project, ScoverageExtension extension) {
 
-        ScoverageRunner scoverageRunner = new ScoverageRunner(project.configurations.scoverage)
+        ScoverageRunner scoverageRunner = new ScoverageRunner(workerExecutor, project.configurations.scoverage)
 
         def originalSourceSet = project.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
         def instrumentedSourceSet = project.sourceSets.create('scoverage') {
@@ -125,7 +133,7 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                     group = 'verification'
                     runner = scoverageRunner
                     reportDir = taskReportDir
-                    sources = originalSourceSet.scala.getSourceDirectories()
+                    sources.from(originalSourceSet.scala.getSourceDirectories())
                     dataDir = extension.dataDir
                     sourceEncoding.set(detectedSourceEncoding)
                     coverageOutputCobertura = extension.coverageOutputCobertura
@@ -144,10 +152,9 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                 group = 'verification'
                 runner = scoverageRunner
                 reportDir = extension.reportDir
-                sources = originalSourceSet.scala.getSourceDirectories()
+                sources.from(originalSourceSet.scala.getSourceDirectories())
                 dirsToAggregateFrom = dataDirs
                 sourceEncoding.set(detectedSourceEncoding)
-                deleteReportsOnAggregation = false
                 coverageOutputCobertura = extension.coverageOutputCobertura
                 coverageOutputXML = extension.coverageOutputXML
                 coverageOutputHTML = extension.coverageOutputHTML
@@ -308,7 +315,7 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                     def allReportTasks = childReportTasks + globalReportTask.get()
                     def allSources = project.objects.fileCollection()
                     allReportTasks.each {
-                        allSources = allSources.plus(it.sources.get())
+                        allSources = allSources.plus(it.sources)
                     }
                     def aggregationTask = project.tasks.create(AGGREGATE_NAME, ScoverageAggregate) {
                         def dataDirs = allReportTasks.findResults { it.dirsToAggregateFrom.get() }.flatten()
@@ -319,10 +326,9 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                         group = 'verification'
                         runner = scoverageRunner
                         reportDir = extension.reportDir
-                        sources = allSources
+                        sources.from(allSources)
                         sourceEncoding.set(detectedSourceEncoding)
                         dirsToAggregateFrom = dataDirs
-                        deleteReportsOnAggregation = extension.deleteReportsOnAggregation
                         coverageOutputCobertura = extension.coverageOutputCobertura
                         coverageOutputXML = extension.coverageOutputXML
                         coverageOutputHTML = extension.coverageOutputHTML
