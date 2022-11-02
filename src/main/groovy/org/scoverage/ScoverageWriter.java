@@ -5,11 +5,11 @@ import scala.Option;
 import scala.Some;
 import scala.collection.immutable.Seq;
 import scala.collection.mutable.Buffer;
-import scoverage.Constants;
-import scoverage.Coverage;
-import scoverage.report.CoberturaXmlWriter;
-import scoverage.report.ScoverageHtmlWriter;
-import scoverage.report.ScoverageXmlWriter;
+import scoverage.domain.Constants;
+import scoverage.domain.Coverage;
+import scoverage.reporter.CoberturaXmlWriter;
+import scoverage.reporter.ScoverageHtmlWriter;
+import scoverage.reporter.ScoverageXmlWriter;
 import scala.collection.JavaConverters;
 
 import java.io.File;
@@ -65,11 +65,17 @@ public class ScoverageWriter {
         if (coverageOutputCobertura) {
             Constructor<CoberturaXmlWriter> cst;
             try {
-                cst = CoberturaXmlWriter.class.getConstructor(Class.forName("scala.collection.immutable.Seq"), File.class);
+                cst = CoberturaXmlWriter.class.getConstructor(
+                        Class.forName("scala.collection.immutable.Seq"),
+                        File.class,
+                        Class.forName("scala.Option"));
             } catch (NoSuchMethodException | ClassNotFoundException e) {
-                cst = CoberturaXmlWriter.class.getConstructor(Class.forName("scala.collection.Seq"), File.class);
+                cst = CoberturaXmlWriter.class.getConstructor(
+                        Class.forName("scala.collection.Seq"),
+                        File.class,
+                        Class.forName("scala.Option"));
             }
-            CoberturaXmlWriter writer = cst.newInstance(sourceDirsSeq, reportDir);
+            CoberturaXmlWriter writer = cst.newInstance(sourceDirsSeq, reportDir, new Some<>(sourceEncoding));
             writer.write(coverage);
             logger.info("[scoverage] Written Cobertura XML report to " +
                 reportDir.getAbsolutePath() +
@@ -80,11 +86,19 @@ public class ScoverageWriter {
         if (coverageOutputXML) {
             Constructor<ScoverageXmlWriter> cst;
             try {
-                cst = ScoverageXmlWriter.class.getConstructor(Class.forName("scala.collection.immutable.Seq"), File.class, boolean.class);
+                cst = ScoverageXmlWriter.class.getConstructor(
+                        Class.forName("scala.collection.immutable.Seq"),
+                        File.class,
+                        boolean.class,
+                        Class.forName("scala.Option"));
             } catch (NoSuchMethodException | ClassNotFoundException e) {
-                cst = ScoverageXmlWriter.class.getConstructor(Class.forName("scala.collection.Seq"), File.class, boolean.class);
+                cst = ScoverageXmlWriter.class.getConstructor(
+                        Class.forName("scala.collection.Seq"),
+                        File.class,
+                        boolean.class,
+                        Class.forName("scala.Option"));
             }
-            ScoverageXmlWriter writer = cst.newInstance(sourceDirsSeq, reportDir, false);
+            ScoverageXmlWriter writer = cst.newInstance(sourceDirsSeq, reportDir, false, new Some<>(sourceEncoding));
             writer.write(coverage);
             logger.info("[scoverage] Written XML report to " +
                 reportDir.getAbsolutePath() +

@@ -51,9 +51,12 @@ class ScoveragePlugin implements Plugin<PluginAware> {
             project.logger.info("Project ${project.name} already has the scoverage plugin")
             return
         }
-        project.logger.info("Applying scoverage plugin to $project.name")
 
+        project.logger.info("Applying scoverage plugin to $project.name")
         def extension = project.extensions.create('scoverage', ScoverageExtension, project)
+
+        def scalaVersion = resolveScalaVersions(project)
+
         if (!project.configurations.asMap[CONFIGURATION_NAME]) {
             project.configurations.create(CONFIGURATION_NAME) {
                 visible = false
@@ -62,23 +65,27 @@ class ScoveragePlugin implements Plugin<PluginAware> {
             }
 
             project.afterEvaluate {
-                def scalaFullVersion = resolveScalaVersion(project)
-                def scalaBinaryVersion = scalaFullVersion.substring(0, scalaFullVersion.lastIndexOf('.'))
                 def scoverageVersion = project.extensions.scoverage.scoverageVersion.get()
+                project.logger.info("Using scoverage scalac plugin $scoverageVersion for scala $scalaVersion")
 
-                project.logger.info("Using scoverage scalac plugin $scoverageVersion for scala $scalaFullVersion")
+                def scalacScoverageVersion = scalaVersion.scalacScoverageVersion
+                def scalacScoveragePluginVersion = scalaVersion.scalacScoveragePluginVersion
+                def scalacScoverageRuntimeVersion = scalaVersion.scalacScoverageRuntimeVersion
 
                 project.dependencies {
-                    scoverage("org.scoverage:scalac-scoverage-plugin_$scalaFullVersion:$scoverageVersion")
-                    scoverage("org.scoverage:scalac-scoverage-runtime_$scalaBinaryVersion:$scoverageVersion")
+                    scoverage("org.scoverage:scalac-scoverage-domain_$scalacScoverageVersion:$scoverageVersion")
+                    scoverage("org.scoverage:scalac-scoverage-reporter_$scalacScoverageVersion:$scoverageVersion")
+                    scoverage("org.scoverage:scalac-scoverage-serializer_$scalacScoverageVersion:$scoverageVersion")
+                    scoverage("org.scoverage:scalac-scoverage-runtime_$scalacScoverageRuntimeVersion:$scoverageVersion")
+                    scoverage("org.scoverage:scalac-scoverage-plugin_$scalacScoveragePluginVersion:$scoverageVersion")
                 }
             }
         }
 
-        createTasks(project, extension)
+        createTasks(project, extension, scalaVersion)
     }
 
-    private void createTasks(Project project, ScoverageExtension extension) {
+    private void createTasks(Project project, ScoverageExtension extension, ScalaVersion scalaVersion) {
 
         ScoverageRunner scoverageRunner = new ScoverageRunner(project.configurations.scoverage)
 
@@ -162,32 +169,43 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                 if (existingParameters) {
                     parameters.addAll(existingParameters)
                 }
-                parameters.add("-P:scoverage:dataDir:${extension.dataDir.get().absolutePath}".toString())
-                if (extension.excludedPackages.get()) {
-                    def packages = extension.excludedPackages.get().join(';')
-                    parameters.add("-P:scoverage:excludedPackages:$packages".toString())
-                }
-                if (extension.excludedFiles.get()) {
-                    def packages = extension.excludedFiles.get().join(';')
-                    parameters.add("-P:scoverage:excludedFiles:$packages".toString())
-                }
-                if (extension.highlighting.get()) {
-                    parameters.add('-Yrangepos')
-                }
-                scalaCompileOptions.additionalParameters = parameters
-                // the compile task creates a store of measured statements
-                outputs.file(new File(extension.dataDir.get(), 'scoverage.coverage'))
 
-                dependsOn project.configurations[CONFIGURATION_NAME]
-                doFirst {
-                    /*
-                        It is crucial that this would run in `doFirst`, as this resolves the (dependencies of the)
-                        configuration, which we do not want to do at configuration time (but only at execution time).
-                     */
-                    def pluginFile = project.configurations[CONFIGURATION_NAME].find {
-                        it.name.startsWith("scalac-scoverage-plugin")
+                if (scalaVersion.majorVersion < 3) {
+                    parameters.add("-P:scoverage:dataDir:${extension.dataDir.get().absolutePath}".toString())
+                    parameters.add("-P:scoverage:sourceRoot:${extension.project.getRootDir().absolutePath}".toString())
+                    if (extension.excludedPackages.get()) {
+                        def packages = extension.excludedPackages.get().join(';')
+                        parameters.add("-P:scoverage:excludedPackages:$packages".toString())
                     }
-                    scalaCompileOptions.additionalParameters.add('-Xplugin:' + pluginFile.absolutePath)
+                    if (extension.excludedFiles.get()) {
+                        def packages = extension.excludedFiles.get().join(';')
+                        parameters.add("-P:scoverage:excludedFiles:$packages".toString())
+                    }
+                    if (extension.highlighting.get()) {
+                        parameters.add('-Yrangepos')
+                    }
+                    scalaCompileOptions.additionalParameters = parameters
+                    // the compile task creates a store of measured statements
+                    outputs.file(new File(extension.dataDir.get(), 'scoverage.coverage'))
+
+                    dependsOn project.configurations[CONFIGURATION_NAME]
+                    doFirst {
+                        /*
+                            It is crucial that this would run in `doFirst`, as this resolves the (dependencies of the)
+                            configuration, which we do not want to do at configuration time (but only at execution time).
+                         */
+                        def pluginFiles = project.configurations[CONFIGURATION_NAME].findAll {
+                            it.name.startsWith("scalac-scoverage-plugin") ||
+                            it.name.startsWith("scalac-scoverage-domain") ||
+                            it.name.startsWith("scalac-scoverage-serializer")
+                        }.collect {
+                            it.absolutePath
+                        }
+                        scalaCompileOptions.additionalParameters.add('-Xplugin:' + pluginFiles.join(":"))
+                    }
+                } else {
+                    parameters.add("-coverage-out:${extension.dataDir.get().absolutePath}".toString())
+                    scalaCompileOptions.additionalParameters = parameters
                 }
             }
 
@@ -364,27 +382,41 @@ class ScoveragePlugin implements Plugin<PluginAware> {
         }
     }
 
-    private String resolveScalaVersion(Project project) {
-
+    private ScalaVersion resolveScalaVersions(Project project) {
         def scalaVersionProperty = project.extensions.scoverage.scoverageScalaVersion
         if (scalaVersionProperty.isPresent()) {
             def configuredScalaVersion = scalaVersionProperty.get()
             project.logger.info("Using configured Scala version: $configuredScalaVersion")
-            return configuredScalaVersion
+            return new ScalaVersion(configuredScalaVersion)
         } else {
             project.logger.info("No Scala version configured. Detecting scala library...")
             def components = project.configurations.compileClasspath.incoming.resolutionResult.getAllComponents()
+
+            def scala3Library = components.find {
+                it.moduleVersion.group == "org.scala-lang" && it.moduleVersion.name == "scala3-library_3"
+            }
             def scalaLibrary = components.find {
                 it.moduleVersion.group == "org.scala-lang" && it.moduleVersion.name == "scala-library"
             }
-            if (scalaLibrary != null) {
-                def scalaVersion = scalaLibrary.moduleVersion.version
-                project.logger.info("Detected scala library in compilation classpath. Scala version: $scalaVersion")
-                return scalaVersion
-            } else {
-                project.logger.info("No scala library detected. Using default Scala version: $DEFAULT_SCALA_VERSION")
-                return DEFAULT_SCALA_VERSION
+
+            // Scala 3
+            if (scala3Library != null) {
+                def scala3Version = scala3Library.moduleVersion.version
+                def scala2Version = scalaLibrary.moduleVersion.version
+                project.logger.info("Detected scala 3 library in compilation classpath. Scala 3 version: $scala3Version; using Scala 2 library: $scala2Version")
+                return new ScalaVersion(scala3Version, Optional.of(scala2Version))
             }
+
+            // Scala 2
+            if (scalaLibrary != null) {
+                def scala2Version = scalaLibrary.moduleVersion.version
+                project.logger.info("Detected scala library in compilation classpath. Scala version: $scala2Version")
+                return new ScalaVersion(scala2Version)
+            }
+
+            // No Scala library was found, using default Scala version
+            project.logger.info("No scala library detected. Using default Scala version: $DEFAULT_SCALA_VERSION")
+            return new ScalaVersion(DEFAULT_SCALA_VERSION)
         }
     }
 
