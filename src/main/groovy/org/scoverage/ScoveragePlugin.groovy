@@ -51,12 +51,9 @@ class ScoveragePlugin implements Plugin<PluginAware> {
             project.logger.info("Project ${project.name} already has the scoverage plugin")
             return
         }
-
         project.logger.info("Applying scoverage plugin to $project.name")
+
         def extension = project.extensions.create('scoverage', ScoverageExtension, project)
-
-        def scalaVersion = resolveScalaVersions(project)
-
         if (!project.configurations.asMap[CONFIGURATION_NAME]) {
             project.configurations.create(CONFIGURATION_NAME) {
                 visible = false
@@ -65,6 +62,8 @@ class ScoveragePlugin implements Plugin<PluginAware> {
             }
 
             project.afterEvaluate {
+                def scalaVersion = resolveScalaVersions(project)
+
                 def scoverageVersion = project.extensions.scoverage.scoverageVersion.get()
                 project.logger.info("Using scoverage scalac plugin $scoverageVersion for scala $scalaVersion")
 
@@ -82,10 +81,10 @@ class ScoveragePlugin implements Plugin<PluginAware> {
             }
         }
 
-        createTasks(project, extension, scalaVersion)
+        createTasks(project, extension)
     }
 
-    private void createTasks(Project project, ScoverageExtension extension, ScalaVersion scalaVersion) {
+    private void createTasks(Project project, ScoverageExtension extension) {
 
         ScoverageRunner scoverageRunner = new ScoverageRunner(project.configurations.scoverage)
 
@@ -170,6 +169,7 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                     parameters.addAll(existingParameters)
                 }
 
+                def scalaVersion = resolveScalaVersions(project)
                 if (scalaVersion.majorVersion < 3) {
                     parameters.add("-P:scoverage:dataDir:${extension.dataDir.get().absolutePath}".toString())
                     parameters.add("-P:scoverage:sourceRoot:${extension.project.getRootDir().absolutePath}".toString())
