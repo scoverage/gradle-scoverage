@@ -123,7 +123,7 @@ public abstract class ScoverageFunctionalTest {
 
         fullArguments.add("-PscalaVersionMajor=2");
         fullArguments.add("-PscalaVersionMinor=12");
-        fullArguments.add("-PscalaVersionBuild=8");
+        fullArguments.add("-PscalaVersionBuild=17");
         fullArguments.add("-PjunitVersion=5.3.2");
         fullArguments.add("-PjunitPlatformVersion=1.3.2");
         fullArguments.add("-PscalatestVersion=3.0.8");
