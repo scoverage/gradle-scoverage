@@ -205,6 +205,7 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                     }
                 } else {
                     parameters.add("-coverage-out:${extension.dataDir.get().absolutePath}".toString())
+                    parameters.add("-sourceroot:${extension.project.getRootDir().absolutePath}".toString())
                     scalaCompileOptions.additionalParameters = parameters
                 }
             }
