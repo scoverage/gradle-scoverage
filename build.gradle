@@ -1,6 +1,6 @@
 plugins {
     id 'java-gradle-plugin'
-    id "com.gradle.plugin-publish" version "1.0.0"
+    id "com.gradle.plugin-publish" version "1.1.0"
     id "org.jetbrains.gradle.plugin.idea-ext" version "1.0"
 }
 
@@ -22,20 +22,17 @@ ext {
 }
 
 gradlePlugin {
+    website = project.ext.website
+    vcsUrl = project.ext.vcsUrl
+    description = project.description
     plugins {
         gradleScoverage {
             id = 'org.scoverage'
             implementationClass = 'org.scoverage.ScoveragePlugin'
             displayName = 'Gradle Scoverage plugin'
+            tags.set(['coverage', 'scala', 'scoverage'])
         }
     }
-}
-
-pluginBundle {
-    website = project.website
-    vcsUrl = ext.vcsUrl
-    description = project.description
-    tags = ['coverage', 'scala', 'scoverage']
 }
 
 apply plugin: 'maven-publish'
@@ -117,7 +114,7 @@ gradlePlugin {
 
 task groovydocJar(type: Jar, dependsOn: groovydoc) {
     from "$buildDir/docs/groovydoc"
-    classifier 'groovydoc'
+    archiveClassifier.set('groovydoc')
 }
 
 def propOrDefault(String property) {

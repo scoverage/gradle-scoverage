@@ -212,7 +212,7 @@ class ScoveragePlugin implements Plugin<PluginAware> {
 
             compileTask.configure {
                 doFirst {
-                    destinationDir.deleteDir()
+                    destinationDirectory.get().getAsFile().deleteDir()
                 }
 
                 // delete non-instrumented classes by comparing normally compiled classes to those compiled with scoverage

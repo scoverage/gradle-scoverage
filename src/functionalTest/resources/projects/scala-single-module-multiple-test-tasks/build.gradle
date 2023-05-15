@@ -1,6 +1,7 @@
 plugins {
     id 'io.spring.dependency-management' version "1.0.4.RELEASE"
     id 'org.scoverage'
+    id 'jvm-test-suite'
 }
 
 repositories {
@@ -27,39 +28,35 @@ dependencies {
     testImplementation group: 'org.scalatest', name: "scalatest_${scalaVersionMajor}.${scalaVersionMinor}", version: scalatestVersion
 }
 
-test {
-    useJUnitPlatform()
-}
-
-
-configurations {
-    intTestImplementation.extendsFrom testImplementation
-    intTestRuntimeOnly.extendsFrom testRuntimeOnly
-}
-sourceSets {
-    intTest {
-        resources.srcDir file('src/intTest/resources')
-        scala {
-            compileClasspath += main.output + test.output
-            runtimeClasspath += main.output + test.output
-            srcDir file("${projectDir}/src/intTest/scala")
+testing {
+    suites {
+        configureEach {
+            useJUnit()
+            targets.configureEach {
+                testTask.configure {
+                    maxParallelForks = 1
+                }
+            }
+        }
+        intTest(JvmTestSuite) {
+            testType = TestSuiteType.INTEGRATION_TEST
+            // dependencies { ... } does not appear to work as advertised?
+            sources {
+                scala {
+                    compileClasspath += sourceSets.test.compileClasspath + sourceSets.main.output + sourceSets.test.output
+                    runtimeClasspath += sourceSets.test.runtimeClasspath
+                }
+            }
+            targets.configureEach {
+                testTask.configure{
+                    outputs.upToDateWhen { false }
+                    mustRunAfter(test)
+                }
+            }
         }
     }
 }
-
-test {
-    maxParallelForks = 1
-}
-
-task intTest(type: Test) {
-    testClassesDirs = sourceSets.intTest.output.classesDirs
-    classpath = sourceSets.intTest.runtimeClasspath
-    outputs.upToDateWhen { false }
-
-    maxParallelForks = 1
-}
-check.dependsOn(intTest)
-intTest.mustRunAfter(test)
+check.dependsOn(testing.suites.intTest)
 
 scoverage {
     minimumRate = 0.6

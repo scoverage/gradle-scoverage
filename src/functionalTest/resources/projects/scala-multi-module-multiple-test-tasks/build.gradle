@@ -25,36 +25,35 @@ allprojects {
         testImplementation group: 'org.scalatest', name: "scalatest_${scalaVersionMajor}.${scalaVersionMinor}", version: scalatestVersion
     }
 
-    test {
-        useJUnitPlatform()
-        maxParallelForks = 1
-    }
-
-    configurations {
-        intTestImplementation.extendsFrom testImplementation
-        intTestRuntimeOnly.extendsFrom testRuntimeOnly
-    }
-    sourceSets {
-        intTest {
-            resources.srcDir file('src/intTest/resources')
-            scala {
-                compileClasspath += main.output + test.output
-                runtimeClasspath += main.output + test.output
-                srcDir file("${projectDir}/src/intTest/scala")
+    testing {
+        suites {
+            configureEach {
+                useJUnit()
+                targets.configureEach {
+                    testTask.configure {
+                        maxParallelForks = 1
+                    }
+                }
+            }
+            intTest(JvmTestSuite) {
+                testType = TestSuiteType.INTEGRATION_TEST
+                // dependencies { ... } does not appear to work as advertised?
+                sources {
+                    scala {
+                        compileClasspath += sourceSets.test.compileClasspath + sourceSets.main.output + sourceSets.test.output
+                        runtimeClasspath += sourceSets.test.runtimeClasspath
+                    }
+                }
+                targets.configureEach {
+                    testTask.configure{
+                        outputs.upToDateWhen { false }
+                        mustRunAfter(test)
+                    }
+                }
             }
         }
     }
-
-
-    task intTest(type: Test) {
-        testClassesDirs = sourceSets.intTest.output.classesDirs
-        classpath = sourceSets.intTest.runtimeClasspath
-        outputs.upToDateWhen { false }
-
-        maxParallelForks = 1
-    }
-    check.dependsOn(intTest)
-    intTest.mustRunAfter(test)
+    check.dependsOn(testing.suites.intTest)
 
     scoverage {
         minimumRate = 0.5
