@@ -55,7 +55,7 @@ class ScoverageExtension {
         project.plugins.apply(ScalaPlugin.class)
 
         scoverageVersion = project.objects.property(String)
-        scoverageVersion.set('2.0.7')
+        scoverageVersion.set('2.0.8')
 
         scoverageScalaVersion = project.objects.property(String)
 
