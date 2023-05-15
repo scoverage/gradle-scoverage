@@ -1,6 +1,7 @@
 package org.scoverage;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class ScalaSingleModuleTest extends ScoverageFunctionalTest {
@@ -100,6 +101,7 @@ public class ScalaSingleModuleTest extends ScoverageFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void reportScoverageWithoutNormalCompilation() throws Exception {
 
         AssertableBuildResult result = run("clean", ScoveragePlugin.getREPORT_NAME(),

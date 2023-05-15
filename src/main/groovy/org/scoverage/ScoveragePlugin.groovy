@@ -210,80 +210,50 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                 }
             }
 
-            if (project.hasProperty(SCOVERAGE_COMPILE_ONLY_PROPERTY)) {
-                project.logger.info("Making scoverage compilation the primary compilation task (instead of compileScala)")
-
-                originalCompileTask.enabled = false;
-                compileTask.destinationDirectory = originalCompileTask.destinationDirectory
-
-                project.getTasks().each {
-                    if (recursiveDependenciesOf(it, true).contains(originalCompileTask)) {
-                        it.dependsOn(compileTask)
-                    }
+            compileTask.configure {
+                doFirst {
+                    destinationDir.deleteDir()
                 }
 
-                // make this project's scoverage compilation depend on scoverage compilation of any other project
-                // which this project depends on its normal compilation
-                def originalCompilationDependencies = recursiveDependenciesOf(compileTask, false).findAll {
-                    it instanceof ScalaCompile
-                }
-                originalCompilationDependencies.each {
-                    def dependencyProjectCompileTask = it.project.tasks.findByName(COMPILE_NAME)
-                    def dependencyProjectReportTask = it.project.tasks.findByName(REPORT_NAME)
-                    if (dependencyProjectCompileTask != null) {
-                        compileTask.dependsOn(dependencyProjectCompileTask)
-                        // we don't want this project's tests to affect the other project's report
-                        testTasks.each {
-                            it.mustRunAfter(dependencyProjectReportTask)
-                        }
-                    }
-                }
-            } else {
-                compileTask.configure {
-                    doFirst {
-                        destinationDir.deleteDir()
-                    }
-
-                    // delete non-instrumented classes by comparing normally compiled classes to those compiled with scoverage
-                    doLast {
-                        project.logger.info("Deleting classes compiled by scoverage but non-instrumented (identical to normal compilation)")
-                        def originalCompileTaskName = project.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
-                                .getCompileTaskName("scala")
-                        def originalDestinationDirectory = project.tasks[originalCompileTaskName].destinationDirectory
-                        def originalDestinationDir = originalDestinationDirectory.get().asFile
-                        def destinationDir = destinationDirectory.get().asFile
+                // delete non-instrumented classes by comparing normally compiled classes to those compiled with scoverage
+                doLast {
+                    project.logger.info("Deleting classes compiled by scoverage but non-instrumented (identical to normal compilation)")
+                    def originalCompileTaskName = project.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
+                            .getCompileTaskName("scala")
+                    def originalDestinationDirectory = project.tasks[originalCompileTaskName].destinationDirectory
+                    def originalDestinationDir = originalDestinationDirectory.get().asFile
+                    def destinationDir = destinationDirectory.get().asFile
 
 
-                        def findFiles = { File dir, Closure<Boolean> condition = null ->
-                            def files = []
+                    def findFiles = { File dir, Closure<Boolean> condition = null ->
+                        def files = []
 
-                            if (dir.exists()) {
-                                dir.eachFileRecurse(FILES) { f ->
-                                    if (condition == null || condition(f)) {
-                                        def relativePath = dir.relativePath(f)
-                                        files << relativePath
-                                    }
+                        if (dir.exists()) {
+                            dir.eachFileRecurse(FILES) { f ->
+                                if (condition == null || condition(f)) {
+                                    def relativePath = dir.relativePath(f)
+                                    files << relativePath
                                 }
                             }
-
-                            files
                         }
 
-                        def isSameFile = { String relativePath ->
-                            def fileA = new File(originalDestinationDir, relativePath)
-                            def fileB = new File(destinationDir, relativePath)
-                            FileUtils.contentEquals(fileA, fileB)
-                        }
+                        files
+                    }
 
-                        def originalClasses = findFiles(originalDestinationDir)
-                        def identicalInstrumentedClasses = findFiles(destinationDir, { f ->
-                            def relativePath = destinationDir.relativePath(f)
-                            originalClasses.contains(relativePath) && isSameFile(relativePath)
-                        })
+                    def isSameFile = { String relativePath ->
+                        def fileA = new File(originalDestinationDir, relativePath)
+                        def fileB = new File(destinationDir, relativePath)
+                        FileUtils.contentEquals(fileA, fileB)
+                    }
 
-                        identicalInstrumentedClasses.each { f ->
-                            Files.deleteIfExists(destinationDir.toPath().resolve(f))
-                        }
+                    def originalClasses = findFiles(originalDestinationDir)
+                    def identicalInstrumentedClasses = findFiles(destinationDir, { f ->
+                        def relativePath = destinationDir.relativePath(f)
+                        originalClasses.contains(relativePath) && isSameFile(relativePath)
+                    })
+
+                    identicalInstrumentedClasses.each { f ->
+                        Files.deleteIfExists(destinationDir.toPath().resolve(f))
                     }
                 }
             }

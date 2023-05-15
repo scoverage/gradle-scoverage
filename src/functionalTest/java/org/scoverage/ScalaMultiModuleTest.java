@@ -1,6 +1,7 @@
 package org.scoverage;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -60,6 +61,7 @@ public class ScalaMultiModuleTest extends ScoverageFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void reportScoverageOnlyAWithoutNormalCompilation() {
 
         AssertableBuildResult result = run("clean", ":a:" + ScoveragePlugin.getREPORT_NAME(),
@@ -192,6 +194,7 @@ public class ScalaMultiModuleTest extends ScoverageFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void checkScoverageWithoutNormalCompilationAndWithoutCoverageInCommon() throws Exception {
 
         AssertableBuildResult result = runAndFail("clean",
@@ -254,6 +257,7 @@ public class ScalaMultiModuleTest extends ScoverageFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void aggregateScoverageWithoutNormalCompilation() throws Exception {
 
         AssertableBuildResult result = run("clean", ScoveragePlugin.getAGGREGATE_NAME(),
