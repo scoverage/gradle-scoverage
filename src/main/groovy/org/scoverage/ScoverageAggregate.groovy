@@ -10,7 +10,7 @@ import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.TaskAction
-import scoverage.report.CoverageAggregator
+import scoverage.reporter.CoverageAggregator
 
 import static org.gradle.api.tasks.PathSensitivity.RELATIVE
 
@@ -57,7 +57,8 @@ class ScoverageAggregate extends DefaultTask {
 
             def dirs = []
             dirs.addAll(dirsToAggregateFrom.get())
-            def coverage = CoverageAggregator.aggregate(dirs.unique() as File[])
+            def sourceRoot = getProject().getRootDir()
+            def coverage = CoverageAggregator.aggregate(dirs.unique() as File[], sourceRoot)
 
             if (coverage.nonEmpty()) {
                 new ScoverageWriter(project.logger).write(

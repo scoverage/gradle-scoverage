@@ -1,6 +1,6 @@
 plugins {
     id 'java-gradle-plugin'
-    id "com.gradle.plugin-publish" version "1.0.0"
+    id "com.gradle.plugin-publish" version "1.1.0"
     id "org.jetbrains.gradle.plugin.idea-ext" version "1.0"
 }
 
@@ -11,7 +11,7 @@ repositories {
 group 'org.scoverage'
 description = 'gradle-scoverage is a Gradle plugin for calculating code coverage using Scoverage'
 if (project.version == 'unspecified') {
-    version = '7.0.0-SNAPSHOT'
+    version = '8.0.0-SNAPSHOT'
 }
 ext {
     website = 'http://scoverage.org'
@@ -22,20 +22,17 @@ ext {
 }
 
 gradlePlugin {
+    website = project.ext.website
+    vcsUrl = project.ext.vcsUrl
+    description = project.description
     plugins {
         gradleScoverage {
             id = 'org.scoverage'
             implementationClass = 'org.scoverage.ScoveragePlugin'
             displayName = 'Gradle Scoverage plugin'
+            tags.set(['coverage', 'scala', 'scoverage'])
         }
     }
-}
-
-pluginBundle {
-    website = project.website
-    vcsUrl = ext.vcsUrl
-    description = project.description
-    tags = ['coverage', 'scala', 'scoverage']
 }
 
 apply plugin: 'maven-publish'
@@ -46,7 +43,8 @@ targetCompatibility = '1.8'
 
 
 dependencies {
-    compileOnly "org.scoverage:scalac-scoverage-plugin_2.13:1.4.2"
+    compileOnly "org.scoverage:scalac-scoverage-plugin_2.13.8:2.0.7"
+    compileOnly "org.scoverage:scalac-scoverage-reporter_2.13:2.0.7"
     implementation group: 'commons-io', name: 'commons-io', version: '2.6'
 
     testImplementation 'junit:junit:4.12'
@@ -116,7 +114,7 @@ gradlePlugin {
 
 task groovydocJar(type: Jar, dependsOn: groovydoc) {
     from "$buildDir/docs/groovydoc"
-    classifier 'groovydoc'
+    archiveClassifier.set('groovydoc')
 }
 
 def propOrDefault(String property) {

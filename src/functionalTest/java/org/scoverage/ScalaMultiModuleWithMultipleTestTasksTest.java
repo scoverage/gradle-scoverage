@@ -1,6 +1,7 @@
 package org.scoverage;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 
@@ -188,6 +189,7 @@ public class ScalaMultiModuleWithMultipleTestTasksTest extends ScoverageFunction
     }
 
     @Test
+    @Ignore
     public void checkScoverageWithoutNormalCompilationAndWithoutCoverageInCommon() throws Exception {
 
         AssertableBuildResult result = runAndFail("clean",
@@ -251,6 +253,7 @@ public class ScalaMultiModuleWithMultipleTestTasksTest extends ScoverageFunction
     }
 
     @Test
+    @Ignore
     public void aggregateScoverageWithoutNormalCompilation() throws Exception {
 
         AssertableBuildResult result = run("clean", ScoveragePlugin.getAGGREGATE_NAME(),

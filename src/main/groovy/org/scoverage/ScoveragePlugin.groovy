@@ -62,15 +62,21 @@ class ScoveragePlugin implements Plugin<PluginAware> {
             }
 
             project.afterEvaluate {
-                def scalaFullVersion = resolveScalaVersion(project)
-                def scalaBinaryVersion = scalaFullVersion.substring(0, scalaFullVersion.lastIndexOf('.'))
-                def scoverageVersion = project.extensions.scoverage.scoverageVersion.get()
+                def scalaVersion = resolveScalaVersions(project)
 
-                project.logger.info("Using scoverage scalac plugin $scoverageVersion for scala $scalaFullVersion")
+                def scoverageVersion = project.extensions.scoverage.scoverageVersion.get()
+                project.logger.info("Using scoverage scalac plugin $scoverageVersion for scala $scalaVersion")
+
+                def scalacScoverageVersion = scalaVersion.scalacScoverageVersion
+                def scalacScoveragePluginVersion = scalaVersion.scalacScoveragePluginVersion
+                def scalacScoverageRuntimeVersion = scalaVersion.scalacScoverageRuntimeVersion
 
                 project.dependencies {
-                    scoverage("org.scoverage:scalac-scoverage-plugin_$scalaFullVersion:$scoverageVersion")
-                    scoverage("org.scoverage:scalac-scoverage-runtime_$scalaBinaryVersion:$scoverageVersion")
+                    scoverage("org.scoverage:scalac-scoverage-domain_$scalacScoverageVersion:$scoverageVersion")
+                    scoverage("org.scoverage:scalac-scoverage-reporter_$scalacScoverageVersion:$scoverageVersion")
+                    scoverage("org.scoverage:scalac-scoverage-serializer_$scalacScoverageVersion:$scoverageVersion")
+                    scoverage("org.scoverage:scalac-scoverage-runtime_$scalacScoverageRuntimeVersion:$scoverageVersion")
+                    scoverage("org.scoverage:scalac-scoverage-plugin_$scalacScoveragePluginVersion:$scoverageVersion")
                 }
             }
         }
@@ -162,109 +168,92 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                 if (existingParameters) {
                     parameters.addAll(existingParameters)
                 }
-                parameters.add("-P:scoverage:dataDir:${extension.dataDir.get().absolutePath}".toString())
-                if (extension.excludedPackages.get()) {
-                    def packages = extension.excludedPackages.get().join(';')
-                    parameters.add("-P:scoverage:excludedPackages:$packages".toString())
-                }
-                if (extension.excludedFiles.get()) {
-                    def packages = extension.excludedFiles.get().join(';')
-                    parameters.add("-P:scoverage:excludedFiles:$packages".toString())
-                }
-                if (extension.highlighting.get()) {
-                    parameters.add('-Yrangepos')
-                }
-                scalaCompileOptions.additionalParameters = parameters
-                // the compile task creates a store of measured statements
-                outputs.file(new File(extension.dataDir.get(), 'scoverage.coverage'))
 
-                dependsOn project.configurations[CONFIGURATION_NAME]
-                doFirst {
-                    /*
-                        It is crucial that this would run in `doFirst`, as this resolves the (dependencies of the)
-                        configuration, which we do not want to do at configuration time (but only at execution time).
-                     */
-                    def pluginFile = project.configurations[CONFIGURATION_NAME].find {
-                        it.name.startsWith("scalac-scoverage-plugin")
+                def scalaVersion = resolveScalaVersions(project)
+                if (scalaVersion.majorVersion < 3) {
+                    parameters.add("-P:scoverage:dataDir:${extension.dataDir.get().absolutePath}".toString())
+                    parameters.add("-P:scoverage:sourceRoot:${extension.project.getRootDir().absolutePath}".toString())
+                    if (extension.excludedPackages.get()) {
+                        def packages = extension.excludedPackages.get().join(';')
+                        parameters.add("-P:scoverage:excludedPackages:$packages".toString())
                     }
-                    scalaCompileOptions.additionalParameters.add('-Xplugin:' + pluginFile.absolutePath)
+                    if (extension.excludedFiles.get()) {
+                        def packages = extension.excludedFiles.get().join(';')
+                        parameters.add("-P:scoverage:excludedFiles:$packages".toString())
+                    }
+                    if (extension.highlighting.get()) {
+                        parameters.add('-Yrangepos')
+                    }
+                    scalaCompileOptions.additionalParameters = parameters
+                    // the compile task creates a store of measured statements
+                    outputs.file(new File(extension.dataDir.get(), 'scoverage.coverage'))
+
+                    dependsOn project.configurations[CONFIGURATION_NAME]
+                    doFirst {
+                        /*
+                            It is crucial that this would run in `doFirst`, as this resolves the (dependencies of the)
+                            configuration, which we do not want to do at configuration time (but only at execution time).
+                         */
+                        def pluginFiles = project.configurations[CONFIGURATION_NAME].findAll {
+                            it.name.startsWith("scalac-scoverage-plugin") ||
+                            it.name.startsWith("scalac-scoverage-domain") ||
+                            it.name.startsWith("scalac-scoverage-serializer")
+                        }.collect {
+                            it.absolutePath
+                        }
+                        scalaCompileOptions.additionalParameters.add('-Xplugin:' + pluginFiles.join(":"))
+                    }
+                } else {
+                    parameters.add("-sourceroot:${project.rootDir.absolutePath}".toString())
+                    parameters.add("-coverage-out:${extension.dataDir.get().absolutePath}".toString())
+                    scalaCompileOptions.additionalParameters = parameters
                 }
             }
 
-            if (project.hasProperty(SCOVERAGE_COMPILE_ONLY_PROPERTY)) {
-                project.logger.info("Making scoverage compilation the primary compilation task (instead of compileScala)")
-
-                originalCompileTask.enabled = false;
-                compileTask.destinationDirectory = originalCompileTask.destinationDirectory
-
-                project.getTasks().each {
-                    if (recursiveDependenciesOf(it, true).contains(originalCompileTask)) {
-                        it.dependsOn(compileTask)
-                    }
+            compileTask.configure {
+                doFirst {
+                    destinationDirectory.get().getAsFile().deleteDir()
                 }
 
-                // make this project's scoverage compilation depend on scoverage compilation of any other project
-                // which this project depends on its normal compilation
-                def originalCompilationDependencies = recursiveDependenciesOf(compileTask, false).findAll {
-                    it instanceof ScalaCompile
-                }
-                originalCompilationDependencies.each {
-                    def dependencyProjectCompileTask = it.project.tasks.findByName(COMPILE_NAME)
-                    def dependencyProjectReportTask = it.project.tasks.findByName(REPORT_NAME)
-                    if (dependencyProjectCompileTask != null) {
-                        compileTask.dependsOn(dependencyProjectCompileTask)
-                        // we don't want this project's tests to affect the other project's report
-                        testTasks.each {
-                            it.mustRunAfter(dependencyProjectReportTask)
-                        }
-                    }
-                }
-            } else {
-                compileTask.configure {
-                    doFirst {
-                        destinationDir.deleteDir()
-                    }
-
-                    // delete non-instrumented classes by comparing normally compiled classes to those compiled with scoverage
-                    doLast {
-                        project.logger.info("Deleting classes compiled by scoverage but non-instrumented (identical to normal compilation)")
-                        def originalCompileTaskName = project.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
-                                .getCompileTaskName("scala")
-                        def originalDestinationDirectory = project.tasks[originalCompileTaskName].destinationDirectory
-                        def originalDestinationDir = originalDestinationDirectory.get().asFile
-                        def destinationDir = destinationDirectory.get().asFile
+                // delete non-instrumented classes by comparing normally compiled classes to those compiled with scoverage
+                doLast {
+                    project.logger.info("Deleting classes compiled by scoverage but non-instrumented (identical to normal compilation)")
+                    def originalCompileTaskName = project.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
+                            .getCompileTaskName("scala")
+                    def originalDestinationDirectory = project.tasks[originalCompileTaskName].destinationDirectory
+                    def originalDestinationDir = originalDestinationDirectory.get().asFile
+                    def destinationDir = destinationDirectory.get().asFile
 
 
-                        def findFiles = { File dir, Closure<Boolean> condition = null ->
-                            def files = []
+                    def findFiles = { File dir, Closure<Boolean> condition = null ->
+                        def files = []
 
-                            if (dir.exists()) {
-                                dir.eachFileRecurse(FILES) { f ->
-                                    if (condition == null || condition(f)) {
-                                        def relativePath = dir.relativePath(f)
-                                        files << relativePath
-                                    }
+                        if (dir.exists()) {
+                            dir.eachFileRecurse(FILES) { f ->
+                                if (condition == null || condition(f)) {
+                                    def relativePath = dir.relativePath(f)
+                                    files << relativePath
                                 }
                             }
-
-                            files
                         }
 
-                        def isSameFile = { String relativePath ->
-                            def fileA = new File(originalDestinationDir, relativePath)
-                            def fileB = new File(destinationDir, relativePath)
-                            FileUtils.contentEquals(fileA, fileB)
-                        }
+                        files
+                    }
 
-                        def originalClasses = findFiles(originalDestinationDir)
-                        def identicalInstrumentedClasses = findFiles(destinationDir, { f ->
-                            def relativePath = destinationDir.relativePath(f)
-                            originalClasses.contains(relativePath) && isSameFile(relativePath)
-                        })
+                    def isSameFile = { String relativePath ->
+                        def fileA = new File(originalDestinationDir, relativePath)
+                        def fileB = new File(destinationDir, relativePath)
+                        FileUtils.contentEquals(fileA, fileB)
+                    }
 
-                        identicalInstrumentedClasses.each { f ->
-                            Files.deleteIfExists(destinationDir.toPath().resolve(f))
-                        }
+                    def originalClasses = findFiles(originalDestinationDir)
+                    def identicalInstrumentedClasses = findFiles(destinationDir, { f ->
+                        def relativePath = destinationDir.relativePath(f)
+                        originalClasses.contains(relativePath) && isSameFile(relativePath)
+                    })
+
+                    identicalInstrumentedClasses.each { f ->
+                        Files.deleteIfExists(destinationDir.toPath().resolve(f))
                     }
                 }
             }
@@ -364,27 +353,41 @@ class ScoveragePlugin implements Plugin<PluginAware> {
         }
     }
 
-    private String resolveScalaVersion(Project project) {
-
+    private ScalaVersion resolveScalaVersions(Project project) {
         def scalaVersionProperty = project.extensions.scoverage.scoverageScalaVersion
         if (scalaVersionProperty.isPresent()) {
             def configuredScalaVersion = scalaVersionProperty.get()
             project.logger.info("Using configured Scala version: $configuredScalaVersion")
-            return configuredScalaVersion
+            return new ScalaVersion(configuredScalaVersion)
         } else {
             project.logger.info("No Scala version configured. Detecting scala library...")
             def components = project.configurations.compileClasspath.incoming.resolutionResult.getAllComponents()
+
+            def scala3Library = components.find {
+                it.moduleVersion.group == "org.scala-lang" && it.moduleVersion.name == "scala3-library_3"
+            }
             def scalaLibrary = components.find {
                 it.moduleVersion.group == "org.scala-lang" && it.moduleVersion.name == "scala-library"
             }
-            if (scalaLibrary != null) {
-                def scalaVersion = scalaLibrary.moduleVersion.version
-                project.logger.info("Detected scala library in compilation classpath. Scala version: $scalaVersion")
-                return scalaVersion
-            } else {
-                project.logger.info("No scala library detected. Using default Scala version: $DEFAULT_SCALA_VERSION")
-                return DEFAULT_SCALA_VERSION
+
+            // Scala 3
+            if (scala3Library != null) {
+                def scala3Version = scala3Library.moduleVersion.version
+                def scala2Version = scalaLibrary.moduleVersion.version
+                project.logger.info("Detected scala 3 library in compilation classpath. Scala 3 version: $scala3Version; using Scala 2 library: $scala2Version")
+                return new ScalaVersion(scala3Version, Optional.of(scala2Version))
             }
+
+            // Scala 2
+            if (scalaLibrary != null) {
+                def scala2Version = scalaLibrary.moduleVersion.version
+                project.logger.info("Detected scala library in compilation classpath. Scala version: $scala2Version")
+                return new ScalaVersion(scala2Version)
+            }
+
+            // No Scala library was found, using default Scala version
+            project.logger.info("No scala library detected. Using default Scala version: $DEFAULT_SCALA_VERSION")
+            return new ScalaVersion(DEFAULT_SCALA_VERSION)
         }
     }
 

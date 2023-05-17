@@ -11,7 +11,7 @@ import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.TaskAction
-import scoverage.report.CoverageAggregator
+import scoverage.reporter.CoverageAggregator
 
 import static org.gradle.api.tasks.PathSensitivity.RELATIVE
 
@@ -50,7 +50,8 @@ class ScoverageReport extends DefaultTask {
             reportDir.get().delete()
             reportDir.get().mkdirs()
 
-            def coverage = CoverageAggregator.aggregate([dataDir.get()] as File[])
+            def sourceRoot = getProject().getRootDir()
+            def coverage = CoverageAggregator.aggregate([dataDir.get()] as File[], sourceRoot)
 
             if (coverage.isEmpty()) {
                 project.logger.info("[scoverage] Could not find coverage file, skipping...")
