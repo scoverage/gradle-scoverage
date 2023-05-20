@@ -114,7 +114,8 @@ resolve the compilation classpath, which is prohibited by the versions plugin.
 Migration to 8.x
 ----------------
 
-* Running without normal compilation is no longer supported.
+* Adds support for Scala 3
+* Drops support for disabling normal compilation
 
 Migration to 7.x
 ----------------
