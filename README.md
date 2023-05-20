@@ -114,6 +114,7 @@ resolve the compilation classpath, which is prohibited by the versions plugin.
 Migration to 8.x
 ----------------
 
+* Requires scoverage 2.0
 * Adds support for Scala 3
 * Drops support for disabling normal compilation
 
