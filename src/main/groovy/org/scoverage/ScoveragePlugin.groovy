@@ -201,7 +201,7 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                         }.collect {
                             it.absolutePath
                         }
-                        scalaCompileOptions.additionalParameters.add('-Xplugin:' + pluginFiles.join(":"))
+                        scalaCompileOptions.additionalParameters.add('-Xplugin:' + pluginFiles.join(File.pathSeparator))
                     }
                 } else {
                     parameters.add("-sourceroot:${project.rootDir.absolutePath}".toString())
