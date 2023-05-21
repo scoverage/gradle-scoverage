@@ -6,7 +6,7 @@ import org.gradle.api.logging.Logger
 import org.gradle.internal.impldep.com.google.common.annotations.VisibleForTesting
 
 import java.text.DecimalFormat
-import java.text.NumberFormat
+import java.text.DecimalFormatSymbols
 
 /**
  * Handles different types of coverage Scoverage can measure.
@@ -56,30 +56,21 @@ class CoverageChecker {
     }
 
     public void checkLineCoverage(File reportDir, CoverageType coverageType, double minimumRate) throws GradleException {
-        NumberFormat defaultNf = NumberFormat.getInstance(Locale.getDefault())
-        checkLineCoverage(reportDir, coverageType, minimumRate, defaultNf)
-    }
-
-    public void checkLineCoverage(File reportDir, CoverageType coverageType, double minimumRate, NumberFormat nf) throws GradleException {
         logger.info("Checking coverage. Type: {}. Minimum rate: {}", coverageType, minimumRate)
 
         XmlParser parser = new XmlParser()
         parser.setFeature('http://apache.org/xml/features/disallow-doctype-decl', false)
         parser.setFeature('http://apache.org/xml/features/nonvalidating/load-external-dtd', false)
 
-        DecimalFormat df = new DecimalFormat("#.##")
-
         try {
             File reportFile = new File(reportDir, coverageType.fileName)
             Node xml = parser.parse(reportFile)
-            Double coverageValue = nf.parse(xml.attribute(coverageType.paramName) as String).doubleValue()
+            Double coverageValue = (xml.attribute(coverageType.paramName) as String).toDouble()
             Double overallRate = coverageType.normalize(coverageValue)
             def difference = (minimumRate - overallRate)
 
             if (difference > 1e-7) {
-                String is = df.format(overallRate * 100)
-                String needed = df.format(minimumRate * 100)
-                throw new GradleException(errorMsg(is, needed, coverageType))
+                throw new GradleException(errorMsg(overallRate, minimumRate, coverageType))
             }
         } catch (FileNotFoundException fnfe) {
             throw new GradleException(fileNotFoundErrorMsg(coverageType), fnfe)
@@ -87,7 +78,10 @@ class CoverageChecker {
     }
 
     @VisibleForTesting
-    protected static String errorMsg(String actual, String expected, CoverageType type) {
+    protected static String errorMsg(double overallRate, double minimumRate, CoverageType type) {
+        DecimalFormat df = new DecimalFormat("#.##", DecimalFormatSymbols.getInstance(Locale.ENGLISH))
+        String actual = df.format(overallRate * 100)
+        String expected = df.format(minimumRate * 100)
         "Only $actual% of project is covered by tests instead of $expected% (coverageType: $type)"
     }
 

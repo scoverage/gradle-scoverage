@@ -11,8 +11,6 @@ import org.xml.sax.SAXException;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.NumberFormat;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -108,12 +106,12 @@ public abstract class ScoverageFunctionalTest {
         return file.toPath().resolve(relativePath).toFile();
     }
 
-    private Double coverage(File reportDir, CoverageType coverageType) throws IOException, SAXException, ParseException {
+    private Double coverage(File reportDir, CoverageType coverageType) throws IOException, SAXException, NumberFormatException {
 
         File reportFile = reportDir.toPath().resolve(coverageType.getFileName()).toFile();
         Node xml = parser.parse(reportFile);
         Object attribute = xml.attribute(coverageType.getParamName());
-        double rawValue = NumberFormat.getInstance().parse(attribute.toString()).doubleValue();
+        double rawValue = Double.parseDouble(attribute.toString());
         return coverageType.normalize(rawValue) * 100.0;
     }
 
