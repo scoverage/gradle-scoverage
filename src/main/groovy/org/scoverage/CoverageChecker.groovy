@@ -79,7 +79,7 @@ class CoverageChecker {
 
     @VisibleForTesting
     protected static String errorMsg(double overallRate, double minimumRate, CoverageType type) {
-        DecimalFormat df = new DecimalFormat("#.##", DecimalFormatSymbols.getInstance(Locale.ENGLISH))
+        DecimalFormat df = new DecimalFormat("#.##", DecimalFormatSymbols.getInstance(Locale.US))
         String actual = df.format(overallRate * 100)
         String expected = df.format(minimumRate * 100)
         "Only $actual% of project is covered by tests instead of $expected% (coverageType: $type)"
