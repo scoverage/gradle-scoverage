@@ -30,6 +30,7 @@ gradlePlugin {
             id = 'org.scoverage'
             implementationClass = 'org.scoverage.ScoveragePlugin'
             displayName = 'Gradle Scoverage plugin'
+            description = 'gradle-scoverage is a Gradle plugin for calculating code coverage using Scoverage'
             tags.set(['coverage', 'scala', 'scoverage'])
         }
     }
@@ -183,6 +184,7 @@ if (project.properties.containsKey('signing.keyId')) {
     signing {
         sign publishing.publications.mavenJava
     }
+    project.tasks.publishMavenJavaPublicationToMavenRepository.inputs.files(project.tasks.signMavenJavaPublication)
 }
 
 // see https://stackoverflow.com/questions/44679007
