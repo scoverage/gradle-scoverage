@@ -105,7 +105,7 @@ public class ScoverageWriter {
                 File.separator +
                 Constants.XMLReportFilename());
             if (coverageDebug) {
-                ScoverageXmlWriter writerDebug = cst.newInstance(sourceDirsSeq, reportDir, true);
+                ScoverageXmlWriter writerDebug = cst.newInstance(sourceDirsSeq, reportDir, true, new Some<>(sourceEncoding));
                 writerDebug.write(coverage);
                 logger.info("[scoverage] Written XML report with debug information to " +
                     reportDir.getAbsolutePath() +
