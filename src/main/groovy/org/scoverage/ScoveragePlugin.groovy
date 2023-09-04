@@ -9,7 +9,6 @@ import org.gradle.api.plugins.PluginAware
 import org.gradle.api.plugins.scala.ScalaPlugin
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.TaskProvider
-import org.gradle.api.tasks.scala.ScalaCompile
 import org.gradle.api.tasks.testing.Test
 
 import java.nio.file.Files
@@ -399,22 +398,4 @@ class ScoveragePlugin implements Plugin<PluginAware> {
         }
     }
 
-    private Set<? extends Task> recursiveDependenciesOf(Task task, boolean sameProjectOnly) {
-        def cache = sameProjectOnly ? sameProjectTaskDependencies : crossProjectTaskDependencies
-        if (!cache.containsKey(task)) {
-            def directDependencies = task.getTaskDependencies().getDependencies(task)
-            if (sameProjectOnly) {
-                directDependencies = directDependencies.findAll {
-                    it.project == task.project
-                }
-            }
-            def nestedDependencies = directDependencies.collect { recursiveDependenciesOf(it, sameProjectOnly) }.flatten()
-            def dependencies = directDependencies + nestedDependencies
-
-            cache.put(task, dependencies)
-            return dependencies
-        } else {
-            return cache.get(task)
-        }
-    }
 }
