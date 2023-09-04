@@ -58,6 +58,8 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                 visible = false
                 transitive = true
                 description = 'Scoverage dependencies'
+                canBeResolved = true
+                canBeConsumed = false
             }
 
             project.afterEvaluate {
