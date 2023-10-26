@@ -1,16 +1,20 @@
 package org.scoverage
 
 import org.apache.commons.io.FileUtils
+import org.gradle.api.Action
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.invocation.Gradle
 import org.gradle.api.plugins.PluginAware
 import org.gradle.api.plugins.scala.ScalaPlugin
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.SourceSet
+import org.gradle.api.tasks.Sync
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.scala.ScalaCompile
 import org.gradle.api.tasks.testing.Test
+import org.gradle.api.tasks.util.PatternFilterable
 
 import java.nio.file.Files
 import java.util.concurrent.ConcurrentHashMap
@@ -20,6 +24,7 @@ import static groovy.io.FileType.FILES
 class ScoveragePlugin implements Plugin<PluginAware> {
 
     static final String CONFIGURATION_NAME = 'scoverage'
+    static final String MERGE_MEASUREMENTS_NAME = 'mergeScoverageMeasurements'
     static final String REPORT_NAME = 'reportScoverage'
     static final String CHECK_NAME = 'checkScoverage'
     static final String COMPILE_NAME = 'compileScoverageScala'
@@ -85,6 +90,26 @@ class ScoveragePlugin implements Plugin<PluginAware> {
     }
 
     private void createTasks(Project project, ScoverageExtension extension) {
+        /**
+         dataDir is split into subdirectories:
+           workDir
+           {testTaskName}MeasurementsDir
+           {testTaskName}ReportDir.
+
+         workDir
+         Directory where metadata/measurements are "produced"
+         Two tasks produce files in that directory: compile and test. Because of that, this directory is not
+         cacheable.
+         Only one file from this directory is cached: metadata from compile task (because it is a single file).
+
+         testMeasurementsDir
+         Directory where measurements are synced from "workDir". It is registered as an additional output to test task,
+         which makes the measurements files cacheable.
+
+         reportDir
+         Merges workDir/scoverage.coverage and testMeasurementsDir/scoverage.measurements.* for reporting.
+         */
+        def dataWorkDir = extension.dataDir.map {new File(it, "work") }
 
         ScoverageRunner scoverageRunner = new ScoverageRunner(project.configurations.scoverage)
 
@@ -106,6 +131,9 @@ class ScoveragePlugin implements Plugin<PluginAware> {
         def compileTask = project.tasks[instrumentedSourceSet.getCompileTaskName("scala")]
         compileTask.mustRunAfter(originalCompileTask)
 
+        // merges measurements from individual reports into one directory for use by globalReportTask
+        def globalMergeMeasurementsTask = project.tasks.register(MERGE_MEASUREMENTS_NAME, Sync.class)
+
         def globalReportTask = project.tasks.register(REPORT_NAME, ScoverageAggregate)
         def globalCheckTask = project.tasks.register(CHECK_NAME)
 
@@ -122,17 +150,31 @@ class ScoveragePlugin implements Plugin<PluginAware> {
             List<ScoverageReport> reportTasks = testTasks.collect { testTask ->
                 testTask.mustRunAfter(compileTask)
 
-                def reportTaskName = "report${testTask.name.capitalize()}Scoverage"
-                def taskReportDir = project.file("${project.buildDir}/reports/scoverage${testTask.name.capitalize()}")
+                def cTaskName = testTask.name.capitalize()
+
+                def reportTaskName = "report${cTaskName}Scoverage"
+                def taskReportDir = project.file("${project.buildDir}/reports/scoverage${cTaskName}")
+
+                def scoverageSyncMetaWithOutputs =
+                        project.tasks.register("sync${cTaskName}ScoverageData", Sync.class)
+
+                scoverageSyncMetaWithOutputs.configure {
+                    dependsOn compileTask, testTask
+                    from(dataWorkDir) {
+                        include("scoverage.coverage")
+                    }
+                    from(dataMeasurementsDir(extension, cTaskName))
+                    into(dataReportDir(extension, cTaskName))
+                }
 
                 project.tasks.create(reportTaskName, ScoverageReport) {
-                    dependsOn originalJarTask, compileTask, testTask
-                    onlyIf { extension.dataDir.get().list() }
+                    dependsOn originalJarTask, compileTask, testTask, scoverageSyncMetaWithOutputs
+                    onlyIf { scoverageSyncMetaWithOutputs.get().getDestinationDir().list() }
                     group = 'verification'
                     runner = scoverageRunner
                     reportDir = taskReportDir
                     sources = originalSourceSet.scala.getSourceDirectories()
-                    dataDir = extension.dataDir
+                    dataDir = scoverageSyncMetaWithOutputs.map {it.getDestinationDir()}
                     sourceEncoding.set(detectedSourceEncoding)
                     coverageOutputCobertura = extension.coverageOutputCobertura
                     coverageOutputXML = extension.coverageOutputXML
@@ -141,17 +183,29 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                 }
             }
 
-            globalReportTask.configure {
+            globalMergeMeasurementsTask.configure {sync ->
+                dependsOn(reportTasks)
+                dependsOn(compileTask)
+
                 def dataDirs = reportTasks.findResults { it.dataDir.get() }
 
-                dependsOn reportTasks
-                onlyIf { dataDirs.any { it.list() } }
+                from(dataWorkDir.map {new File(it, 'scoverage.coverage') })
+                from(dataDirs) {
+                    exclude("scoverage.coverage")
+                }
+                into(project.file("${project.buildDir}/mergedScoverage"))
+            }
+
+            globalReportTask.configure {
+                dependsOn globalMergeMeasurementsTask
+
+                onlyIf { globalMergeMeasurementsTask.get().getDestinationDir().list()}
 
                 group = 'verification'
                 runner = scoverageRunner
                 reportDir = extension.reportDir
                 sources = originalSourceSet.scala.getSourceDirectories()
-                dirsToAggregateFrom = dataDirs
+                dirsToAggregateFrom = globalMergeMeasurementsTask.map {[it.getDestinationDir()]}
                 sourceEncoding.set(detectedSourceEncoding)
                 deleteReportsOnAggregation = false
                 coverageOutputCobertura = extension.coverageOutputCobertura
@@ -170,8 +224,12 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                 }
 
                 def scalaVersion = resolveScalaVersions(project)
+
+                // the compile task creates a store of measured statements
+                outputs.file(dataWorkDir.map {new File(it, 'scoverage.coverage') })
+
                 if (scalaVersion.majorVersion < 3) {
-                    parameters.add("-P:scoverage:dataDir:${extension.dataDir.get().absolutePath}".toString())
+                    parameters.add("-P:scoverage:dataDir:${dataWorkDir.get().absolutePath}".toString())
                     parameters.add("-P:scoverage:sourceRoot:${extension.project.getRootDir().absolutePath}".toString())
                     if (extension.excludedPackages.get()) {
                         def packages = extension.excludedPackages.get().join(';')
@@ -185,10 +243,7 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                         parameters.add('-Yrangepos')
                     }
                     scalaCompileOptions.additionalParameters = parameters
-                    // the compile task creates a store of measured statements
-                    outputs.file(new File(extension.dataDir.get(), 'scoverage.coverage'))
-
-                    dependsOn project.configurations[CONFIGURATION_NAME]
+                    dependsOn project.configurations.named(CONFIGURATION_NAME)
                     doFirst {
                         /*
                             It is crucial that this would run in `doFirst`, as this resolves the (dependencies of the)
@@ -205,7 +260,7 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                     }
                 } else {
                     parameters.add("-sourceroot:${project.rootDir.absolutePath}".toString())
-                    parameters.add("-coverage-out:${extension.dataDir.get().absolutePath}".toString())
+                    parameters.add("-coverage-out:${dataWorkDir.get().absolutePath}".toString())
                     scalaCompileOptions.additionalParameters = parameters
                 }
             }
@@ -262,20 +317,26 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                 def hasAnyReportTask = reportTasks.any { graph.hasTask(it) }
 
                 if (hasAnyReportTask) {
+
                     project.tasks.withType(Test).each { testTask ->
                         testTask.configure {
+                            def cTaskName = testTask.name.capitalize()
+
                             project.logger.info("Adding instrumented classes to '${path}' classpath")
 
                             classpath = project.configurations.scoverage + instrumentedSourceSet.output + classpath
 
-                            outputs.upToDateWhen {
-                                extension.dataDir.get().listFiles(new FilenameFilter() {
-                                    @Override
-                                    boolean accept(File dir, String name) {
-                                        name.startsWith("scoverage.measurements.")
-                                    }
-                                })
+                            doLast {
+                                project.sync {
+                                    from(dataWorkDir)
+                                    exclude("scoverage.coverage")
+                                    into(dataMeasurementsDir(extension, cTaskName))
+                                }
+                                project.delete(project.fileTree(dataWorkDir).exclude("scoverage.coverage"))
                             }
+
+                            outputs.dir(dataMeasurementsDir(extension, cTaskName)).withPropertyName("scoverage.measurements")
+
                         }
                     }
                 }
@@ -321,6 +382,14 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                 }
             }
         }
+    }
+
+    private Provider<File> dataMeasurementsDir(ScoverageExtension extension, String testName) {
+        return extension.dataDir.map {new File(it, "${testName}Measurements") }
+    }
+
+    private Provider<File> dataReportDir(ScoverageExtension extension, String testName) {
+        return extension.dataDir.map { new File(it, "${testName}Report") }
     }
 
     private void configureCheckTask(Project project, ScoverageExtension extension,
