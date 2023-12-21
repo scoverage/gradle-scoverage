@@ -1,0 +1,53 @@
+pipeline:
+  identifier: Build_sahithibanda01_gradle_scoverage_1703139166056
+  name: Build gradle-scoverage
+  orgIdentifier: default
+  projectIdentifier: autogen
+  properties:
+    ci:
+      codebase:
+        build: <+input>
+        connectorRef: account.SahithiConnector
+        repoName: sahithibanda01/gradle-scoverage
+  stages:
+    - stage:
+        identifier: build
+        name: build
+        spec:
+          cloneCodebase: true
+          execution:
+            steps:
+              - step:
+                  identifier: dockerbuild
+                  name: docker_build
+                  spec:
+                    image: plugins/docker
+                    settings:
+                      dry_run: "true"
+                      password: <+input>
+                      repo: hello/world
+                      tags: latest
+                      username: <+input>
+                  timeout: ""
+                  type: Plugin
+              - step:
+                  identifier: scalabuild
+                  name: scala_build
+                  spec:
+                    command: "gradle build "
+                  timeout: ""
+                  type: Run
+              - step:
+                  identifier: scalatest
+                  name: scala_test
+                  spec:
+                    command: "./gradlew test\n\t\txml_file=$(find /harness/build/test-results/test -type f -name \"*.xml\" | head -n 1)\n\n\t\tif [ -n \"$xml_file\" ]; then\n\t\t\tcp \"$xml_file\" /harness/reports.xml\n\t\t\techo \"XML file copied to /harness/reports.xml\"\n\t\telse\n\t\t\techo \"No XML file found in /path\"\n\t\tfi"
+                  timeout: ""
+                  type: Run
+          platform:
+            arch: Amd64
+            os: Linux
+          runtime:
+            spec: {}
+            type: Cloud
+        type: CI
