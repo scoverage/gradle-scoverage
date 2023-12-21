@@ -1,0 +1,14 @@
+inputSet:
+  name: Build_sahithibanda01_gradle_scoverage_1703140173662-push-trigger-input-set
+  identifier: Build_sahithibanda01_gradle_scoverage_1703140173662pushtriggerinputset
+  orgIdentifier: default
+  projectIdentifier: autogen
+  pipeline:
+    identifier: Build_sahithibanda01_gradle_scoverage_1703140173662
+    properties:
+      ci:
+        codebase:
+          build:
+            type: branch
+            spec:
+              branch: <+trigger.branch>
