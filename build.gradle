@@ -30,7 +30,7 @@ gradlePlugin {
             id = 'org.scoverage'
             implementationClass = 'org.scoverage.ScoveragePlugin'
             displayName = 'Gradle Scoverage plugin'
-            tags.set(['coverage', 'scala', 'scoverage'])
+            // tags.set(['coverage', 'scala', 'scoverage'])
         }
     }
 }
