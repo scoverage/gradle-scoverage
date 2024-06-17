@@ -24,7 +24,7 @@ class ScoveragePlugin implements Plugin<PluginAware> {
     static final String CHECK_NAME = 'checkScoverage'
     static final String COMPILE_NAME = 'compileScoverageScala'
     static final String AGGREGATE_NAME = 'aggregateScoverage'
-    static final String DEFAULT_SCALA_VERSION = '2.13.6'
+    static final String DEFAULT_SCALA_VERSION = '2.13.14'
     static final String SCOVERAGE_COMPILE_ONLY_PROPERTY = 'scoverageCompileOnly';
 
     static final String DEFAULT_REPORT_DIR = 'reports' + File.separatorChar + 'scoverage'
