@@ -1,11 +1,11 @@
 package org.hello
 
 import org.junit.runner.RunWith
-import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.funsuite._
+import org.scalatestplus.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class TestNothingSuite extends FunSuite {
+class TestNothingSuite extends AnyFunSuite {
 
   test("nothing") {
   }

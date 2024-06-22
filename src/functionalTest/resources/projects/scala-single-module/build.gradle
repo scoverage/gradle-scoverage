@@ -12,12 +12,20 @@ apply plugin: 'java'
 apply plugin: 'scala'
 
 dependencies {
-    implementation group: 'org.scala-lang', name: 'scala-library', version: "${scalaVersionMajor}.${scalaVersionMinor}.${scalaVersionBuild}"
+    if (project.getProperties().get("scalaVersionMajor").equals("2")) {
+        implementation group: 'org.scala-lang', name: 'scala-library', version: "${scalaVersionMajor}.${scalaVersionMinor}.${scalaVersionBuild}"
+
+        testImplementation group: 'org.scalatest', name: 'scalatest_2.13', version: scalatestVersion
+        testImplementation group: 'org.scalatestplus', name: 'junit-4-13_2.13', version: "${scalatestVersion}.0"
+    } else {
+        implementation group: 'org.scala-lang', name: 'scala3-library_3', version: "${scalaVersionMajor}.${scalaVersionMinor}.${scalaVersionBuild}"
+
+        testImplementation group: 'org.scalatest', name: 'scalatest_3', version: scalatestVersion
+        testImplementation group: 'org.scalatestplus', name: 'junit-4-13_3', version: "${scalatestVersion}.0"
+    }
 
     testRuntimeOnly group: 'org.junit.vintage', name: 'junit-vintage-engine', version: junitVersion
     testImplementation group: 'org.junit.platform', name: 'junit-platform-runner', version: junitPlatformVersion
-
-    testImplementation group: 'org.scalatest', name: "scalatest_${scalaVersionMajor}.${scalaVersionMinor}", version: scalatestVersion
 }
 
 test {

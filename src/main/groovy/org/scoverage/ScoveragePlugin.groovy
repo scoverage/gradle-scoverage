@@ -206,6 +206,14 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                 } else {
                     parameters.add("-sourceroot:${project.rootDir.absolutePath}".toString())
                     parameters.add("-coverage-out:${extension.dataDir.get().absolutePath}".toString())
+                    if (extension.excludedPackages.get()) {
+                        def packages = extension.excludedPackages.get().join(',')
+                        parameters.add("-coverage-exclude-classlikes:$packages".toString())
+                    }
+                    if (extension.excludedFiles.get()) {
+                        def packages = extension.excludedFiles.get().join(';')
+                        parameters.add("-coverage-exclude-files:$packages".toString())
+                    }
                     scalaCompileOptions.additionalParameters = parameters
                 }
             }
