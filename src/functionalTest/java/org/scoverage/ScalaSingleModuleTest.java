@@ -4,10 +4,17 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.util.List;
+
 public class ScalaSingleModuleTest extends ScoverageFunctionalTest {
 
     public ScalaSingleModuleTest() {
         super("scala-single-module");
+    }
+
+    @Override
+    protected List<String> getVersionAgruments() {
+        return ScalaVersionArguments.version2;
     }
 
     @Test

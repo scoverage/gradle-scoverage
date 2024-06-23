@@ -116,7 +116,7 @@ public abstract class ScoverageFunctionalTest {
     }
 
     protected List<String> getVersionAgruments() {
-        return ScalaVersionArguments.version2;
+        return ScalaVersionArguments.version2WithLegacyScalatest;
     }
 
     private void configureArguments(String... arguments) {
