@@ -24,7 +24,7 @@ class ScoveragePlugin implements Plugin<PluginAware> {
     static final String CHECK_NAME = 'checkScoverage'
     static final String COMPILE_NAME = 'compileScoverageScala'
     static final String AGGREGATE_NAME = 'aggregateScoverage'
-    static final String DEFAULT_SCALA_VERSION = '2.13.6'
+    static final String DEFAULT_SCALA_VERSION = '2.13.14'
     static final String SCOVERAGE_COMPILE_ONLY_PROPERTY = 'scoverageCompileOnly';
 
     static final String DEFAULT_REPORT_DIR = 'reports' + File.separatorChar + 'scoverage'
@@ -206,6 +206,14 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                 } else {
                     parameters.add("-sourceroot:${project.rootDir.absolutePath}".toString())
                     parameters.add("-coverage-out:${extension.dataDir.get().absolutePath}".toString())
+                    if (extension.excludedPackages.get()) {
+                        def packages = extension.excludedPackages.get().join(',')
+                        parameters.add("-coverage-exclude-classlikes:$packages".toString())
+                    }
+                    if (extension.excludedFiles.get()) {
+                        def packages = extension.excludedFiles.get().join(';')
+                        parameters.add("-coverage-exclude-files:$packages".toString())
+                    }
                     scalaCompileOptions.additionalParameters = parameters
                 }
             }

@@ -4,10 +4,17 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.util.List;
+
 public class ScalaSingleModuleTest extends ScoverageFunctionalTest {
 
     public ScalaSingleModuleTest() {
         super("scala-single-module");
+    }
+
+    @Override
+    protected List<String> getVersionAgruments() {
+        return ScalaVersionArguments.version2;
     }
 
     @Test
@@ -135,7 +142,7 @@ public class ScalaSingleModuleTest extends ScoverageFunctionalTest {
         Assert.assertFalse(resolve(buildDir(), "classes/scala/scoverage/org/hello/World.class").exists());
     }
 
-    private void assertReportFilesExist() {
+    protected void assertReportFilesExist() {
 
         Assert.assertTrue(resolve(reportDir(), "index.html").exists());
         Assert.assertTrue(resolve(reportDir(), "org/hello/World.scala.html").exists());
