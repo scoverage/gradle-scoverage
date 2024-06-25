@@ -18,14 +18,12 @@ public class CompositeBuildTest extends ScoverageFunctionalTest {
         super("composite-build");
     }
 
-    @Ignore
     @Test
     public void buildComposite() {
 
         runComposite("clean", "build");
     }
 
-    @Ignore
     @Test
     public void reportComposite() {
 
