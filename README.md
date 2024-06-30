@@ -107,7 +107,15 @@ scoverage {
         coverageType = CoverageType.Statement
     }
 }
-``` 
+```
+
+In case you use the Kotlin DSL, the following snippet can give you pointers for configuring Scoverage:
+```kotlin
+scoverage {
+	minimumRate.set(BigDecimal("0.80"))
+	excludedPackages.set(listOf<String>("com.example.scala.demo"))
+}
+```
 
 ### Compatibility with Consistent Versions Plugin
 
