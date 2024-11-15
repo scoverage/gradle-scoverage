@@ -8,7 +8,8 @@ WORKDIR /app
 # COPY build/libs/gradle-scoverage.jar /app/gradle-scoverage.jar
 
 ARG GREETING="Hello"
-RUN echo "$GREETING, world!"
+ARG BANDA="sahithi"
+RUN echo "$GREETING, world!, $BANDA"
 
 # Specify the default command to run on boot
 CMD ["java", "-jar", "gradle-scoverage.jar"]
