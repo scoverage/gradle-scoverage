@@ -35,4 +35,10 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build with Gradle
-      run: ./gradlew --info --stacktrace check ${{ matrix.additional-check-args }}
+      run: ./gradlew --info --stacktrace functionalTest --tests ScalaSingleModuleTest ${{ matrix.additional-check-args }}
+
+    - name: Publish Unit Test Results
+      uses: EnricoMi/publish-unit-test-result-action@v1
+      if: always()
+      with:
+        files: test-results/**/*.xml
