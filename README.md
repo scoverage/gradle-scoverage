@@ -68,7 +68,7 @@ plugin (https://github.com/scoverage/scalac-scoverage-plugin).
 
 * `excludedPackages = <packages, classes and modules>` (default `not set`): Comma separated list of regexes for packages, classes and modules to exclude from coverage.
 
-* `excludedSubProjects = <subprojects>` (default `not set`): List of Gradle subprojects to be excluded from the Scoverage parent project aggregation. Projects should be set using the standard Gradle project selector e.g. `excludedSubProjects = [ project(':parent:subproject') ]`
+* `excludedSubProjects = <subprojects>` (default `not set`): List of Gradle sub-projects to be excluded from the Scoverage parent project aggregation. Projects should be added using the standard Gradle project selector e.g. `excludedSubProjects = [ project(':parent:subproject') ]`
 
 #### Multiple check tasks
 
