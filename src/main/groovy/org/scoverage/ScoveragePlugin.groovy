@@ -293,12 +293,14 @@ class ScoveragePlugin implements Plugin<PluginAware> {
             // define aggregation task
             if (!project.subprojects.empty) {
                 project.gradle.projectsEvaluated {
-                    project.subprojects.each {
+                    def excludedSubProjectPaths = project.extensions.scoverage.excludedSubProjects.get().collect { it.getPath() }
+                    def includedSubProjects = project.subprojects.findAll { !excludedSubProjectPaths.contains(it.getPath()) }
+                    includedSubProjects.each {
                         if (it.plugins.hasPlugin(ScalaPlugin) && !it.plugins.hasPlugin(ScoveragePlugin)) {
                             it.logger.warn("Scala sub-project '${it.name}' doesn't have Scoverage applied and will be ignored in parent project aggregation")
                         }
                     }
-                    def childReportTasks = project.subprojects.findResults {
+                    def childReportTasks = includedSubProjects.findResults {
                         it.tasks.find { task ->
                             task.name == REPORT_NAME && task instanceof ScoverageAggregate
                         }
