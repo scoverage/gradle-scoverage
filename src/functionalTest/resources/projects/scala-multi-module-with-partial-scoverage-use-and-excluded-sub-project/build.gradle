@@ -1,0 +1,37 @@
+plugins {
+    id 'org.scoverage' apply false
+}
+
+description = 'a multi-module Scala project that builds successfully and has modules which does not use scoverate plugin'
+
+allprojects { p ->
+    repositories {
+        mavenCentral()
+    }
+
+    apply plugin: 'java'
+    apply plugin: 'scala'
+
+    if (p.name != 'a') {
+        apply plugin: 'org.scoverage'
+        if (project.gradle.rootProject.name == p.name) {
+            scoverage {
+                excludedSubProjects = [project(':a')]
+            }
+        }
+    }
+
+    dependencies {
+
+        implementation group: 'org.scala-lang', name: 'scala-library', version: "${scalaVersionMajor}.${scalaVersionMinor}.${scalaVersionBuild}"
+
+        testImplementation group: 'org.junit.platform', name: 'junit-platform-runner'
+
+        testImplementation group: 'org.scalatest', name: "scalatest_${scalaVersionMajor}.${scalaVersionMinor}"
+    }
+}
+
+dependencies {
+    implementation project(':a')
+    implementation project(':b')
+}

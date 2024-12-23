@@ -35,6 +35,9 @@ class ScoverageExtension {
     /** regex for each excluded file */
     final ListProperty<String> excludedFiles
 
+    /** List of sub-projects excluded intentionally from aggregation */
+    final ListProperty<Project> excludedSubProjects
+
     /** Options for enabling and disabling output */
     final Property<Boolean> coverageOutputCobertura
     final Property<Boolean> coverageOutputXML
@@ -73,6 +76,9 @@ class ScoverageExtension {
 
         excludedFiles = project.objects.listProperty(String)
         excludedFiles.set([])
+
+        excludedSubProjects = project.objects.listProperty(Project)
+        excludedSubProjects.set([])
 
         coverageOutputCobertura = project.objects.property(Boolean)
         coverageOutputCobertura.set(true)
