@@ -101,6 +101,11 @@ task functionalTest(type: Test) {
     group = 'verification'
     testClassesDirs = sourceSets.functionalTest.output
     classpath = sourceSets.functionalTest.runtimeClasspath
+    forkEvery = 1
+
+    filter {
+        includeTestsMatching 'org.scoverage.*'
+    }
 
     testLogging {
         events 'passed', 'failed', 'skipped'

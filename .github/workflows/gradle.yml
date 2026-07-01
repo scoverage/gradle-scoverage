@@ -35,4 +35,4 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build with Gradle
-      run: ./gradlew --info --stacktrace check ${{ matrix.additional-check-args }}
+      run: ./gradlew --info --stacktrace --configuration-cache check ${{ matrix.additional-check-args }}

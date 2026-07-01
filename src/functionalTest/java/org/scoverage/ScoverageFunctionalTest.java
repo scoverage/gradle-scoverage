@@ -11,8 +11,11 @@ import org.xml.sax.SAXException;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -77,6 +80,45 @@ public abstract class ScoverageFunctionalTest {
         return new AssertableBuildResult(runner.build());
     }
 
+    protected AssertableBuildResult runWithConfigurationCache(String... arguments) {
+
+        configureConfigurationCacheArguments(arguments);
+        return new AssertableBuildResult(runner.build());
+    }
+
+    protected void prepareConfigurationCacheRun(String... arguments) {
+
+        configureConfigurationCacheArguments(arguments);
+    }
+
+    protected AssertableBuildResult buildPreparedConfigurationCacheRun() {
+
+        return new AssertableBuildResult(runner.build());
+    }
+
+    protected void cleanProjectForConfigurationCache() throws IOException {
+
+        deleteRecursively(buildDir());
+        deleteRecursively(new File(projectDir(), ".gradle"));
+    }
+
+    private void deleteRecursively(File directory) throws IOException {
+
+        if (!directory.exists()) {
+            return;
+        }
+
+        Files.walk(directory.toPath())
+                .sorted(Comparator.reverseOrder())
+                .forEach(path -> {
+                    try {
+                        Files.delete(path);
+                    } catch (IOException e) {
+                        throw new UncheckedIOException(e);
+                    }
+                });
+    }
+
     protected AssertableBuildResult runAndFail(String... arguments) {
 
         configureArguments(arguments);
@@ -121,7 +163,22 @@ public abstract class ScoverageFunctionalTest {
 
     private void configureArguments(String... arguments) {
 
+        configureArguments(false, arguments);
+    }
+
+    private void configureConfigurationCacheArguments(String... arguments) {
+
+        configureArguments(true, arguments);
+    }
+
+    private void configureArguments(boolean configurationCache, String... arguments) {
+
         List<String> fullArguments = new ArrayList<>(getVersionAgruments());
+
+        if (configurationCache) {
+            fullArguments.add("--configuration-cache");
+            fullArguments.add("--configuration-cache-problems=fail");
+        }
 
         if (Boolean.parseBoolean(System.getProperty("failOnWarning"))) {
             fullArguments.add("--warning-mode=fail");
@@ -200,6 +257,26 @@ public abstract class ScoverageFunctionalTest {
 
             Pattern regex = Pattern.compile("^(> Task )?" + fullTaskName(taskName), Pattern.MULTILINE);
             return regex.matcher(result.getOutput()).find();
+        }
+
+        public void assertConfigurationCacheStored() {
+
+            Assert.assertTrue(
+                    "Expected configuration cache to be stored",
+                    result.getOutput().contains("Configuration cache entry stored")
+                            || result.getOutput().contains("Calculating task graph as no cached configuration is available")
+            );
+        }
+
+        public void assertConfigurationCacheReused() {
+
+            String output = result.getOutput();
+            Assert.assertTrue(
+                    "Expected configuration cache to be reused",
+                    output.contains("Reusing configuration cache")
+                            || output.contains("Configuration cache entry reused")
+                            || output.contains("from configuration cache")
+            );
         }
     }
 }

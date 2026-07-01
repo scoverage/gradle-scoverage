@@ -76,7 +76,7 @@ public class ScalaSingleModuleTest extends ScoverageFunctionalTest {
     public void checkScoverageFails() throws Exception {
 
         AssertableBuildResult result = runAndFail("clean", ScoveragePlugin.getCHECK_NAME(),
-                "test", "--tests", "org.hello.TestNothingSuite");
+                ScoveragePlugin.scoverageTestTaskName("test"), "--tests", "org.hello.TestNothingSuite");
 
         result.assertTaskSucceeded(ScoveragePlugin.getCOMPILE_NAME());
         result.assertTaskSucceeded(ScoveragePlugin.getREPORT_NAME());

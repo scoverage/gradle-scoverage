@@ -118,17 +118,17 @@ public class ScalaMultiModuleWithMultipleTestTasksTest extends ScoverageFunction
     @Test
     public void checkScoverageWithoutIntTests() {
         AssertableBuildResult result = dryRun("clean", ScoveragePlugin.getCHECK_NAME(),
-                "-x", "intTest");
+                "-x", ScoveragePlugin.scoverageTestTaskName("intTest"));
 
         result.assertTaskExists(ScoveragePlugin.getREPORT_NAME());
         result.assertTaskExists("a:" + ScoveragePlugin.getREPORT_NAME());
         result.assertTaskExists("b:" + ScoveragePlugin.getREPORT_NAME());
         result.assertTaskExists("common:" + ScoveragePlugin.getREPORT_NAME());
-        result.assertTaskDoesntExist("intTest");
+        result.assertTaskDoesntExist(ScoveragePlugin.scoverageTestTaskName("intTest"));
         result.assertTaskExists("reportIntTestScoverage");
-        result.assertTaskDoesntExist("a:intTest");
-        result.assertTaskDoesntExist("b:intTest");
-        result.assertTaskDoesntExist("common:intTest");
+        result.assertTaskDoesntExist("a:" + ScoveragePlugin.scoverageTestTaskName("intTest"));
+        result.assertTaskDoesntExist("b:" + ScoveragePlugin.scoverageTestTaskName("intTest"));
+        result.assertTaskDoesntExist("common:" + ScoveragePlugin.scoverageTestTaskName("intTest"));
         result.assertTaskExists("a:reportIntTestScoverage");
         result.assertTaskExists("b:reportIntTestScoverage");
         result.assertTaskExists("common:reportIntTestScoverage");
@@ -158,12 +158,12 @@ public class ScalaMultiModuleWithMultipleTestTasksTest extends ScoverageFunction
     public void checkScoverageWithoutCoverageInRoot() throws Exception {
 
         AssertableBuildResult result = runAndFail("clean", ScoveragePlugin.getCHECK_NAME(),
-                "test",
+                ScoveragePlugin.scoverageTestTaskName("test"),
                 "--tests", "org.hello.TestNothingSuite",
                 "--tests", "org.hello.a.WorldASuite",
                 "--tests", "org.hello.b.WorldBSuite",
                 "--tests", "org.hello.common.WorldCommonSuite",
-                "-x", "intTest");
+                "-x", ScoveragePlugin.scoverageTestTaskName("intTest"));
 
         result.assertTaskFailed(ScoveragePlugin.getCHECK_NAME());
 
@@ -175,12 +175,12 @@ public class ScalaMultiModuleWithMultipleTestTasksTest extends ScoverageFunction
     public void checkScoverageWithoutCoverageInA() throws Exception {
 
         AssertableBuildResult result = runAndFail("clean", ScoveragePlugin.getCHECK_NAME(),
-                "test",
+                ScoveragePlugin.scoverageTestTaskName("test"),
                 "--tests", "org.hello.a.TestNothingASuite",
                 "--tests", "org.hello.WorldSuite",
                 "--tests", "org.hello.b.WorldBSuite",
                 "--tests", "org.hello.common.WorldCommonSuite",
-                "-x", ":a:intTest");
+                "-x", ":a:" + ScoveragePlugin.scoverageTestTaskName("intTest"));
 
         result.assertTaskFailed("a:" + ScoveragePlugin.getCHECK_NAME());
 
@@ -193,8 +193,8 @@ public class ScalaMultiModuleWithMultipleTestTasksTest extends ScoverageFunction
     public void checkScoverageWithoutNormalCompilationAndWithoutCoverageInCommon() throws Exception {
 
         AssertableBuildResult result = runAndFail("clean",
-                ":a:test",
-                ":common:test", "--tests", "org.hello.common.TestNothingCommonSuite",
+                ":a:" + ScoveragePlugin.scoverageTestTaskName("test"),
+                ":common:" + ScoveragePlugin.scoverageTestTaskName("test"), "--tests", "org.hello.common.TestNothingCommonSuite",
                 "-P" + ScoveragePlugin.getSCOVERAGE_COMPILE_ONLY_PROPERTY(),
                 ScoveragePlugin.getCHECK_NAME());
 
@@ -210,7 +210,7 @@ public class ScalaMultiModuleWithMultipleTestTasksTest extends ScoverageFunction
         // should pass as the check on the root is for the aggregation (which covers > 50%)
 
         AssertableBuildResult result = run("clean", ScoveragePlugin.getCHECK_NAME(),
-                ScoveragePlugin.getAGGREGATE_NAME(), "test",
+                ScoveragePlugin.getAGGREGATE_NAME(), ScoveragePlugin.scoverageTestTaskName("test"),
                 "--tests", "org.hello.TestNothingSuite",
                 "--tests", "org.hello.a.WorldASuite",
                 "--tests", "org.hello.b.WorldBSuite",
@@ -234,12 +234,12 @@ public class ScalaMultiModuleWithMultipleTestTasksTest extends ScoverageFunction
     public void checkAndAggregateScoverageWithoutCoverageInAll() throws Exception {
 
         AssertableBuildResult result = runAndFail("clean", ScoveragePlugin.getCHECK_NAME(),
-                ScoveragePlugin.getAGGREGATE_NAME(), "test",
+                ScoveragePlugin.getAGGREGATE_NAME(), ScoveragePlugin.scoverageTestTaskName("test"),
                 "--tests", "org.hello.TestNothingSuite",
                 "--tests", "org.hello.a.TestNothingASuite",
                 "--tests", "org.hello.b.TestNothingBSuite",
                 "--tests", "org.hello.common.TestNothingCommonSuite",
-                "-x", "intTest");
+                "-x", ScoveragePlugin.scoverageTestTaskName("intTest"));
 
         result.assertTaskSucceeded(ScoveragePlugin.getREPORT_NAME());
         result.assertTaskSucceeded("a:" + ScoveragePlugin.getREPORT_NAME());

@@ -16,40 +16,43 @@ import scoverage.reporter.CoverageAggregator
 import static org.gradle.api.tasks.PathSensitivity.RELATIVE
 
 @CacheableTask
-class ScoverageReport extends DefaultTask {
+abstract class ScoverageReport extends DefaultTask {
 
     @Nested
-    ScoverageRunner runner
+    abstract Property<ScoverageRunner> getRunner()
 
     @InputDirectory
     @PathSensitive(RELATIVE)
-    final Property<File> dataDir = project.objects.property(File)
+    abstract Property<File> getDataDir()
 
     @InputFiles
     @PathSensitive(RELATIVE)
-    final Property<FileCollection> sources = project.objects.property(FileCollection)
+    abstract Property<FileCollection> getSources()
 
     @OutputDirectory
-    final Property<File> reportDir = project.objects.property(File)
+    abstract Property<File> getReportDir()
 
     @Input
-    final Property<String> sourceEncoding = project.objects.property(String)
+    abstract Property<String> getSourceEncoding()
 
     @Input
-    final Property<Boolean> coverageOutputCobertura = project.objects.property(Boolean)
-    @Input
-    final Property<Boolean> coverageOutputXML = project.objects.property(Boolean)
-    @Input
-    final Property<Boolean> coverageOutputHTML = project.objects.property(Boolean)
-    @Input
-    final Property<Boolean> coverageDebug = project.objects.property(Boolean)
+    abstract Property<Boolean> getCoverageOutputCobertura()
 
     @Input
-    final Property<File> sourceRoot = project.objects.property(File)
+    abstract Property<Boolean> getCoverageOutputXML()
+
+    @Input
+    abstract Property<Boolean> getCoverageOutputHTML()
+
+    @Input
+    abstract Property<Boolean> getCoverageDebug()
+
+    @Input
+    abstract Property<File> getSourceRoot()
 
     @TaskAction
     def report() {
-        runner.run {
+        runner.get().run {
             reportDir.get().delete()
             reportDir.get().mkdirs()
 

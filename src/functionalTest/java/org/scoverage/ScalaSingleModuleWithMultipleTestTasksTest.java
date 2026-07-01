@@ -87,8 +87,8 @@ public class ScalaSingleModuleWithMultipleTestTasksTest extends ScoverageFunctio
     public void checkScoverageFails() throws Exception {
 
         AssertableBuildResult result = runAndFail("clean", ScoveragePlugin.getCHECK_NAME(),
-                "intTest", "--tests", "org.hello.TestNothingSuite",
-                "-x", "test");
+                ScoveragePlugin.scoverageTestTaskName("intTest"), "--tests", "org.hello.TestNothingSuite",
+                "-x", ScoveragePlugin.scoverageTestTaskName("test"));
 
         result.assertTaskSucceeded(ScoveragePlugin.getCOMPILE_NAME());
         result.assertTaskSucceeded(ScoveragePlugin.getREPORT_NAME());

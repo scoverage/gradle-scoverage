@@ -16,47 +16,46 @@ import scoverage.reporter.CoverageAggregator
 import static org.gradle.api.tasks.PathSensitivity.RELATIVE
 
 @CacheableTask
-class ScoverageAggregate extends DefaultTask {
+abstract class ScoverageAggregate extends DefaultTask {
 
     @Nested
-    ScoverageRunner runner
+    abstract Property<ScoverageRunner> getRunner()
 
     @InputFiles
     @PathSensitive(RELATIVE)
-    final Property<FileCollection> sources = project.objects.property(FileCollection)
+    abstract Property<FileCollection> getSources()
 
     @OutputDirectory
-    final Property<File> reportDir = project.objects.property(File)
+    abstract Property<File> getReportDir()
 
     @Input
-    final ListProperty<File> dirsToAggregateFrom = project.objects.listProperty(File)
+    abstract ListProperty<File> getDirsToAggregateFrom()
 
     @Input
-    final Property<Boolean> deleteReportsOnAggregation = project.objects.property(Boolean)
+    abstract Property<Boolean> getDeleteReportsOnAggregation()
 
     @Input
-    final Property<String> sourceEncoding = project.objects.property(String)
+    abstract Property<String> getSourceEncoding()
 
     // TODO - consider separate options for `report` and `aggregate` tasks
     @Input
-    final Property<Boolean> coverageOutputCobertura = project.objects.property(Boolean)
-    @Input
-    final Property<Boolean> coverageOutputXML = project.objects.property(Boolean)
-    @Input
-    final Property<Boolean> coverageOutputHTML = project.objects.property(Boolean)
-    @Input
-    final Property<Boolean> coverageDebug = project.objects.property(Boolean)
+    abstract Property<Boolean> getCoverageOutputCobertura()
 
     @Input
-    final Property<File> sourceRoot = project.objects.property(File)
+    abstract Property<Boolean> getCoverageOutputXML()
 
-    ScoverageAggregate() {
-        dirsToAggregateFrom.set([project.extensions.scoverage.dataDir.get()])
-    }
+    @Input
+    abstract Property<Boolean> getCoverageOutputHTML()
+
+    @Input
+    abstract Property<Boolean> getCoverageDebug()
+
+    @Input
+    abstract Property<File> getSourceRoot()
 
     @TaskAction
     def aggregate() {
-        runner.run {
+        runner.get().run {
             reportDir.get().deleteDir()
             reportDir.get().mkdirs()
 
