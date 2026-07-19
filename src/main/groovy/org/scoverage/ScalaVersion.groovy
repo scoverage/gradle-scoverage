@@ -26,6 +26,6 @@ class ScalaVersion {
 
     @Override
     String toString() {
-        return majorVersion < 3 ? primaryVersion : "$primaryVersion (${secondaryVersion.get()})"
+        return majorVersion < 3 ? primaryVersion : "$primaryVersion ($secondaryVersion)"
     }
 }

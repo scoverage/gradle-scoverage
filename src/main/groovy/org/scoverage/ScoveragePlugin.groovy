@@ -76,8 +76,10 @@ class ScoveragePlugin implements Plugin<PluginAware> {
                     scoverage("org.scoverage:scalac-scoverage-domain_$scalacScoverageVersion:$scoverageVersion")
                     scoverage("org.scoverage:scalac-scoverage-reporter_$scalacScoverageVersion:$scoverageVersion")
                     scoverage("org.scoverage:scalac-scoverage-serializer_$scalacScoverageVersion:$scoverageVersion")
-                    scoverage("org.scoverage:scalac-scoverage-runtime_$scalacScoverageRuntimeVersion:$scoverageVersion")
-                    scoverage("org.scoverage:scalac-scoverage-plugin_$scalacScoveragePluginVersion:$scoverageVersion")
+                    if (scalaVersion.majorVersion < 3) {
+                        scoverage("org.scoverage:scalac-scoverage-runtime_$scalacScoverageRuntimeVersion:$scoverageVersion")
+                        scoverage("org.scoverage:scalac-scoverage-plugin_$scalacScoveragePluginVersion:$scoverageVersion")
+                    }
                 }
             }
         }

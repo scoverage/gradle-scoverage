@@ -1,0 +1,31 @@
+plugins {
+    id 'org.scoverage'
+}
+
+repositories {
+    mavenCentral()
+}
+
+description = 'a single-module Scala project that builds successfully configured via scala { ... }'
+
+apply plugin: 'java'
+apply plugin: 'scala'
+
+scala.scalaVersion = "${scalaVersionMajor}.${scalaVersionMinor}.${scalaVersionBuild}"
+
+dependencies {
+    if (project.findProperty("scalaVersionMajor") == "2") {
+        testImplementation "org.scalatest:scalatest_2.$scalaVersionMinor:$scalatestVersion"
+        testImplementation "org.scalatestplus:junit-4-13_2.$scalaVersionMinor:${scalatestVersion}.0"
+    } else {
+        testImplementation "org.scalatest:scalatest_3:$scalatestVersion"
+        testImplementation "org.scalatestplus:junit-4-13_3:${scalatestVersion}.0"
+    }
+
+    testRuntimeOnly "org.junit.vintage:junit-vintage-engine:$junitVersion"
+    testImplementation "org.junit.platform:junit-platform-runner:$junitPlatformVersion"
+}
+
+test {
+    useJUnitPlatform()
+}

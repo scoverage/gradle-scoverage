@@ -1,6 +1,7 @@
 plugins {
     id 'java-gradle-plugin'
     id "com.gradle.plugin-publish" version "1.1.0"
+    id 'org.jreleaser' version '1.25.0'
     id "org.jetbrains.gradle.plugin.idea-ext" version "1.0"
 }
 
@@ -11,14 +12,12 @@ repositories {
 group = 'org.scoverage'
 description = 'gradle-scoverage is a Gradle plugin for calculating code coverage using Scoverage'
 if (project.version == 'unspecified') {
-    version = '8.0.0-SNAPSHOT'
+    version = '9.0.0-SNAPSHOT'
 }
 ext {
     website = 'http://scoverage.org'
     vcsUrl = 'https://github.com/scoverage/gradle-scoverage.git'
     scmUrl = "scm:git:$vcsUrl"
-    sonatypeUser = System.env.SONATYPE_USER
-    sonatypePass = System.env.SONATYPE_PASS
 }
 
 gradlePlugin {
@@ -36,7 +35,6 @@ gradlePlugin {
     }
 }
 
-apply plugin: 'maven-publish'
 apply plugin: 'groovy'
 
 java {
@@ -122,22 +120,11 @@ task groovydocJar(type: Jar, dependsOn: groovydoc) {
     archiveClassifier.set('groovydoc')
 }
 
-def propOrDefault(String property) {
-    if (project.hasProperty(property)) {
-        return project.getProperty(property)
-    } else {
-        return ''
-    }
-}
-
 publishing {
     repositories {
         maven {
-            url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-            credentials(PasswordCredentials) {
-                username = propOrDefault('sonatypeUser')
-                password = propOrDefault('sonatypePass')
-            }
+	    name = 'staging'
+            url = layout.buildDirectory.dir('staging-deploy')
         }
     }
     publications {
@@ -145,7 +132,7 @@ publishing {
             pom {
                 name = 'GradleScoverage'
                 description = project.description
-                url = project.website
+                url = project.ext.website
 
                 scm {
                     url = scmUrl
@@ -181,13 +168,27 @@ publishing {
     }
 }
 
-if (project.hasProperty('signing.keyId')) {
-    apply plugin: 'signing'
+jreleaser {
     signing {
-        sign publishing.publications.mavenJava
+        pgp {
+            mode='COMMAND'
+            active = 'ALWAYS'
+            armored = true
+        }
     }
-    project.tasks.publishMavenJavaPublicationToMavenRepository.inputs.files(project.tasks.signMavenJavaPublication)
+    deploy {
+        maven {
+            mavenCentral {
+                sonatype {
+                    active = 'ALWAYS'
+                    url = 'https://central.sonatype.com/api/v1/publisher'
+                    stagingRepository('build/staging-deploy')
+                }
+            }
+        }
+    }
 }
+
 
 // see https://stackoverflow.com/questions/44679007
 task fixIdeaPluginClasspath {

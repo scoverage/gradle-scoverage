@@ -58,6 +58,7 @@ class ScoverageExtension {
         scoverageVersion.set('2.1.1')
 
         scoverageScalaVersion = project.objects.property(String)
+        scoverageScalaVersion.convention(project.scala.scalaVersion)
 
         dataDir = project.objects.property(File)
         dataDir.set(project.layout.buildDirectory.dir('scoverage').get().asFile)
